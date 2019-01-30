@@ -9,11 +9,12 @@
   <!-- no need source, use lastly compiled classes-->
   <property name="build" location="bin"/>
   <property name="jar.dir" value="jar" />
-  <property name="main" value = "main.CitationNetworkRetriever"/>
+  <property name="main" value = "bibliodata.core.CitationNetworkRetriever"/>
     <!--<property name="main" value = "main.CitationNetwork"/>-->
   <!--<property name="main" value="utils.tor.TestTorPoolManager"/>-->
   <property name="bib" location="lib"/>
 
+    <mkdir dir="bin"/>
 
   <path id="classpath">
     <fileset dir="lib" includes="*.jar"/>
