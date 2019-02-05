@@ -3,7 +3,7 @@
  */
 package bibliodata.database.sql;
 
-import bibliodata.core.Main;
+import bibliodata.core.AlgorithmicSystematicReview;
 import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.reference.Abstract;
 import bibliodata.core.reference.CybergeoBiblioParser;
@@ -11,12 +11,9 @@ import bibliodata.core.reference.Reference;
 import bibliodata.core.reference.Title;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Set;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -26,9 +23,6 @@ import org.jsoup.select.Elements;
 import bibliodata.utils.BasicWriter;
 import bibliodata.utils.CSVReader;
 import bibliodata.utils.CSVWriter;
-import bibliodata.utils.GEXFWriter;
-import bibliodata.utils.RISWriter;
-import bibliodata.utils.StringUtils;
 
 /**
  * @author Raimbault Juste <br/> <a href="mailto:juste.raimbault@polytechnique.edu">juste.raimbault@polytechnique.edu</a>
@@ -350,7 +344,7 @@ public class CybergeoImport {
 	
 	
 	public static void computeDegrees(){
-		Main.setup();
+		AlgorithmicSystematicReview.setup();
 		//SQLConnection.setupSQLCredentials(); -> credential setup done in main
 		Corpus cybnetwork = SQLImporter.sqlImport("cybnetwork", "cybergeo", "refs", "links", -1, false);
 		// compute res on primary refs

@@ -8,9 +8,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import bibliodata.scholar.ScholarAPI;
+import bibliodata.utils.BIBReader;
 import bibliodata.utils.CSVWriter;
 import bibliodata.utils.GEXFWriter;
 import bibliodata.core.reference.Reference;
+import bibliodata.utils.RISReader;
 
 /**
  * A corpus is a set of references
@@ -131,6 +133,32 @@ public abstract class Corpus implements Iterable<Reference> {
 	@Override
 	public String toString() {
 		return("Corpus "+name+" ("+references.size()+" refs)");
+	}
+
+
+
+
+	public static Corpus fromFile(String refFile, String citedFolder){
+		Corpus initial = new DefaultCorpus();
+
+		if(refFile.endsWith(".ris")){
+			RISReader.read(refFile,-1);
+			initial = new DefaultCorpus(Reference.references.keySet());
+		}
+		if(refFile.endsWith(".csv")){
+			if(citedFolder.length()==0){
+				initial = new CSVFactory(refFile).getCorpus();
+			}else{
+				initial = new CSVFactory(refFile,-1,citedFolder).getCorpus();
+			}
+		}
+
+		if(refFile.endsWith(".bib")){
+			BIBReader.read(refFile);
+			initial = new DefaultCorpus(Reference.references.keySet());
+		}
+
+		return(initial);
 	}
 
 

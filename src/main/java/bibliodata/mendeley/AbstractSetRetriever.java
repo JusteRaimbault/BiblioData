@@ -4,11 +4,9 @@
 package bibliodata.mendeley;
 
 import java.io.File;
-import java.util.HashSet;
 
-import org.apache.commons.lang3.StringUtils;
+import bibliodata.core.AlgorithmicSystematicReview;
 
-import bibliodata.sql.SQLExporter;
 import bibliodata.utils.Log;
 import bibliodata.utils.RISReader;
 import bibliodata.core.corpuses.CSVFactory;
@@ -40,7 +38,7 @@ public class AbstractSetRetriever {
 			String refFile = args[0];
 			String outFile = args[1];
 
-			bibliodata.core.Main.setup();
+			AlgorithmicSystematicReview.setup();
 			MendeleyAPI.setupAPI();
 
 			Corpus initial = new DefaultCorpus();

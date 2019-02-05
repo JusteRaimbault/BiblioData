@@ -1,7 +1,7 @@
 /**
  *
  */
-package main;
+package bibliodata.core;
 
 import java.io.File;
 import java.io.FileWriter;

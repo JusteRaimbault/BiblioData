@@ -3,12 +3,8 @@
  */
 package bibliodata.mendeley;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import javax.json.Json;
@@ -17,10 +13,9 @@ import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonStructure;
-import javax.json.JsonValue;
 
+import bibliodata.core.AlgorithmicSystematicReview;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -31,7 +26,6 @@ import org.apache.http.util.EntityUtils;
 
 import bibliodata.utils.Connexion;
 import bibliodata.utils.Log;
-import bibliodata.core.Main;
 import bibliodata.core.reference.Abstract;
 import bibliodata.core.reference.GhostReference;
 import bibliodata.core.reference.Reference;
@@ -87,7 +81,7 @@ public class MendeleyAPI{
 		//idem
 		//System.out.println(appid+" : "+appsecret);
 		client = new DefaultHttpClient();
-		client.getCredentialsProvider().setCredentials(AuthScope.ANY,new UsernamePasswordCredentials(bibliodata.core.Main.mendeleyAppId, bibliodata.core.Main.mendeleyAppSecret));
+		client.getCredentialsProvider().setCredentials(AuthScope.ANY,new UsernamePasswordCredentials(AlgorithmicSystematicReview.mendeleyAppId, AlgorithmicSystematicReview.mendeleyAppSecret));
 
 		//context
 		context = new BasicHttpContext();
@@ -360,7 +354,7 @@ public class MendeleyAPI{
 	
 	public static void main(String[] args) throws Exception {
 		
-		Main.setup();
+		AlgorithmicSystematicReview.setup();
 		setupAPI();
 		
 		// Test token request

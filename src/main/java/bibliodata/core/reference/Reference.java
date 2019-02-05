@@ -105,7 +105,9 @@ public class Reference {
 		id=i;
 		title=t;
 		resume=r;
-		year=y;scholarID=schID;
+		year=y;
+		date="";
+		scholarID=schID;
 		authors = new HashSet<String>();
 		keywords = new HashSet<String>();
 		citing=new HashSet<Reference>();

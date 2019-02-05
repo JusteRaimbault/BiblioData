@@ -12,11 +12,9 @@ import bibliodata.core.corpuses.CSVFactory;
 import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.corpuses.DefaultCorpus;
 import bibliodata.core.reference.Reference;
-import bibliodata.mendeley.MendeleyAPI;
 import bibliodata.scholar.ScholarAPI;
 import bibliodata.database.sql.CybergeoImport;
 import bibliodata.database.sql.SQLConnection;
-import bibliodata.utils.BIBReader;
 import bibliodata.utils.CSVWriter;
 import bibliodata.utils.GEXFWriter;
 import bibliodata.utils.RISReader;
@@ -55,7 +53,7 @@ public class CitationNetwork {
 	 */
 	public static void buildGeneralizedNetwork(String prefix,String[] keywords,String outPrefix,int maxIt){
 		// setup
-		Main.setup("conf/default.conf");
+		AlgorithmicSystematicReview.setup("conf/default.conf");
 		
 		TorPool.setupConnectionPool(50,false);
 		
@@ -120,30 +118,13 @@ public class CitationNetwork {
 	 */
 	public static void buildCitationNetworkFromRefFile(String refFile,String outFile,int depth,String citedFolder){
         
-		Main.setup("conf/default.conf");
+		AlgorithmicSystematicReview.setup("conf/default.conf");
         try{TorPoolManager.setupTorPoolConnexion();}catch(Exception e){e.printStackTrace();}
 		ScholarAPI.init();
 		
 		System.out.println("Reconstructing References from file "+refFile);
 		
-		Corpus initial = new DefaultCorpus();
-		
-		if(refFile.endsWith(".ris")){
-			RISReader.read(refFile,-1);
-			initial = new DefaultCorpus(Reference.references.keySet());
-		}
-		if(refFile.endsWith(".csv")){
-			if(citedFolder.length()==0){
-			   initial = new CSVFactory(refFile).getCorpus();
-			}else{
-			   initial = new CSVFactory(refFile,-1,citedFolder).getCorpus();
-			}
-		}
-
-		if(refFile.endsWith(".bib")){
-			BIBReader.read(refFile);
-			initial = new DefaultCorpus(Reference.references.keySet());
-		}
+		Corpus initial = Corpus.fromFile(refFile,citedFolder);
 
 		System.out.println("Number of References : "+Reference.references.keySet().size());
 
@@ -184,7 +165,7 @@ public class CitationNetwork {
 	 */
 	public static void buildCitationNetworkFromSQL(String outFile){
 		
-		Main.setup("conf/default.conf");
+		AlgorithmicSystematicReview.setup("conf/default.conf");
 		TorPool.setupConnectionPool(50,false);
 		ScholarAPI.init();
 		

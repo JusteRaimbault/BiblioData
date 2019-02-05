@@ -6,7 +6,7 @@ package bibliodata.core.corpuses;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import bibliodata.sql.CybergeoImport;
+import bibliodata.database.sql.CybergeoImport;
 import bibliodata.core.reference.Reference;
 
 /**

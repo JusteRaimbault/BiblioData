@@ -4,28 +4,24 @@
 package bibliodata.cybergeo;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 
-import bibliodata.core.Main;
+import bibliodata.core.AlgorithmicSystematicReview;
 import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.corpuses.CybergeoCorpus;
 import bibliodata.core.corpuses.CybergeoFactory;
 import bibliodata.core.corpuses.DefaultCorpus;
 import bibliodata.core.corpuses.RISFactory;
-import bibliodata.core.reference.Abstract;
 import bibliodata.core.reference.Reference;
-import bibliodata.core.reference.Title;
 import bibliodata.mendeley.MendeleyAPI;
 import bibliodata.scholar.ScholarAPI;
-import bibliodata.sql.CybergeoImport;
-import bibliodata.sql.SQLConnection;
-import bibliodata.sql.SQLConverter;
-import bibliodata.sql.SQLExporter;
-import bibliodata.sql.SQLImporter;
+import bibliodata.database.sql.CybergeoImport;
+import bibliodata.database.sql.SQLConnection;
+import bibliodata.database.sql.SQLConverter;
+import bibliodata.database.sql.SQLExporter;
+import bibliodata.database.sql.SQLImporter;
 import bibliodata.utils.Log;
 import bibliodata.utils.RISWriter;
-import bibliodata.utils.tor.TorPool;
 import bibliodata.utils.tor.TorPoolManager;
 
 /**
@@ -55,7 +51,7 @@ public class Cybergeo {
 	 */
 	public static Corpus setup(String bibFile,int numRefs){
 
-		 Main.setup("conf/default.conf");
+		 AlgorithmicSystematicReview.setup("conf/default.conf");
 
 		 Log.purpose("runtime", "Started at "+(new Date()).toString());
 
@@ -75,7 +71,7 @@ public class Cybergeo {
 	 * @param withScholar
 	 */
 	public static void setup(boolean withScholar){
-		Main.setup("conf/default.conf");
+		AlgorithmicSystematicReview.setup("conf/default.conf");
 		Log.purpose("runtime", "Started at "+(new Date()).toString());
 		if(withScholar){
 			try{TorPoolManager.setupTorPoolConnexion();}catch(Exception e){e.printStackTrace();}
@@ -347,7 +343,7 @@ public class Cybergeo {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Main.setup();
+		AlgorithmicSystematicReview.setup();
 
 		//exportCybergeoAsRIS(System.getenv("CS_HOME")+"/Cybergeo/cybergeo20/Data/bib/fullbase_refsAsBib.ris");
 
@@ -366,7 +362,7 @@ public class Cybergeo {
 
 		//testCitingRefs();
 
-		/*Main.setup();
+		/*AlgorithmicSystematicReview.setup();
 		try{TorPoolManager.setupTorPoolConnexion();}catch(Exception e){}
 		SQLConnection.setupSQL("cybtest");
 		*/

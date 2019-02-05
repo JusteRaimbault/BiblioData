@@ -58,6 +58,10 @@ public class MongoConnection {
         }
     }
 
+    public static void initMongo(String db) {
+        initMongo("127.0.0.1",27017,db);
+    }
+
 
     /**
      * Close the mongo client
@@ -81,7 +85,7 @@ public class MongoConnection {
 
     public static void mongoInsert(String collection, List<Document> documents) {
         MongoCollection<Document> mongoCollection = mongoDatabase.getCollection(collection);
-        mongoCollection.insertMany(documents);
+        if(documents.size()>0){mongoCollection.insertMany(documents);}
     }
 
     public void mongoInsert(List<Document> documents){collection.insertMany(documents);}

@@ -43,6 +43,10 @@ public class Title {
 	 */
 	public Title(String t){
 		title = t;
+		raw_title=t;
+		en_title=t;
+		language="EN";
+		translated=false;
 	}
 	
 	public Title(String t,String e){

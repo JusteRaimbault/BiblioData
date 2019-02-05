@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--BuidFile for jarring project-->
 
-<project name="abstractSetRetriever" default="jar" basedir=".">
+<project name="bibliodata" default="jar" basedir=".">
   <description>buildfile</description>
 
   <!-- global properties -->
@@ -9,18 +9,27 @@
   <!-- no need source, use lastly compiled classes-->
   <property name="build" location="bin"/>
   <property name="jar.dir" value="jar" />
-  <property name="main" value = "mendeley.AbstractSetRetriever"/>
+  <property name="main" value = "bibliodata.Main"/>
+    <!--<property name="main" value = "main.CitationNetwork"/>-->
   <!--<property name="main" value="utils.tor.TestTorPoolManager"/>-->
   <property name="bib" location="lib"/>
 
+    <mkdir dir="bin"/>
 
   <path id="classpath">
     <fileset dir="lib" includes="*.jar"/>
   </path>
-	
-	<target name="compile" description="compile the source " >
-	    <javac srcdir="src" destdir="${build}" classpathref="classpath"/>
-	  </target>
+
+	<target name="compile" description="compile the source ">
+	    <!--<javac srcdir="src" destdir="${build}" classpathref="classpath"/>-->
+        <javac srcdir="src" destdir="${build}">
+            <classpath>
+                <fileset dir="lib" includes="**/*.jar"/>
+                <!--<pathelement location="lib/*.jar"/>-->
+            </classpath>
+        </javac>
+
+    </target>
 	
 	
   <target name="jar" depends="compile">

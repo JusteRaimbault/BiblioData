@@ -5,6 +5,7 @@ package bibliodata.mendeley;
 
 import java.util.HashSet;
 
+import bibliodata.core.AlgorithmicSystematicReview;
 import org.apache.commons.lang3.StringUtils;
 
 import bibliodata.core.reference.Reference;
@@ -28,7 +29,7 @@ public class AbstractRetriever {
 		
 		// do not forget to setup api
 
-		bibliodata.core.Main.setup(confPath);
+		AlgorithmicSystematicReview.setup(confPath);
 		
 		MendeleyAPI.setupAPI();
 		

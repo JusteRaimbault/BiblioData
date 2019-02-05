@@ -1,8 +1,8 @@
 package bibliodata.utils;
 
-import main.reference.Abstract;
-import main.reference.Reference;
-import main.reference.Title;
+import bibliodata.core.reference.Abstract;
+import bibliodata.core.reference.Reference;
+import bibliodata.core.reference.Title;
 import org.jbibtex.BibTeXDatabase;
 import org.jbibtex.BibTeXEntry;
 import org.jbibtex.Key;

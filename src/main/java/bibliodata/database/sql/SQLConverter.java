@@ -5,9 +5,9 @@ package bibliodata.database.sql;
 
 import java.util.HashSet;
 
+import bibliodata.core.AlgorithmicSystematicReview;
 import bibliodata.utils.CSVWriter;
 import bibliodata.utils.GEXFWriter;
-import bibliodata.core.Main;
 import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.reference.Reference;
 
@@ -63,7 +63,7 @@ public class SQLConverter {
 	
 	
 	public static void main(String[] args){
-		Main.setup();
+		AlgorithmicSystematicReview.setup();
 		sqlToCsv("cybfull","res/nwcsv/full");
 		//sqlToGexf("cybfull","/Users/Juste/Documents/ComplexSystems/Cybergeo/cybergeo20/CitationNetwork/Data/nw/full.gexf");
 	}

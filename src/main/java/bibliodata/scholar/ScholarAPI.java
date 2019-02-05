@@ -3,56 +3,30 @@
  */
 package bibliodata.scholar;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.Socket;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLContext;
 
-import bibliodata.core.Main;
 import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.reference.Abstract;
 import bibliodata.core.reference.Reference;
 import bibliodata.core.reference.Title;
-import bibliodata.mendeley.MendeleyAPI;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.client.utils.URIUtils;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -61,7 +35,6 @@ import org.jsoup.select.Elements;
 import org.apache.commons.httpclient.util.URIUtil;
 
 import bibliodata.utils.Log;
-import bibliodata.utils.tor.TorPool;
 import bibliodata.utils.tor.TorPoolManager;
 import bibliodata.utils.tor.TorThread;
 

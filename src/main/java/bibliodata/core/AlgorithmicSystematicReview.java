@@ -7,7 +7,7 @@ import java.util.HashSet;
 
 import bibliodata.core.reference.Reference;
 import bibliodata.mendeley.MendeleyAPI;
-import bibliodata.sql.SQLConnection;
+import bibliodata.database.sql.SQLConnection;
 import bibliodata.utils.CSVWriter;
 import bibliodata.utils.Log;
 import bibliodata.utils.RISReader;
@@ -21,7 +21,7 @@ import bibliodata.cortext.CortextAPI;
  * @author Raimbault Juste <br/> <a href="mailto:juste.raimbault@polytechnique.edu">juste.raimbault@polytechnique.edu</a>
  *
  */
-public class Main {
+public class AlgorithmicSystematicReview {
 
 	
 	/**

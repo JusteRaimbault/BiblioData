@@ -47,8 +47,11 @@ public class Bibliography {
 		// no raw
 		citedRaw = new HashSet<String>();
 	}
-	
-	
+
+
+	/**
+	 * Empty bibliography
+	 */
 	public Bibliography(){
 		cited = new HashSet<Reference>();
 		citedTitles = new HashSet<String>();
