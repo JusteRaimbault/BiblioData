@@ -1,7 +1,7 @@
 /**
  * 
  */
-package bibliodata.sql;
+package bibliodata.database.sql;
 
 import java.util.HashMap;
 import java.util.HashSet;

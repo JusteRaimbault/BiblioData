@@ -1,7 +1,7 @@
 /**
  * 
  */
-package bibliodata.sql;
+package bibliodata.database.sql;
 
 import bibliodata.core.Main;
 import bibliodata.core.corpuses.Corpus;

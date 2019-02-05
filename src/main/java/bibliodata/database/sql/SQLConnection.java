@@ -1,7 +1,7 @@
 /**
  * 
  */
-package bibliodata.sql;
+package bibliodata.database.sql;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
