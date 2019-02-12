@@ -306,6 +306,9 @@ public class ScholarAPI {
 
 						r.citingFilled = true;
 
+						// update depth of citing refs
+						for(Reference citing:r.citing){citing.depth=r.depth-1;}
+
 						Log.stdout("Citing refs : "+r.citing.size());
 
 					}catch(Exception e){e.printStackTrace();}

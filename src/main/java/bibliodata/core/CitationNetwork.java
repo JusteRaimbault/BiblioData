@@ -12,6 +12,8 @@ import bibliodata.core.corpuses.CSVFactory;
 import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.corpuses.DefaultCorpus;
 import bibliodata.core.reference.Reference;
+import bibliodata.database.mongo.MongoConnection;
+import bibliodata.database.mongo.MongoDocument;
 import bibliodata.scholar.ScholarAPI;
 import bibliodata.database.sql.CybergeoImport;
 import bibliodata.database.sql.SQLConnection;
@@ -29,7 +31,29 @@ import bibliodata.utils.tor.TorPoolManager;
  *
  */
 public class CitationNetwork {
-	
+
+
+	/**
+	 * Construct the citation network for refs in a mongo database
+	 * @param database
+	 * @param refcollection
+	 * @param linkcollection
+	 * @param numrefs
+	 */
+	public static void fillCitationsMongo(String database,String refcollection,String linkcollection,int numrefs){
+		//init mongo connection
+		MongoConnection.initMongo(database);
+
+		for(int i = 0;i<numrefs;i++){
+			Reference r = MongoConnection.getUnfilled(database,refcollection);
+			ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r));
+		}
+
+		MongoConnection.updateCorpus(new DefaultCorpus(Reference.references.keySet()),refcollection,linkcollection);
+
+		MongoConnection.closeMongo();
+	}
+
 	
 	/**
 	 * Build first order network : foreach ref, find citing refs

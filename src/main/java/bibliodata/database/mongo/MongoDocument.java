@@ -9,6 +9,8 @@ import java.util.LinkedList;
 
 public class MongoDocument {
 
+
+
     /**
      *
      * @param reference
@@ -17,7 +19,7 @@ public class MongoDocument {
      *
      * @return
      */
-    public static Document fromReference(Reference reference,int initDepth) {
+    public static Document fromReference(Reference reference){//,int initDepth) {
         //Log.stdout(reference.toString());
         Document res = new Document("id", reference.scholarID);
         res.append("title",reference.title.title);
@@ -28,7 +30,8 @@ public class MongoDocument {
         if(reference.year.length()>0){res.append("year",reference.year);}
         if(reference.date.length()>0){res.append("date",reference.date);}
         res.append("citingFilled",reference.citingFilled);
-        res.append("depth",initDepth);
+        //res.append("depth",initDepth);
+        res.append("depth",reference.depth);
         return(res);
     }
 
@@ -51,10 +54,10 @@ public class MongoDocument {
         return(links);
     }
 
-    public static LinkedList<Document> fromCorpus(Corpus corpus,int initDepth){
+    public static LinkedList<Document> fromCorpus(Corpus corpus){
         LinkedList<Document> docs = new LinkedList();
         for(Reference r:corpus){
-            docs.add(fromReference(r,initDepth));
+            docs.add(fromReference(r));
         }
         return(docs);
     }

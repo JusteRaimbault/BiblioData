@@ -3,6 +3,7 @@ package bibliodata.database.mongo;
 
 
 import bibliodata.core.corpuses.Corpus;
+import bibliodata.core.reference.Reference;
 import bibliodata.utils.Log;
 
 import org.bson.Document;
@@ -15,8 +16,10 @@ public class MongoImport {
     public static void fileToMongo(String file,String citedFolder,String db, String refcollection, String citcollection,int initDepth){
         Corpus initial = Corpus.fromFile(file,citedFolder);
         Log.stdout("Imported corpus of size "+initial.references.size());
+        //update the depth
+        for(Reference r:initial){r.depth=initDepth;}
         MongoConnection.initMongo(db);
-        List<Document> toinsert = MongoDocument.fromCorpus(initial,initDepth);
+        List<Document> toinsert = MongoDocument.fromCorpus(initial);
         Log.stdout("To import : "+toinsert.size());
         MongoConnection.mongoInsert(refcollection,toinsert);
         MongoConnection.mongoInsert(citcollection,MongoDocument.citationLinksFromCorpus(initial));

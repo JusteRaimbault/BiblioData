@@ -79,7 +79,12 @@ public class Reference {
 	public HashSet<Reference> citing;
 	
 	public boolean citingFilled;
-	
+
+	/**
+	 * relative depth in the citation network
+	 */
+	public int depth;
+
 	/**
 	 * Bibliography
 	 */
@@ -114,6 +119,7 @@ public class Reference {
 		biblio=new Bibliography();
 		attributes = new HashMap<String,String>();
 		citingFilled = false;
+		depth = 0;
 	}
 	
 	/**
@@ -167,6 +173,14 @@ public class Reference {
 			references.put(newRef, newRef);
 			return newRef;
 		}
+	}
+
+	public static Reference construct(String id,String title){
+		return construct("",new Title(title),new Abstract(),"",id);
+	}
+
+	public static Reference construct(String id,String title, String year){
+		return construct("",new Title(title),new Abstract(),year,id);
 	}
 	
 	public static Reference construct(String schID){

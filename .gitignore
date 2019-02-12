@@ -3,7 +3,9 @@ jar
 .DS_Store
 
 bin
-lib
+
+# include libs as not mavend or sbted
+#lib
 
 .tor_tmp
 .idea
