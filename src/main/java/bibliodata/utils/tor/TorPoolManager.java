@@ -40,24 +40,29 @@ public class TorPoolManager {
 	/**
 	 * Checks if a pool is currently running, and setup initial port correspondingly.
 	 */
-	public static void setupTorPoolConnexion() throws Exception {
+	public static void setupTorPoolConnexion(boolean portexclusivity) {//throws Exception {// shouldnt throw any exception
 		
 		Log.stdout("Setting up TorPool connection...");
 		
 		// check if pool is running.
-		checkRunningPool();
-		
-		System.setProperty("socksProxyHost", "127.0.0.1");
-		
-		
-		try{
-			//changePortFromFile(new BufferedReader(new FileReader(new File(".tor_tmp/ports"))));
-			switchPort();
-		}catch(Exception e){e.printStackTrace();}
-		
-		//showIP();
-		
-		hasTorPoolConnexion = true;
+		//checkRunningPool();
+
+		if(hasRunningPool()) {
+
+			System.setProperty("socksProxyHost", "127.0.0.1");
+
+
+			try {
+				switchPort(portexclusivity);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			//showIP();
+
+			hasTorPoolConnexion = true;
+
+		}
 	}
 	
 	
@@ -72,13 +77,20 @@ public class TorPoolManager {
 	private static void checkRunningPool() throws Exception{
 		if(!new File(".tor_tmp/ports").exists()){throw new Exception("NO RUNNING TOR POOL !"); }
 	}
+
+	public static boolean hasRunningPool() {
+		if (new File(".tor_tmp").exists()){
+			return(new File(".tor_tmp/ports").exists());
+		}else{return(false);}
+	}
+
 	
 	
 	/**
 	 * Switch the current port to the oldest living TorThread.
 	 *   - Reads communication file -
 	 */
-	public static void switchPort(){
+	public static void switchPort(boolean portexclusivity){
 		try{
 			//send kill signal via kill file
 			// if current port is set
@@ -86,60 +98,35 @@ public class TorPoolManager {
 				Log.stdout("Sending kill signal for current tor thread...");
 				(new File(".tor_tmp/kill"+currentPort)).createNewFile();
 			}
-			
-			//waiting for lock to read new available port
-			/*boolean locked = true;int t=0;
-			while(locked){
-				Log.stdout("Waiting for lock on .tor_tmp/lock");
-				Thread.sleep(200);
-				locked = (new File(".tor_tmp/lock")).exists();t++;
-			}*/
-			
-			// make the next step concurrent
-			// -> also lock ports file
-			// create the lock
-			//File lock = new File(".tor_tmp/lock");lock.createNewFile();
-			
-			// read new port - delete taken port from communication file
-			//BufferedReader r = new BufferedReader(new FileReader(new File(".tor_tmp/ports")));
+
 			String portpath = ".tor_tmp/ports";
 			String lockfile = ".tor_tmp/lock";
+			String newport = "";
 
-			changePortFromFile(portpath,lockfile);
-
-
-			/*
-			LinkedList<String> queue = new LinkedList<String>();
-			String currentLine = r.readLine();
-			while(currentLine!=null){
-				queue.add(currentLine);currentLine = r.readLine();
+			while(newport.length()<4) {
+				if (portexclusivity) {
+					newport = readAndRemoveLineWithLock(portpath, lockfile);
+				} else {
+					newport = readLineWithLock(portpath, lockfile);
+				}
 			}
-			*/
 
-			//now rewrite the port file
-			// FIXME change the concurrence architecture -> available ports should be written server-side
-			/*
-			(new File(".tor_tmp/ports")).delete();
-			BufferedWriter w = new BufferedWriter(new FileWriter(new File(".tor_tmp/ports")));
-			for(String p:queue){w.write(p);w.newLine();}
-			w.close();
-			*/
-
-			// release the lock
-			//lock.delete();
-			
 			// show ip to check
 			showIP();
-			
+
+			changePort(newport);
+
 		}catch(Exception e){e.printStackTrace();}
 	}
 	
 	/**
 	 *
+	 * FIXME not checked
+	 *
 	 * @param portpath
 	 * @param lockfile
 	 */
-	private static void changePortFromFile(String portpath,String lockfile){
+	private static String changePortFromFile(String portpath,String lockfile){
 		//String newPort = "9050";
 		String newPort = "";
 
@@ -151,13 +138,40 @@ public class TorPoolManager {
 				if(newPort.length()<4){System.out.println("Waiting for an available tor port");Thread.sleep(1000);}
 			}catch(Exception e){e.printStackTrace();}
 		}
-		
+
 		// set the new port
 		System.setProperty("socksProxyPort",newPort);
 		currentPort = Integer.parseInt(newPort);
 		Log.stdout("Current Port set to "+newPort);
+		return(newPort);
 	}
 
+	/**
+	 * Change port
+	 */
+	private static void changePort(String newport){
+		// set the new port
+		System.setProperty("socksProxyPort",newport);
+		currentPort = Integer.parseInt(newport);
+		Log.stdout("Current Port set to "+newport);
+	}
+
+	/**
+	 * Release the current port (without killing the task) -> used when in exclusivity ?
+	 */
+	public static void releasePort() {
+		Log.stdout("Releasing port "+currentPort);
+		switchPort(false);
+	}
+
+
+	/**
+	 *
+	 *
+	 * @param portpath
+	 * @param lockfile
+	 * @return
+	 */
 	private static String readLineWithLock(String portpath,String lockfile){
 		String res = "";
 		try{
@@ -167,38 +181,94 @@ public class TorPoolManager {
 				Thread.sleep(200);
 				locked = (new File(lockfile)).exists();t++;
 			}
-			File lock = new File(".tor_tmp/lock");lock.createNewFile();
+			File lock = new File(lockfile);lock.createNewFile();
 			BufferedReader r = new BufferedReader(new FileReader(new File(portpath)));
 			res=r.readLine();
 			lock.delete();
 		}catch(Exception e){e.printStackTrace();}
 		return(res);
 	}
-	
-	
-	
-	
+
+
+	private static String readAndRemoveLineWithLock(String portfile,String lockfile) {
+		String res = "";
+		try {
+			boolean locked = true;
+			while (locked) {
+				Log.stdout("Waiting for lock on " + lockfile);
+				Thread.sleep(200);
+				locked = (new File(lockfile)).exists();
+			}
+			File lock = new File(lockfile);lock.createNewFile();
+			BufferedReader r = new BufferedReader(new FileReader(new File(portfile)));
+			LinkedList<String> newcontent = new LinkedList<String>();
+			String currentline = r.readLine();
+			while(currentline!=null){newcontent.add(currentline);currentline=r.readLine();}
+			r.close();
+
+			BufferedWriter w = new BufferedWriter(new FileWriter(new File(portfile)));
+			res = newcontent.removeFirst();
+			for(String remp:newcontent){
+				w.write(remp);w.newLine();
+			}
+			w.close();
+			// unlock the dir
+			lock.delete();
+		}catch(Exception e){e.printStackTrace();}
+		return(res);
+	}
+
+	private static void removeInFileWithLock(String s,String file,String lock){
+		try{
+			boolean locked = true;
+			while(locked){
+				System.out.println("Waiting for lock on "+lock);
+				Thread.sleep(200);
+				locked = (new File(lock)).exists();
+			}
+			File lockfile = new File(lock);lockfile.createNewFile();
+			BufferedReader r = new BufferedReader(new FileReader(new File(file)));
+			LinkedList<String> newcontent = new LinkedList<String>();
+			String currentline = r.readLine();
+			while(currentline!=null){
+				if(currentline.replace("\n","")!=s){newcontent.add(currentline);currentline=r.readLine();}
+			}
+			r.close();
+			BufferedWriter w = new BufferedWriter(new FileWriter(new File(file)));
+			for(String remp:newcontent){
+				w.write(remp);w.newLine();
+			}
+			w.close();
+			// unlock the dir
+			lockfile.delete();
+		}catch(Exception e){e.printStackTrace();}
+	}
+
+
+
+
+
 	// Test functions
 	
 	private static void testRemotePool(){
-		try{setupTorPoolConnexion();
+		try{setupTorPoolConnexion(true);
 		
 		showIP();
 		
 		while(true){
 			Thread.sleep(10000);
 			Log.stdout("TEST : Switching port... ");
-			switchPort();
+			switchPort(true);
 			showIP();
 		}
 		}catch(Exception e){e.printStackTrace();}
 	}
-	
+
 	private static void showIP(){
 		try{
-		BufferedReader r = new BufferedReader(new InputStreamReader(new URL("http://ipecho.net/plain").openConnection().getInputStream()));
-		String currentLine=r.readLine();
-		while(currentLine!= null){Log.stdout(currentLine);currentLine=r.readLine();}
+			BufferedReader r = new BufferedReader(new InputStreamReader(new URL("http://ipecho.net/plain").openConnection().getInputStream()));
+			String currentLine=r.readLine();
+			while(currentLine!= null){Log.stdout(currentLine);currentLine=r.readLine();}
 		}catch(Exception e){e.printStackTrace();}
 	}
 	

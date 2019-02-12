@@ -181,7 +181,7 @@ public class ScholarAPI {
 			 }
 		}catch(Exception e){e.printStackTrace();}
 
-		System.out.println("req : "+refs.size()+" results");
+		Log.stdout("req : "+refs.size()+" results");
 
 		return refs;
 	}
@@ -293,6 +293,8 @@ public class ScholarAPI {
 						 */
 
 						Reference rr;
+
+						// FIXME require ref details only if no ID -> should be an option to get other available fields
 						if(r.scholarID==null||r.scholarID==""){rr = getScholarRef(r);}else{rr=r;}
 
 						if(rr!=null){
@@ -300,7 +302,8 @@ public class ScholarAPI {
 							//r.scholarID=rr.scholarID;//no need as rr and r should be same pointer ?
 							if(!rr.equals(r)){Reference.references.remove(r);}
 							r=rr; //contradiction with hashconsing here : should delete the old one here
-							List<Reference> citing = scholarRequest(r.scholarID,10000,"cites"); // TODO ; limit of max cit number ?
+							// TODO ; limit of max cit number ?
+							List<Reference> citing = scholarRequest(r.scholarID,10000,"cites");
 							for(Reference c:citing){r.citing.add(c);}
 						}
 
@@ -343,13 +346,12 @@ public class ScholarAPI {
 				//while(dom==null||dom.getElementById("gs_res_bdy")==null){
 				while(dom==null||dom.getElementById("gs_res_ccl")==null){
 					// swith TOR port
-					Log.stdout("Current IP blocked by ggl fuckers ; switching currentTorThread.");
+					Log.stdout("Current IP failed ; switching currentTorThread.");
 
-				    // TODO : write ip in file for systematic stats of blocked adress (may have patterns in google-fuckers blocking policy)
+				    // TODO : write ip in file for systematic stats of blocked adress (may have patterns in blocking policy)
 
-				    //TorPool.switchPort(true);
-				    // use TorPoolManager instead
-				    TorPoolManager.switchPort();
+					// FIXME port exclusivity as a global parameter
+				    TorPoolManager.switchPort(true);
 
 					// reinit scholar API
 					init();
@@ -377,7 +379,11 @@ public class ScholarAPI {
 		for(Element r:e){
 	    	if(resultsNumber<remResponses){
 	    		String id = getCluster(r);
-	    		if(id!=null&&id.length()>0){
+	    		// FIXME we make the choice here to add only if cluster is identified (i.e. different versions or cited in scholar) => could be added as an option (but requires unique id creation)
+	    		// plus could get the users = authors here !
+				// TODO add author collection (-> cocitation networks)
+				// for exact citation/all authors/bibtex -> needs js emulation (out of question for now for perf reasons)
+				if(id!=null&&id.length()>0){
 	    		  refs.add(Reference.construct("", getTitle(r), new Abstract(), getYear(r), id));
 	    		  resultsNumber++;
 	    		}

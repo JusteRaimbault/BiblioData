@@ -36,7 +36,7 @@ public class KeywordsRequest {
 			int numref = Integer.parseInt(args[2]);
 			String addterm = "";if(args.length==4){addterm=args[3];}
 
-			try{TorPoolManager.setupTorPoolConnexion();}catch(Exception e){e.printStackTrace();}
+			try{TorPoolManager.setupTorPoolConnexion(true);}catch(Exception e){e.printStackTrace();}
 			ScholarAPI.init();
 
 			// existing corpus - not needed, will go through the keywords anyway

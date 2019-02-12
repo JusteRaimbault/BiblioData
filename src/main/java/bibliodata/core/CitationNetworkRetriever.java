@@ -25,7 +25,7 @@ public class CitationNetworkRetriever {
 			String action = args[0];
 
 			/**
-			 * Usage :
+			 * Usage : $DATABASENAME $NREFS
 			 */
 			if(action.equals("--mongo")){
 				Log.stdout("Citation network from mongo");

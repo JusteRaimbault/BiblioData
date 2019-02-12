@@ -13,7 +13,7 @@ import java.util.List;
 public class MongoImport {
 
 
-    public static void fileToMongo(String file,String citedFolder,String db, String refcollection, String citcollection,int initDepth){
+    public static void fileToMongo(String file,String citedFolder,String db, String refcollection, String citcollection,int initDepth,boolean dropCollections){
         Corpus initial = Corpus.fromFile(file,citedFolder);
         Log.stdout("Imported corpus of size "+initial.references.size());
         //update the depth
@@ -21,6 +21,10 @@ public class MongoImport {
         MongoConnection.initMongo(db);
         List<Document> toinsert = MongoDocument.fromCorpus(initial);
         Log.stdout("To import : "+toinsert.size());
+        if(dropCollections){
+            MongoConnection.mongoDatabase.getCollection(refcollection).drop();
+            MongoConnection.mongoDatabase.getCollection(citcollection).drop();
+        }
         MongoConnection.mongoInsert(refcollection,toinsert);
         MongoConnection.mongoInsert(citcollection,MongoDocument.citationLinksFromCorpus(initial));
         MongoConnection.closeMongo();

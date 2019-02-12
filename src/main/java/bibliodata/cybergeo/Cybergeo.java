@@ -55,7 +55,7 @@ public class Cybergeo {
 
 		 Log.purpose("runtime", "Started at "+(new Date()).toString());
 
-		 try{TorPoolManager.setupTorPoolConnexion();}catch(Exception e){e.printStackTrace();}
+		 try{TorPoolManager.setupTorPoolConnexion(true);}catch(Exception e){e.printStackTrace();}
 		 ScholarAPI.init();
 
 		 //CybergeoImport.setupSQL();
@@ -74,7 +74,7 @@ public class Cybergeo {
 		AlgorithmicSystematicReview.setup("conf/default.conf");
 		Log.purpose("runtime", "Started at "+(new Date()).toString());
 		if(withScholar){
-			try{TorPoolManager.setupTorPoolConnexion();}catch(Exception e){e.printStackTrace();}
+			try{TorPoolManager.setupTorPoolConnexion(true);}catch(Exception e){e.printStackTrace();}
 			ScholarAPI.init();
 		}
 
@@ -256,7 +256,6 @@ public class Cybergeo {
 	 * Get abstracts and authors from Mendeley and fill sql base
 	 *
 	 * @param database
-	 * @param numRefs
 	 */
 	public static void fillAbstractsSQLExport(String database){
 		setup(false);

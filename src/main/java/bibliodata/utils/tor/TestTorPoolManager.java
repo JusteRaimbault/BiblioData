@@ -14,12 +14,12 @@ public class TestTorPoolManager {
 	 * Test for connexion from multiple threads -> to be launched //.
 	 */
 	public static void testSimultaneousConnexions() throws Exception{
-		TorPoolManager.setupTorPoolConnexion();
+		TorPoolManager.setupTorPoolConnexion(true);
 		while(true){
 			long t=(long)(Math.random()*20000.0);
 			System.out.println("sleeping "+t+"s...");
 			Thread.sleep(t);
-			TorPoolManager.switchPort();
+			TorPoolManager.switchPort(true);
 		}
 	}
 	

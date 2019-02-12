@@ -35,7 +35,8 @@ public class DefaultCorpus extends Corpus {
 	public DefaultCorpus(Set<Reference> refs){
 		references = new HashSet<Reference>(refs);
 	}
-	
+
+
 	
 	/**
 	 * Fusion of corpuses
@@ -51,6 +52,10 @@ public class DefaultCorpus extends Corpus {
 			}
 		}
 	}
-	
+
+	public DefaultCorpus(Reference r,Set<Reference> refs){
+		references = new HashSet<Reference>(refs);
+		references.add(r);
+	}
 	
 }

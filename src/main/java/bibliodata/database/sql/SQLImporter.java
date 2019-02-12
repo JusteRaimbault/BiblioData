@@ -67,7 +67,7 @@ public class SQLImporter {
 				citing.biblio.cited.add(cited);
 			}
 			
-			if(reconnectTorPool){TorPoolManager.setupTorPoolConnexion();}
+			if(reconnectTorPool){TorPoolManager.setupTorPoolConnexion(true);}
 		}catch(Exception e){e.printStackTrace();}
 
 		return new DefaultCorpus(refs);
@@ -84,7 +84,7 @@ public class SQLImporter {
 			query = query + ";";
 			ResultSet resprim = SQLConnection.executeQuery(query);		
 			while(resprim.next()){refs.add(Reference.construct("",new Title(resprim.getString(2)),new Abstract(),resprim.getString(3), resprim.getString(1)));}
-			if(reconnectTorPool){TorPoolManager.setupTorPoolConnexion();}
+			if(reconnectTorPool){TorPoolManager.setupTorPoolConnexion(true);}
 		}catch(Exception e){e.printStackTrace();}
 		
 		return new DefaultCorpus(refs) ;
@@ -98,7 +98,7 @@ public class SQLImporter {
 			String query = "SELECT "+column+" FROM "+table+";";
 			ResultSet resq = SQLConnection.executeQuery(query);		
 			while(resq.next()){res.add(resq.getString(1));}
-			if(reconnectTorPool){TorPoolManager.setupTorPoolConnexion();}
+			if(reconnectTorPool){TorPoolManager.setupTorPoolConnexion(true);}
 		}catch(Exception e){e.printStackTrace();}
 		
 		return res;

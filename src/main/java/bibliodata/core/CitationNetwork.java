@@ -19,6 +19,7 @@ import bibliodata.database.sql.CybergeoImport;
 import bibliodata.database.sql.SQLConnection;
 import bibliodata.utils.CSVWriter;
 import bibliodata.utils.GEXFWriter;
+import bibliodata.utils.Log;
 import bibliodata.utils.RISReader;
 import bibliodata.utils.tor.TorPool;
 import bibliodata.utils.tor.TorPoolManager;
@@ -41,15 +42,25 @@ public class CitationNetwork {
 	 * @param numrefs
 	 */
 	public static void fillCitationsMongo(String database,String refcollection,String linkcollection,int numrefs){
+
+		TorPoolManager.setupTorPoolConnexion(true);
+		ScholarAPI.init();
+
+		Log.stdout("Filling mongobase "+database+" ; collections "+refcollection+","+linkcollection+" ; "+numrefs+" refs");
+
 		//init mongo connection
 		MongoConnection.initMongo(database);
 
 		for(int i = 0;i<numrefs;i++){
-			Reference r = MongoConnection.getUnfilled(database,refcollection);
+			Reference r = MongoConnection.getUnfilled(refcollection);
+			if(r==null){break;}
+			Log.stdout("Unfilled ref : "+r.toString());
 			ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r));
+			MongoConnection.updateCorpus(new DefaultCorpus(r,r.citing),refcollection,linkcollection);
 		}
 
-		MongoConnection.updateCorpus(new DefaultCorpus(Reference.references.keySet()),refcollection,linkcollection);
+		// corpus need to be updated at each loop to iterate on depth !
+		//MongoConnection.updateCorpus(new DefaultCorpus(Reference.references.keySet()),refcollection,linkcollection);
 
 		MongoConnection.closeMongo();
 	}
@@ -143,7 +154,7 @@ public class CitationNetwork {
 	public static void buildCitationNetworkFromRefFile(String refFile,String outFile,int depth,String citedFolder){
         
 		AlgorithmicSystematicReview.setup("conf/default.conf");
-        try{TorPoolManager.setupTorPoolConnexion();}catch(Exception e){e.printStackTrace();}
+        try{TorPoolManager.setupTorPoolConnexion(true);}catch(Exception e){e.printStackTrace();}
 		ScholarAPI.init();
 		
 		System.out.println("Reconstructing References from file "+refFile);

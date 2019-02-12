@@ -72,7 +72,7 @@ public class SQLExporter {
 			
 			SQLConnection.closeSQLConnection();
 			
-			if(reconnectTorPool){TorPoolManager.setupTorPoolConnexion();}
+			if(reconnectTorPool){TorPoolManager.setupTorPoolConnexion(true);}
 			
 			/**
 			 * TODO : sql connection not closed ?
@@ -114,7 +114,7 @@ public class SQLExporter {
 		
 		SQLConnection.closeSQLConnection();
 		
-		if(reconnectTorPool){try{TorPoolManager.setupTorPoolConnexion();}catch(Exception e){e.printStackTrace();}}
+		if(reconnectTorPool){try{TorPoolManager.setupTorPoolConnexion(true);}catch(Exception e){e.printStackTrace();}}
 	}
 	
 	
@@ -139,7 +139,7 @@ public class SQLExporter {
 	 * insert a set of refs
 	 * 
 	 * @param r
-	 * @param primaryTableName
+	 * @param table
 	 * @return
 	 */
 	private static String insertSetRequest(HashSet<Reference> r,String table){
