@@ -108,8 +108,9 @@ public class MongoConnection {
         //Document prev = mongoFindOne(collection,"id",r.scholarID);
         //if(prev.containsKey("id")){}
         //else{mongoInsert(collection,MongoDocument.fromReference(r));}
+
         // FIXME should merge docs with a merge strategy
-        // TODO do not insert if already at a higher depth
+        // do not insert if already at a higher depth
         mongoUpsert(collection,"id",r.scholarID,MongoDocument.fromReference(r).append("processing",false));
     }
 
@@ -181,7 +182,11 @@ public class MongoConnection {
     /**
      * insert document if do not exist
      *
-     * // FIXME the field-specific uppdate strategy should be an argument - however difficult without func prog
+     * // FIXME the field-specific update strategy should be an argument - however difficult without func prog
+     *   - case class MergeStrategy(
+     *        existingFieldsStrat: Map[field: String -> (condition,operator)],
+     *        addFieldsStrat: (condition,operator)
+     *        )
      *
      * @param collection
      * @param idkey
@@ -199,7 +204,7 @@ public class MongoConnection {
         if(existing.keySet().size()>0){
             List<Bson> updates = new LinkedList<Bson>();
             for(String k:document.keySet()){if(!k.equals("_id")&!k.equals("depth")&!k.equals("id")){updates.add(set(k,document.get(k)));}}
-            // update depth only if older depth if larger
+            // update depth only if older depth is smaller
             if(existing.getInteger("depth")<document.getInteger("depth")){updates.add(set("depth",document.getInteger("depth")));}
             // update citingFilled with a or
             updates.add(set("citingFilled",document.getBoolean("citingFilled")||existing.getBoolean("citingFilled")));

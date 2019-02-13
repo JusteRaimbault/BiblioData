@@ -86,6 +86,11 @@ public class Reference {
 	public int depth;
 
 	/**
+	 * where originated from in the case of multiple corpuses
+	 */
+	public String origin;
+
+	/**
 	 * Bibliography
 	 */
 	public Bibliography biblio;
@@ -120,6 +125,7 @@ public class Reference {
 		attributes = new HashMap<String,String>();
 		citingFilled = false;
 		depth = 0;
+		origin="";
 	}
 	
 	/**
