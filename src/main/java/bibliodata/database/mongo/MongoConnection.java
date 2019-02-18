@@ -201,7 +201,12 @@ public class MongoConnection {
         //Log.stdout("Upsert on existing : "+existing.toJson());
         if(existing.keySet().size()>0){
             List<Bson> updates = new LinkedList<Bson>();
-            for(String k:document.keySet()){if(!k.equals("_id")&!k.equals("depth")&!k.equals("id")&!k.equals("citingFilled")&!k.equals("origin")){updates.add(set(k,document.get(k)));}}
+            for(String k:document.keySet()){
+                if(!k.equals("_id")&!k.equals("depth")&
+                    !k.equals("id")&!k.equals("citingFilled")&!k.equals("origin")){
+                    updates.add(set(k,document.get(k)));
+                }
+            }
             // update depth only if older depth is smaller
             if(existing.getInteger("depth")<document.getInteger("depth")){
                 updates.add(set("depth",document.getInteger("depth")));
@@ -210,7 +215,11 @@ public class MongoConnection {
             updates.add(set("citingFilled",document.getBoolean("citingFilled")||existing.getBoolean("citingFilled")));
             // concatenate origins
             if(existing.getString("origin").length()>0){
-                updates.add(set("origin",existing.getString("origin")+";"+document.getString("origin")));
+                if(!existing.getString("origin").contains(document.getString("origin"))) {
+                    updates.add(set("origin", existing.getString("origin") + ";" + document.getString("origin")));
+                }else{
+                    updates.add(set("origin",document.getString("origin")));
+                }
             }
             mongoCollection.updateOne(eq(idkey, idvalue), combine(updates),(new UpdateOptions()).upsert(true));
         }else{
