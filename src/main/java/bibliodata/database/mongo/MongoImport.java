@@ -13,6 +13,18 @@ import java.util.List;
 public class MongoImport {
 
 
+    /**
+     * Import a corpus from file to mongo
+     *
+     * @param file
+     * @param citedFolder
+     * @param db
+     * @param refcollection
+     * @param citcollection
+     * @param initDepth
+     * @param origin
+     * @param dropCollections
+     */
     public static void fileToMongo(String file,String citedFolder,String db, String refcollection, String citcollection,int initDepth,String origin,boolean dropCollections){
         Corpus initial = Corpus.fromFile(file,citedFolder);
         Log.stdout("Imported corpus of size "+initial.references.size());
@@ -21,21 +33,32 @@ public class MongoImport {
             r.depth=initDepth;
             r.origin=origin;
         }
+
+        corpusToMongo(initial,db,refcollection,citcollection,dropCollections);
+
+    }
+
+    /**
+     * Import a corpus in mongo
+     *
+     * @param corpus
+     * @param db
+     * @param refcollection
+     * @param citcollection
+     * @param dropCollections
+     */
+    public static void corpusToMongo(Corpus corpus,String db,String refcollection,String citcollection,boolean dropCollections){
         MongoConnection.initMongo(db);
 
-        //List<Document> toinsert = MongoDocument.fromCorpus(initial);
-
-        Log.stdout("To import : "+initial.references.size());
+        Log.stdout("To import : "+corpus.references.size());
 
         if(dropCollections){
             MongoConnection.mongoDatabase.getCollection(refcollection).drop();
             MongoConnection.mongoDatabase.getCollection(citcollection).drop();
         }
 
-        //MongoConnection.mongoInsert(refcollection,toinsert);
-        //MongoConnection.mongoInsert(citcollection,MongoDocument.citationLinksFromCorpus(initial));
         // better updating to avoid duplicates also in initial import
-        MongoConnection.updateCorpus(initial,refcollection,citcollection);
+        MongoConnection.updateCorpus(corpus,refcollection,citcollection);
 
         MongoConnection.closeMongo();
     }

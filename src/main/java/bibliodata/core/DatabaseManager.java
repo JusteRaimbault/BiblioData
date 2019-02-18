@@ -29,10 +29,13 @@ public class DatabaseManager {
             MongoImport.fileToMongo(args[1],"",args[2],"references","citations",initDepth,origin,dropCols);
         }
 
+        // increase depth
         if(action.equals("--incrdepth")){
             MongoConnection.initMongo(args[1]);
             MongoConnection.incrAllDepths("references");
         }
+
+
 
 
     }

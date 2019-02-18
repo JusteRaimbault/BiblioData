@@ -20,7 +20,11 @@ public class CitationNetworkRetriever {
 	 */
 		public static void main(String[] args) {
 
-			if(args.length==0){System.out.println("Usage : --citation --mongo/--csv");}
+			if(args.length==0){
+				System.out.println("Usage : --citation\n"+
+					"| --mongo $DATABASE $NUMREFS\n"+
+					"| --csv $CSVFILE $OUTPUT_PREFIX $DEPTH [$CITEDFOLDER]"
+			);}
 
 			String action = args[0];
 

@@ -195,19 +195,23 @@ public class MongoConnection {
      */
     public static void mongoUpsert(String collection, String idkey,Object idvalue, Document document){
         MongoCollection<Document> mongoCollection = mongoDatabase.getCollection(collection);
-        //mongoCollection.updateOne(eq(idkey, idvalue), set("id",1)document,(new UpdateOptions()).upsert(true));
-        //mongoCollection.replaceOne(eq(idkey, idvalue),document,(new UpdateOptions()).upsert(true));
 
         //  doing something when already present is distinguished (fields to be updated)
         Document existing = mongoFindOne(collection,idkey,idvalue);
         //Log.stdout("Upsert on existing : "+existing.toJson());
         if(existing.keySet().size()>0){
             List<Bson> updates = new LinkedList<Bson>();
-            for(String k:document.keySet()){if(!k.equals("_id")&!k.equals("depth")&!k.equals("id")){updates.add(set(k,document.get(k)));}}
+            for(String k:document.keySet()){if(!k.equals("_id")&!k.equals("depth")&!k.equals("id")&!k.equals("citingFilled")&!k.equals("origin")){updates.add(set(k,document.get(k)));}}
             // update depth only if older depth is smaller
-            if(existing.getInteger("depth")<document.getInteger("depth")){updates.add(set("depth",document.getInteger("depth")));}
+            if(existing.getInteger("depth")<document.getInteger("depth")){
+                updates.add(set("depth",document.getInteger("depth")));
+            }
             // update citingFilled with a or
             updates.add(set("citingFilled",document.getBoolean("citingFilled")||existing.getBoolean("citingFilled")));
+            // concatenate origins
+            if(existing.getString("origin").length()>0){
+                updates.add(set("origin",existing.getString("origin")+";"+document.getString("origin")));
+            }
             mongoCollection.updateOne(eq(idkey, idvalue), combine(updates),(new UpdateOptions()).upsert(true));
         }else{
             mongoInsert(collection,document);

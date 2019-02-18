@@ -13,8 +13,10 @@ import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.corpuses.DefaultCorpus;
 import bibliodata.core.corpuses.OrderedCorpus;
 import bibliodata.core.reference.Reference;
+import bibliodata.database.mongo.MongoImport;
 import bibliodata.scholar.ScholarAPI;
 import bibliodata.utils.CSVReader;
+import bibliodata.utils.Log;
 import bibliodata.utils.tor.TorPoolManager;
 
 /**
@@ -26,51 +28,72 @@ public class KeywordsRequest {
 
 	/**
 	*  Construct a corpus from keyword request
+	 *   Keyword file specification :
+	 *    - csv with delimiter ";"
+	 *    - if one column, terms separated by space are merge with "+" (equivalent to a "AND" in the request)
+	 *    - if two columns, idem, but first column is the corpus identifier
 	*/
 	public static void main(String[] args) {
 
+		if(args.length==0){
+			System.out.println(
+					"Usage : --keywords\n"+
+							"| --file $KWFILE $OUTFILE $NUMREF [$ADDTERM]\n"+
+							"| --mongo $KWFILE $DATABASE $NUMREF [$ADDTERM] [$INITDEPTH]"
+			);}
 
-		if(args.length==3||args.length==4){
-			String kwFile=args[0];
-			String outFile=args[1];
-			int numref = Integer.parseInt(args[2]);
-			String addterm = "";if(args.length==4){addterm=args[3];}
+		String mode = args[0];
 
-			try{TorPoolManager.setupTorPoolConnexion(true);}catch(Exception e){e.printStackTrace();}
+		if((args.length==4||args.length==5||args.length==6)&&(mode.equals("--file")||mode.equals("--mongo"))){
+
+
+			String kwFile=args[1];
+			String out=args[2];// either the file or the database
+			int numref = Integer.parseInt(args[3]);
+			String addterm = "";if(args.length==5){addterm=args[4];}
+			int initdepth = 0;if(args.length==6){initdepth=Integer.parseInt(args[5]);}
+
+			// FIXME torpool should not raise any exception
+			//try{TorPoolManager.setupTorPoolConnexion(true);}catch(Exception e){e.printStackTrace();}
+			TorPoolManager.setupTorPoolConnexion(true);
+
 			ScholarAPI.init();
 
-			// existing corpus - not needed, will go through the keywords anyway
-			/*Corpus existing = new DefaultCorpus();
-			if(new File(outFile).exists()){
-				existing = new CSVFactory(outFile).getCorpus();
-			}*/
-
 			// parse kws file
-			String[][] kwraw = CSVReader.read(kwFile, ",","\"");
+			String[][] kwraw = CSVReader.read(kwFile, ";","\"");
 			//System.out.println(kwraw.length);
 			String[] reqs = new String[kwraw.length];
+			String[] reqnames = new String[kwraw.length];
 			for(int i=0;i<kwraw.length;i++){
-				// TODO : why index 1 ? -> clarify specification of the kw file
-				//String currentreq = kwraw[i][1].replace(" ", "+");
-				String currentreq = kwraw[i][0].replace(" ","+");
+				String currentreq = "";
+				if(kwraw[i].length>1){currentreq = kwraw[i][1].replace(" ", "+");reqnames[i]= kwraw[i][0];}
+				else{currentreq = kwraw[i][0].replace(" ","+");}
 				if(addterm.length()>0){currentreq=currentreq+"+"+addterm;}
+				if(kwraw[i].length==1){reqnames[i]=currentreq;}
 			    reqs[i] = currentreq ;
-				System.out.println(currentreq);
+				Log.stdout("Request : "+currentreq);
 			}
 
-			try{(new FileWriter(new File(outFile+"_achieved.txt"))).write(kwFile+'\n');}catch(Exception e){e.printStackTrace();}
 
-			for(String req:reqs){
+			//try{(new FileWriter(new File(outFile+"_achieved.txt"))).write(kwFile+'\n');}catch(Exception e){e.printStackTrace();}
+
+			for(int i=0;i<reqs.length;i++){
+				String req = reqs[i];String reqname=reqnames[i];
 				List<Reference> currentrefs = ScholarAPI.scholarRequest(req, numref, "direct");
-				new OrderedCorpus(currentrefs).csvExport(outFile+"_"+req,false);
-				//new DefaultCorpus(Reference.references.keySet()).csvExport(outFile+req,false);
+				for(Reference r:currentrefs){r.depth=initdepth;r.origin=reqname;}
+				Corpus toexport = new OrderedCorpus(currentrefs);
+
+				if(mode.equals("--file")){toexport.csvExport(out+"_"+req,false);}
+
+				if(mode.equals("--mongo")){
+					MongoImport.corpusToMongo(toexport,out,"references","links",false);
+				}
+
 				// write kws in achieved file
-				try{(new FileWriter(new File(outFile+"_achieved.txt"),true)).write(req+"\n");}catch(Exception e){e.printStackTrace();}
+				//try{(new FileWriter(new File(outFile+"_achieved.txt"),true)).write(req+"\n");}catch(Exception e){e.printStackTrace();}
 			}
 
 
-		}else{
-			System.out.println("usage : java -jar keywordsRequest.jar kwfile outfile numrefs [addterm]");
 		}
 
 

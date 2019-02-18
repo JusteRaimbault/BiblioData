@@ -9,7 +9,7 @@ import bibliodata.mendeley.AbstractSetRetriever;
 public class Main {
 
 
-    public static String usage = "Usage : java -jar bibliodata.jar $OPTION ; where $OPTION in {--database,--citation,--abstracts,--abstract,--keywords}";
+    public static String usage = "Usage : java -jar bibliodata.jar $OPTION [...]; where $OPTION in {--database,--citation,--abstracts,--abstract,--keywords}";
 
 
     public static void main(String[] args) {
