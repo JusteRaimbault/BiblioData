@@ -51,14 +51,7 @@ public class TorPoolManager {
 
 			System.setProperty("socksProxyHost", "127.0.0.1");
 
-
-			try {
-				switchPort(portexclusivity);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			//showIP();
+			switchPort(portexclusivity);
 
 			hasTorPoolConnexion = true;
 
@@ -79,9 +72,13 @@ public class TorPoolManager {
 	}
 
 	public static boolean hasRunningPool() {
-		if (new File(".tor_tmp").exists()){
-			return(new File(".tor_tmp/ports").exists());
-		}else{return(false);}
+		try {
+			if (new File(".tor_tmp").exists()) {
+				return (new File(".tor_tmp/ports").exists());
+			} else {
+				return (false);
+			}
+		}catch(Exception e){e.printStackTrace();return(false);}
 	}
 
 	
@@ -116,7 +113,10 @@ public class TorPoolManager {
 
 			changePort(newport);
 
-		}catch(Exception e){e.printStackTrace();}
+		}catch(Exception e){
+			e.printStackTrace();
+			removeLock(".tor_tmp/lock");
+		}
 	}
 	
 	/**
@@ -185,7 +185,10 @@ public class TorPoolManager {
 			BufferedReader r = new BufferedReader(new FileReader(new File(portpath)));
 			res=r.readLine();
 			lock.delete();
-		}catch(Exception e){e.printStackTrace();}
+		}catch(Exception e){
+			e.printStackTrace();
+			removeLock(lockfile);
+		}
 		return(res);
 	}
 
@@ -214,7 +217,10 @@ public class TorPoolManager {
 			w.close();
 			// unlock the dir
 			lock.delete();
-		}catch(Exception e){e.printStackTrace();}
+		}catch(Exception e){
+			e.printStackTrace();
+			removeLock(lockfile);
+		}
 		return(res);
 	}
 
@@ -241,9 +247,18 @@ public class TorPoolManager {
 			w.close();
 			// unlock the dir
 			lockfile.delete();
-		}catch(Exception e){e.printStackTrace();}
+		}catch(Exception e){
+			e.printStackTrace();
+			removeLock(lock);
+		}
 	}
 
+	private static void removeLock(String lock){
+		try {
+			File lockfile = new File(lock);
+			if(lockfile.exists()){lockfile.delete();}
+		}catch(Exception e){e.printStackTrace();}
+	}
 
 
 
