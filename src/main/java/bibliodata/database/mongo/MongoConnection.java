@@ -214,13 +214,12 @@ public class MongoConnection {
             // update citingFilled with a or
             updates.add(set("citingFilled",document.getBoolean("citingFilled")||existing.getBoolean("citingFilled")));
             // concatenate origins
-            if(existing.getString("origin").length()>0){
-                if(!existing.getString("origin").contains(document.getString("origin"))) {
-                    updates.add(set("origin", existing.getString("origin") + ";" + document.getString("origin")));
-                }else{
-                    updates.add(set("origin",document.getString("origin")));
-                }
+            if(existing.containsKey("origin")&existing.getString("origin").length()>0&!existing.getString("origin").contains(document.getString("origin"))) {
+                updates.add(set("origin", existing.getString("origin") + ";" + document.getString("origin")));
+            }else{
+                updates.add(set("origin",document.getString("origin")));
             }
+
             mongoCollection.updateOne(eq(idkey, idvalue), combine(updates),(new UpdateOptions()).upsert(true));
         }else{
             mongoInsert(collection,document);
