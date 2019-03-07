@@ -39,22 +39,22 @@ public class KeywordsRequest {
 			System.out.println(
 					"Usage : --keywords\n"+
 							"| --file $KWFILE $OUTFILE $NUMREF [$ADDTERM]\n"+
-							"| --mongo $KWFILE $DATABASE $NUMREF [$ADDTERM] [$INITDEPTH]"
-			);}
+							"| --mongo $KWFILE $DATABASE $NUMREF [$INITDEPTH] [$DROPCOLLECTION] [$ADDTERM]"
+			);
+		}
 
 		String mode = args[0];
 
-		if((args.length==4||args.length==5||args.length==6)&&(mode.equals("--file")||mode.equals("--mongo"))){
+		if((args.length==4||args.length==5||args.length==6||args.length==7)&&(mode.equals("--file")||mode.equals("--mongo"))){
 
 
 			String kwFile=args[1];
 			String out=args[2];// either the file or the database
 			int numref = Integer.parseInt(args[3]);
-			String addterm = "";if(args.length==5){addterm=args[4];}
-			int initdepth = 0;if(args.length==6){initdepth=Integer.parseInt(args[5]);}
+			int initdepth = 0;if(args.length==5){initdepth=Integer.parseInt(args[4]);}
+			boolean dropcols = false;if(args.length==6){dropcols=Boolean.parseBoolean(args[5]);}
+			String addterm = "";if(args.length==7){addterm=args[6];}
 
-			// FIXME torpool should not raise any exception
-			//try{TorPoolManager.setupTorPoolConnexion(true);}catch(Exception e){e.printStackTrace();}
 			TorPoolManager.setupTorPoolConnexion(true);
 
 			ScholarAPI.init();
@@ -66,11 +66,16 @@ public class KeywordsRequest {
 			String[] reqnames = new String[kwraw.length];
 			for(int i=0;i<kwraw.length;i++){
 				String currentreq = "";
-				if(kwraw[i].length>1){currentreq = kwraw[i][1].replace(" ", "+");reqnames[i]= kwraw[i][0];}
-				else{currentreq = kwraw[i][0].replace(" ","+");}
+				if(kwraw[i].length>1){
+					currentreq = kwraw[i][1].replace(" ", "+");
+					reqnames[i]= kwraw[i][0];
+				}else{
+					currentreq = kwraw[i][0].replace(" ","+");
+					reqnames[i]=kwraw[i][0].replace(" ","_");
+				}
 				if(addterm.length()>0){currentreq=currentreq+"+"+addterm;}
-				if(kwraw[i].length==1){reqnames[i]=currentreq;}
 			    reqs[i] = currentreq ;
+
 				Log.stdout("Request : "+currentreq);
 			}
 
@@ -78,15 +83,28 @@ public class KeywordsRequest {
 			//try{(new FileWriter(new File(outFile+"_achieved.txt"))).write(kwFile+'\n');}catch(Exception e){e.printStackTrace();}
 
 			for(int i=0;i<reqs.length;i++){
-				String req = reqs[i];String reqname=reqnames[i];
+				String req = reqs[i];
+				String reqname=reqnames[i];
+
+				Log.stdout("Keyword request \""+req+"\" for "+numref+" refs");
+
 				List<Reference> currentrefs = ScholarAPI.scholarRequest(req, numref, "direct");
-				for(Reference r:currentrefs){r.depth=initdepth;r.origin=reqname;}
+
+				// add additional info
+				for(Reference r:currentrefs){
+					r.depth=initdepth;
+					r.origin=reqname;
+				}
+
 				Corpus toexport = new OrderedCorpus(currentrefs);
 
-				if(mode.equals("--file")){toexport.csvExport(out+"_"+req,false);}
+				if(mode.equals("--file")){
+					toexport.csvExport(out+"_"+req,false);
+				}
 
 				if(mode.equals("--mongo")){
-					MongoImport.corpusToMongo(toexport,out,"references","links",false);
+					boolean drop=false;if(i==0&&dropcols){drop=true;}// drop only at the first kw
+					MongoImport.corpusToMongo(toexport,out,"references","links",drop);
 				}
 
 				// write kws in achieved file

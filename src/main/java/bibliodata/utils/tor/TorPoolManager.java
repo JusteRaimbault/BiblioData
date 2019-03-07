@@ -35,12 +35,14 @@ public class TorPoolManager {
 	
 	
 	public static boolean hasTorPoolConnexion = false;
-	
-	
+
+
 	/**
 	 * Checks if a pool is currently running, and setup initial port correspondingly.
+	 *
+	 * @param portexclusivity should the used port be removed from the list of available ports (exclusivity)
 	 */
-	public static void setupTorPoolConnexion(boolean portexclusivity) {//throws Exception {// shouldnt throw any exception
+	public static void setupTorPoolConnexion(boolean portexclusivity) {
 		
 		Log.stdout("Setting up TorPool connection...");
 		
