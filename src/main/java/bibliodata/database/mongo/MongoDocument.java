@@ -32,7 +32,8 @@ public class MongoDocument {
         res.append("citingFilled",reference.citingFilled);
         //res.append("depth",initDepth);
         res.append("depth",reference.depth);
-        if(reference.origin.length()>0){res.append("origin",reference.origin);}
+        //if(reference.origin.length()>0){
+        res.append("origin",reference.origin);//}
         return(res);
     }
 

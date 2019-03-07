@@ -49,12 +49,18 @@ public class TorPoolManager {
 
 		if(hasRunningPool()) {
 
+			Log.stdout("   -> running pool ok");
+
 			System.setProperty("socksProxyHost", "127.0.0.1");
 
-			switchPort(portexclusivity);
+			try{
+				switchPort(portexclusivity);
+			}catch(Exception e){Log.stdout("Impossible to set port at initialization");e.printStackTrace();}
 
 			hasTorPoolConnexion = true;
 
+		}else{
+			Log.stdout("   -> no running pool, not setting socks proxy");
 		}
 	}
 	

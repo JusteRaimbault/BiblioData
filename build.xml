@@ -79,6 +79,8 @@
             <arg value="data/testmin.csv"/>
             <arg value="testmin"/>
             <arg value="1"/>
+            <arg value="testimport"/>
+            <arg value="true"/>
             <classpath>
                 <pathelement location="${jar.dir}/${ant.project.name}.jar"/>
             </classpath>

@@ -187,6 +187,7 @@ public class MongoConnection {
      *        existingFieldsStrat: Map[field: String -> (condition,operator)],
      *        addFieldsStrat: (condition,operator)
      *        )
+     *        -> terrible, keep quickndirty approach for now
      *
      * @param collection
      * @param idkey
@@ -201,25 +202,53 @@ public class MongoConnection {
         //Log.stdout("Upsert on existing : "+existing.toJson());
         if(existing.keySet().size()>0){
             List<Bson> updates = new LinkedList<Bson>();
+
             for(String k:document.keySet()){
-                if(!k.equals("_id")&!k.equals("depth")&
-                    !k.equals("id")&!k.equals("citingFilled")&!k.equals("origin")){
-                    updates.add(set(k,document.get(k)));
+                // update all non specific keys
+                if(!k.equals("_id")&
+                   !k.equals("depth")&
+                   !k.equals("id")&
+                   !k.equals("citingFilled")&
+                   !k.equals("origin")){
+                      updates.add(set(k,document.get(k)));
                 }
             }
-            // update depth only if older depth is smaller
-            if(existing.getInteger("depth")<document.getInteger("depth")){
-                updates.add(set("depth",document.getInteger("depth")));
-            }
-            // update citingFilled with a or
-            updates.add(set("citingFilled",document.getBoolean("citingFilled")||existing.getBoolean("citingFilled")));
-            // concatenate origins
-            if(existing.containsKey("origin")&existing.getString("origin").length()>0&!existing.getString("origin").contains(document.getString("origin"))) {
-                updates.add(set("origin", existing.getString("origin") + ";" + document.getString("origin")));
-            }else{
-                updates.add(set("origin",document.getString("origin")));
+
+            if(document.containsKey("depth")) {
+                // update depth only if older depth is smaller
+                if(existing.containsKey("depth")) {
+                    if (existing.getInteger("depth") < document.getInteger("depth")) {
+                        updates.add(set("depth", document.getInteger("depth")));
+                    }
+                }else{
+                    updates.add(set("depth", document.getInteger("depth")));
+                }
             }
 
+            if(document.containsKey("citingFilled")) {
+                // update citingFilled with a or
+                if(existing.containsKey("citingFilled")) {
+                    updates.add(set("citingFilled", document.getBoolean("citingFilled") || existing.getBoolean("citingFilled")));
+                }else{
+                    updates.add(set("citingFilled", document.getBoolean("citingFilled")));
+                }
+            }
+
+
+            if(document.containsKey("origin")) {
+                // concatenate origins if the document has the origin key
+                if (existing.containsKey("origin")) {
+                    if (existing.getString("origin").length() > 0 & !existing.getString("origin").contains(document.getString("origin"))) {
+                        updates.add(set("origin", existing.getString("origin") + ";" + document.getString("origin")));
+                    } else {
+                        updates.add(set("origin", document.getString("origin")));
+                    }
+                }else {
+                    updates.add(set("origin", document.getString("origin")));
+                }
+            }
+
+            // apply updates
             mongoCollection.updateOne(eq(idkey, idvalue), combine(updates),(new UpdateOptions()).upsert(true));
         }else{
             mongoInsert(collection,document);
