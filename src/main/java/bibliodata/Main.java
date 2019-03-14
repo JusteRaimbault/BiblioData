@@ -3,8 +3,8 @@ package bibliodata;
 import bibliodata.core.CitationNetworkRetriever;
 import bibliodata.core.DatabaseManager;
 import bibliodata.core.KeywordsRequest;
-import bibliodata.mendeley.AbstractRetriever;
-import bibliodata.mendeley.AbstractSetRetriever;
+//import bibliodata.mendeley.AbstractRetriever;
+import bibliodata.core.AbstractSetRetriever;
 
 public class Main {
 
@@ -27,8 +27,8 @@ public class Main {
                 CitationNetworkRetriever.main(tail);break;
             case "--abstracts" :
                 AbstractSetRetriever.main(tail);break;
-            case "--abstract" :
-                AbstractRetriever.main(tail);break;
+            //case "--abstract" : // FIXME no use ?
+            //    AbstractRetriever.main(tail);break;
             case "--keywords" :
                 KeywordsRequest.main(tail);break;
 

@@ -1,18 +1,21 @@
 /**
  * 
  */
-package bibliodata.mendeley;
+package bibliodata.core;
 
 import java.io.File;
+import java.util.HashSet;
 
 import bibliodata.core.AlgorithmicSystematicReview;
 
+import bibliodata.mendeley.MendeleyAPI;
 import bibliodata.utils.Log;
 import bibliodata.utils.RISReader;
 import bibliodata.core.corpuses.CSVFactory;
 import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.corpuses.DefaultCorpus;
 import bibliodata.core.reference.Reference;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Raimbault Juste <br/> <a href="mailto:juste.raimbault@polytechnique.edu">juste.raimbault@polytechnique.edu</a>
@@ -78,5 +81,49 @@ public class AbstractSetRetriever {
 		}
 		
 	}
+
+
+
+	/**
+	 * single ref abstract
+	 * @param args
+	 *
+	 * args[0] : title
+	 * args[1] : path to config file
+	 *
+	 */
+	/*
+	public static void main(String[] args) {
+		String title = args[0];
+		String confPath = args[1];
+
+		// do not forget to setup api
+
+		AlgorithmicSystematicReview.setup(confPath);
+
+		MendeleyAPI.setupAPI();
+
+		// rq : replacement should not been needed as provided title will be already treated (in appscript ?)
+		HashSet<Reference> refs = MendeleyAPI.catalogRequest(title.replaceAll(" ","+").replaceAll("\\{", "").replaceAll("\\}", ""), 1,false);
+		//at most one element
+		Reference r = refs.iterator().next();
+		String qTitle = StringUtils.lowerCase(title.replaceAll("\\+", " ").replaceAll("\\{", "").replaceAll("\\}", ""));
+		String rTitle = StringUtils.lowerCase(r.title.title);
+
+		try{
+			if(StringUtils.getLevenshteinDistance(qTitle,rTitle)< 4){
+				System.out.println(r.resume);
+			}
+			//else do nothing, no abstract found
+		}catch(Exception e){
+			//empty abstract if issue
+
+		}
+
+	}
+	*/
+
+
+
 
 }

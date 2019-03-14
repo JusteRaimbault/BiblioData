@@ -374,6 +374,7 @@ public class ScholarAPI {
 	 * @param remResponses
 	 */
 	private static void addPage(List<Reference> refs,Document dom,int remResponses){
+		//,String origin,int pageHorizDepth // not needed to be done at this depth as the retrived list is ordered !
 		int resultsNumber = 0;
 		Elements e = dom.getElementsByClass("gs_ri");
 		for(Element r:e){
@@ -384,8 +385,10 @@ public class ScholarAPI {
 				// TODO add author collection (-> cocitation networks)
 				// for exact citation/all authors/bibtex -> needs js emulation (out of question for now for perf reasons)
 				if(id!=null&&id.length()>0){
-	    		  refs.add(Reference.construct("", getTitle(r), new Abstract(), getYear(r), id));
-	    		  resultsNumber++;
+					Reference toadd = Reference.construct("", getTitle(r), new Abstract(), getYear(r), id);
+					//toadd.horizontalDepth.put(origin,new Integer(pageHorizDepth+i));
+	    		  	refs.add(toadd);
+	    		  	resultsNumber++;
 	    		}
 	    	}
 	    }

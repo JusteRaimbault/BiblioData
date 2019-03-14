@@ -6,6 +6,7 @@ import bibliodata.utils.Log;
 import org.bson.Document;
 
 import java.util.LinkedList;
+import java.util.Map;
 
 public class MongoDocument {
 
@@ -19,7 +20,7 @@ public class MongoDocument {
      *
      * @return
      */
-    public static Document fromReference(Reference reference){//,int initDepth) {
+    public static Document fromReference(Reference reference){
         //Log.stdout(reference.toString());
         Document res = new Document("id", reference.scholarID);
         res.append("title",reference.title.title);
@@ -30,10 +31,12 @@ public class MongoDocument {
         if(reference.year.length()>0){res.append("year",reference.year);}
         if(reference.date.length()>0){res.append("date",reference.date);}
         res.append("citingFilled",reference.citingFilled);
-        //res.append("depth",initDepth);
         res.append("depth",reference.depth);
-        //if(reference.origin.length()>0){
-        res.append("origin",reference.origin);//}
+        res.append("origin",reference.origin);
+        if(reference.horizontalDepth.keySet().size()>0){
+            Document hdepth = new Document((Map) reference.horizontalDepth);
+            res.append("horizontalDepth",hdepth);
+        }
         return(res);
     }
 

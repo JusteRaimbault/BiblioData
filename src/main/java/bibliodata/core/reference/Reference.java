@@ -81,9 +81,18 @@ public class Reference {
 	public boolean citingFilled;
 
 	/**
-	 * relative depth in the citation network
+	 * relative vertical depth in the citation network
 	 */
 	public int depth;
+
+	/**
+	 * Horizontal depth -> as a map since the reference can come from different contexts :
+	 *   - keyword request (from several simultaneously) map reqString -> depth
+	 *   - order in citing : map citing ID -> depth
+	 *   // FIXME is this useful ?
+	 */
+	public HashMap<String,Integer> horizontalDepth;
+
 
 	/**
 	 * where originated from in the case of multiple corpuses
@@ -125,6 +134,7 @@ public class Reference {
 		attributes = new HashMap<String,String>();
 		citingFilled = false;
 		depth = 0;
+		horizontalDepth=new HashMap<String,Integer>();
 		origin="";
 	}
 	

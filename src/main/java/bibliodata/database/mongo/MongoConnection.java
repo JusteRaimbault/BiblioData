@@ -17,10 +17,7 @@ import static com.mongodb.client.model.Updates.combine;
 import static com.mongodb.client.model.Updates.inc;
 import static com.mongodb.client.model.Updates.set;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Handling class for the connection with a mongo database
@@ -109,7 +106,7 @@ public class MongoConnection {
         //if(prev.containsKey("id")){}
         //else{mongoInsert(collection,MongoDocument.fromReference(r));}
 
-        // FIXME should merge docs with a merge strategy
+        // FIXME should merge docs with a merge strategy - but functional programming in java is more than a pain
         // do not insert if already at a higher depth
         mongoUpsert(collection,"id",r.scholarID,MongoDocument.fromReference(r).append("processing",false));
     }
@@ -209,7 +206,9 @@ public class MongoConnection {
                    !k.equals("depth")&
                    !k.equals("id")&
                    !k.equals("citingFilled")&
-                   !k.equals("origin")){
+                   !k.equals("origin")&
+                   !k.equals("horizontalDepth")
+                ){
                       updates.add(set(k,document.get(k)));
                 }
             }
@@ -245,6 +244,23 @@ public class MongoConnection {
                     }
                 }else {
                     updates.add(set("origin", document.getString("origin")));
+                }
+            }
+
+            if(document.containsKey("horizontalDepth")){
+                if(existing.containsKey("horizontalDepth")){
+                    // merge the maps - in case of key conflict : duplicate
+                    // new doc as cannot copy the generic object
+                    // Lenses would be cool here
+                    Document merged = new Document();
+                    for(String k1 : ((Document)document.get("horizontalDepth")).keySet()){merged.append(k1,((Document)document.get("horizontalDepth")).get(k1));}
+                    for(String k2 : ((Document) existing.get("horizontalDepth")).keySet()){
+                        if(merged.containsKey(k2)){merged.append(k2+"_1",((Document) existing.get("horizontalDepth")).get(k2));}
+                        else {merged.append(k2,((Document) existing.get("horizontalDepth")).get(k2));}
+                    }
+                    updates.add(set("horizontalDepth",merged));
+                }else{
+                    updates.add(set("horizontalDepth", document.getString("horizontalDepth")));
                 }
             }
 
