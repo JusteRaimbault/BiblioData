@@ -255,8 +255,9 @@ public class MongoConnection {
                     Document merged = new Document();
                     for(String k1 : ((Document)document.get("horizontalDepth")).keySet()){merged.append(k1,((Document)document.get("horizontalDepth")).get(k1));}
                     for(String k2 : ((Document) existing.get("horizontalDepth")).keySet()){
-                        if(merged.containsKey(k2)){merged.append(k2+"_1",((Document) existing.get("horizontalDepth")).get(k2));}
-                        else {merged.append(k2,((Document) existing.get("horizontalDepth")).get(k2));}
+                        /*if(merged.containsKey(k2)){merged.append(k2+"_1",((Document) existing.get("horizontalDepth")).get(k2));}
+                        else {merged.append(k2,((Document) existing.get("horizontalDepth")).get(k2));}*/
+                        merged.append(k2,((Document) existing.get("horizontalDepth")).get(k2));
                     }
                     updates.add(set("horizontalDepth",merged));
                 }else{

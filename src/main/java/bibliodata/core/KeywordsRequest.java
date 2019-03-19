@@ -107,6 +107,9 @@ public class KeywordsRequest {
 
 				if(mode.equals("--mongo")){
 					boolean drop=false;if(i==0&&dropcols){drop=true;}// drop only at the first kw
+					//Log.stdout("to export : "+toexport.references.size());
+					//for(Reference r:toexport.references){Log.stdout(r.title.title);for(String h:r.horizontalDepth.keySet()){Log.stdout(h+" -> "+r.horizontalDepth.get(h));}}
+					// exporting kwreq by kwreq causes a redundancy with horizdepth when names are duplicated -> change merge strategy with latest only
 					MongoImport.corpusToMongo(toexport,out,"references","links",drop);
 				}
 

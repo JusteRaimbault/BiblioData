@@ -92,9 +92,9 @@
         <java jar="${jar.dir}/${ant.project.name}.jar" fork="true">
             <arg value="--keywords"/>
             <arg value="--mongo"/>
-            <arg value="data/requests.csv"/>
+            <arg value="data/testkw.csv"/>
             <arg value="testkwreq"/>
-            <arg value="2"/>
+            <arg value="4"/>
             <arg value="2"/>
             <arg value="true"/>
             <classpath>
