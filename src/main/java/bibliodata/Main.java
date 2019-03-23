@@ -27,8 +27,6 @@ public class Main {
                 CitationNetworkRetriever.main(tail);break;
             case "--abstracts" :
                 AbstractSetRetriever.main(tail);break;
-            //case "--abstract" : // FIXME no use ?
-            //    AbstractRetriever.main(tail);break;
             case "--keywords" :
                 KeywordsRequest.main(tail);break;
 

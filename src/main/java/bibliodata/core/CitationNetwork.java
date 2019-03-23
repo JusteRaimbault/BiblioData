@@ -88,7 +88,7 @@ public class CitationNetwork {
 	 */
 	public static void buildGeneralizedNetwork(String prefix,String[] keywords,String outPrefix,int maxIt){
 		// setup
-		AlgorithmicSystematicReview.setup("conf/default.conf");
+		//AlgorithmicSystematicReview.setup("conf/default.conf");
 		
 		TorPool.setupConnectionPool(50,false);
 		
@@ -153,8 +153,9 @@ public class CitationNetwork {
 	 */
 	public static void buildCitationNetworkFromRefFile(String refFile,String outFile,int depth,String citedFolder){
         
-		AlgorithmicSystematicReview.setup("conf/default.conf");
-        try{TorPoolManager.setupTorPoolConnexion(true);}catch(Exception e){e.printStackTrace();}
+		//AlgorithmicSystematicReview.setup("conf/default.conf");
+
+		try{TorPoolManager.setupTorPoolConnexion(true);}catch(Exception e){e.printStackTrace();}
 		ScholarAPI.init();
 		
 		System.out.println("Reconstructing References from file "+refFile);
@@ -200,7 +201,8 @@ public class CitationNetwork {
 	 */
 	public static void buildCitationNetworkFromSQL(String outFile){
 		
-		AlgorithmicSystematicReview.setup("conf/default.conf");
+		//AlgorithmicSystematicReview.setup("conf/default.conf");
+
 		TorPool.setupConnectionPool(50,false);
 		ScholarAPI.init();
 		

@@ -28,7 +28,7 @@ public class TestWorkflow {
 		
 		// setup mendeley
 		System.out.println("Setting up Mendeley...");
-		MendeleyAPI.setupAPI();
+		MendeleyAPI.setupAPI("conf/mendeley");
 		
 		// construct 100 references from catalog request
 		System.out.println("Catalog request : "+searchQuery);

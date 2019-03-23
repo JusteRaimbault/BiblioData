@@ -51,7 +51,7 @@ public class Cybergeo {
 	 */
 	public static Corpus setup(String bibFile,int numRefs){
 
-		 AlgorithmicSystematicReview.setup("conf/default.conf");
+		 //AlgorithmicSystematicReview.setup("conf/default.conf");
 
 		 Log.purpose("runtime", "Started at "+(new Date()).toString());
 
@@ -71,7 +71,7 @@ public class Cybergeo {
 	 * @param withScholar
 	 */
 	public static void setup(boolean withScholar){
-		AlgorithmicSystematicReview.setup("conf/default.conf");
+		//AlgorithmicSystematicReview.setup("conf/default.conf");
 		Log.purpose("runtime", "Started at "+(new Date()).toString());
 		if(withScholar){
 			try{TorPoolManager.setupTorPoolConnexion(true);}catch(Exception e){e.printStackTrace();}
@@ -79,7 +79,7 @@ public class Cybergeo {
 		}
 
 		// setup mendeley
-		MendeleyAPI.setupAPI();
+		MendeleyAPI.setupAPI("conf/mendeley");
 
 	}
 
@@ -342,7 +342,7 @@ public class Cybergeo {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		AlgorithmicSystematicReview.setup();
+		//AlgorithmicSystematicReview.setup();
 
 		//exportCybergeoAsRIS(System.getenv("CS_HOME")+"/Cybergeo/cybergeo20/Data/bib/fullbase_refsAsBib.ris");
 

@@ -114,6 +114,8 @@ public class TorPoolManager {
 				} else {
 					newport = readLineWithLock(portpath, lockfile);
 				}
+				// add significant waiting time to avoid overcrowding
+				Thread.sleep(1000);
 			}
 
 			// show ip to check
@@ -129,11 +131,12 @@ public class TorPoolManager {
 	
 	/**
 	 *
-	 * FIXME not checked
+	 * FIXME function not used
 	 *
 	 * @param portpath
 	 * @param lockfile
 	 */
+	/*
 	private static String changePortFromFile(String portpath,String lockfile){
 		//String newPort = "9050";
 		String newPort = "";
@@ -153,6 +156,7 @@ public class TorPoolManager {
 		Log.stdout("Current Port set to "+newPort);
 		return(newPort);
 	}
+	*/
 
 	/**
 	 * Change port
@@ -185,7 +189,7 @@ public class TorPoolManager {
 		try{
 			boolean locked = true;int t=0;
 			while(locked){
-				Log.stdout("Waiting for lock on "+lockfile);
+				if(t==0){Log.stdout("Waiting for lock on "+lockfile);}else{Log.stdout(".",false);}
 				Thread.sleep(200);
 				locked = (new File(lockfile)).exists();t++;
 			}
@@ -204,11 +208,11 @@ public class TorPoolManager {
 	private static String readAndRemoveLineWithLock(String portfile,String lockfile) {
 		String res = "";
 		try {
-			boolean locked = true;
+			boolean locked = true;int t = 0;
 			while (locked) {
-				Log.stdout("Waiting for lock on " + lockfile);
+				if(t==0){Log.stdout("Waiting for lock on "+lockfile);}else{Log.stdout(".",false);}
 				Thread.sleep(200);
-				locked = (new File(lockfile)).exists();
+				locked = (new File(lockfile)).exists();t++;
 			}
 			File lock = new File(lockfile);lock.createNewFile();
 			BufferedReader r = new BufferedReader(new FileReader(new File(portfile)));
@@ -217,12 +221,16 @@ public class TorPoolManager {
 			while(currentline!=null){newcontent.add(currentline);currentline=r.readLine();}
 			r.close();
 
-			BufferedWriter w = new BufferedWriter(new FileWriter(new File(portfile)));
-			res = newcontent.removeFirst();
-			for(String remp:newcontent){
-				w.write(remp);w.newLine();
+			// content may be empty (too much requests simultaneously)
+			if(newcontent.size()>0) {
+				BufferedWriter w = new BufferedWriter(new FileWriter(new File(portfile)));
+				res = newcontent.removeFirst();
+				for (String remp : newcontent) {
+					w.write(remp);
+					w.newLine();
+				}
+				w.close();
 			}
-			w.close();
 			// unlock the dir
 			lock.delete();
 		}catch(Exception e){
@@ -232,6 +240,8 @@ public class TorPoolManager {
 		return(res);
 	}
 
+	/*
+	// FIXME function not used ?
 	private static void removeInFileWithLock(String s,String file,String lock){
 		try{
 			boolean locked = true;
@@ -260,6 +270,7 @@ public class TorPoolManager {
 			removeLock(lock);
 		}
 	}
+	*/
 
 	private static void removeLock(String lock){
 		try {
@@ -292,7 +303,9 @@ public class TorPoolManager {
 			BufferedReader r = new BufferedReader(new InputStreamReader(new URL("http://ipecho.net/plain").openConnection().getInputStream()));
 			String currentLine=r.readLine();
 			while(currentLine!= null){Log.stdout(currentLine);currentLine=r.readLine();}
-		}catch(Exception e){e.printStackTrace();}
+		}catch(Exception e){
+			//e.printStackTrace();
+		}
 	}
 	
 	

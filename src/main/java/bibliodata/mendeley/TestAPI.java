@@ -19,7 +19,7 @@ public class TestAPI {
 	public static void main(String[] args) {
 		
 		//setup
-		MendeleyAPI.setupAPI();
+		MendeleyAPI.setupAPI("conf/mendeley");
 		
 		// test token request
 		//System.out.println(MendeleyAPI.getAccessToken());

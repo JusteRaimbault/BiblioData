@@ -14,7 +14,8 @@ public class DatabaseManager {
             System.out.println(
                 "Usage : --database\n"+
                 "| --import $FILE $DATABASE [$DEPTH] [$ORIGIN] [$DROP_COLLECTIONS]\n"+
-                "| --incrdepth $DATABASE"
+                "| --incrdepth $DATABASE\n"+
+                "| --notproc $DATABASE"
         );}
 
         String action = args[0];
@@ -35,7 +36,11 @@ public class DatabaseManager {
             MongoConnection.incrAllDepths("references");
         }
 
-
+        // set processing to false for all references (to be used after crashes or interrupted runs)
+        if(action.equals("--notproc")){
+            MongoConnection.initMongo(args[1]);
+            MongoConnection.notProcessing("references");
+        }
 
 
     }

@@ -344,7 +344,7 @@ public class CybergeoImport {
 	
 	
 	public static void computeDegrees(){
-		AlgorithmicSystematicReview.setup();
+		//AlgorithmicSystematicReview.setup();
 		//SQLConnection.setupSQLCredentials(); -> credential setup done in main
 		Corpus cybnetwork = SQLImporter.sqlImport("cybnetwork", "cybergeo", "refs", "links", -1, false);
 		// compute res on primary refs
@@ -364,7 +364,7 @@ public class CybergeoImport {
 	/**
 	 * Export authors with infos
 	 * 
-	 * @param outdirs
+	 * @param outDir
 	 */
 	public static void exportAuthors(String outDir){
 		LinkedList<String[]> authors = new LinkedList<String[]>();

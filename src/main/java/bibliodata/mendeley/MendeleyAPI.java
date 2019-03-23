@@ -15,6 +15,7 @@ import javax.json.JsonReader;
 import javax.json.JsonStructure;
 
 import bibliodata.core.AlgorithmicSystematicReview;
+import bibliodata.utils.CSVReader;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -36,6 +37,17 @@ import bibliodata.core.reference.Title;
  *
  */
 public class MendeleyAPI{
+
+
+	/**
+	 * Mendeley api
+	 */
+	public static String mendeleyAppId;
+
+	/**
+	 * Mendeley secret
+	 */
+	public static String mendeleyAppSecret;
 
 	/**
 	 * Http client
@@ -67,29 +79,27 @@ public class MendeleyAPI{
 	 * Initialize API requests, by setting client and context.
 	 */
 	@SuppressWarnings("resource")
-	public static void setupAPI(){
+	public static void setupAPI(String mendeleyconf){
 		try{
-		//System.out.println("Setting Mendeley API...");
-			
-		// simple client and context, no need for cookies
-		//credentials and client
-	    // path to appID and appSecret have to be absolute if called by jar anywhere
-		//TODO eventually fix that by providing conf file storing paths
-		//String appid = (new BufferedReader(new FileReader("/Users/Juste/Documents/ComplexSystems/CityNetwork/Models/Biblio/AlgoSR/AlgoSRJavaApp/data/appID"))).readLine();
-		// Replaced by global variable appid
-		//String appsecret = (new BufferedReader(new FileReader("/Users/Juste/Documents/ComplexSystems/CityNetwork/Models/Biblio/AlgoSR/AlgoSRJavaApp/data/appSecret"))).readLine();
-		//idem
-		//System.out.println(appid+" : "+appsecret);
-		client = new DefaultHttpClient();
-		client.getCredentialsProvider().setCredentials(AuthScope.ANY,new UsernamePasswordCredentials(AlgorithmicSystematicReview.mendeleyAppId, AlgorithmicSystematicReview.mendeleyAppSecret));
+		    Log.stdout("Setting up Mendeley API...");
 
-		//context
-		context = new BasicHttpContext();
+			HashMap<String,String> confsMap = CSVReader.readMap(mendeleyconf, ":","");
+
+			// mendeley
+			if(confsMap.containsKey("appID")){mendeleyAppId = confsMap.get("appID");}
+			if(confsMap.containsKey("appSecret")){mendeleyAppSecret=confsMap.get("appSecret");}
+
+
+			client = new DefaultHttpClient();
+			client.getCredentialsProvider().setCredentials(AuthScope.ANY,new UsernamePasswordCredentials(mendeleyAppId,mendeleyAppSecret));
+
+			//context
+			context = new BasicHttpContext();
 		
-		// empty access token
-		accessToken = "";
+			// empty access token
+			accessToken = "";
 		
-		isSetup=true;
+			isSetup=true;
 		
 		}catch(Exception e){e.printStackTrace();}
 	}
@@ -162,7 +172,7 @@ public class MendeleyAPI{
 	 */
 	public static HashSet<Reference> catalogRequest(String query,int numResponse,boolean ghostRefs){
 		
-		System.out.println(query);
+		Log.stdout("Mendeley query : "+query);
 		
 		HashSet<Reference> refs = new HashSet<Reference>();
 		
@@ -349,13 +359,10 @@ public class MendeleyAPI{
 	
 	/**
 	 * TEST
-	 * 
 	 */
-	
 	public static void main(String[] args) throws Exception {
-		
-		AlgorithmicSystematicReview.setup();
-		setupAPI();
+
+		setupAPI("conf/mendeley");
 		
 		// Test token request
 		//System.out.println(rawRequest("transfer+theorem",10,getAccessToken(true)));

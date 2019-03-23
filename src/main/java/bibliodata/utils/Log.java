@@ -41,13 +41,21 @@ public class Log {
 	
 	
 	public static void stdout(String s){
-		System.out.println("["+new Date().toString()+"] "+s);
+		stdout(s,true);
+	}
+
+	public static void stdout(String s,boolean newline){
+		if(newline==true){
+			System.out.println("["+new Date().toString()+"] "+s);
+		}else{
+			System.out.print(s);
+		}
 	}
 	
 	
 
 	/**
-	 * @param string
+	 * @param purpose
 	 */
 	public static void addPurposeLog(String purpose,String file) {
 		try{

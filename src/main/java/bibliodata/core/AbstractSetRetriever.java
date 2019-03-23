@@ -8,7 +8,9 @@ import java.util.HashSet;
 
 import bibliodata.core.AlgorithmicSystematicReview;
 
+import bibliodata.database.mongo.MongoConnection;
 import bibliodata.mendeley.MendeleyAPI;
+import bibliodata.scholar.ScholarAPI;
 import bibliodata.utils.Log;
 import bibliodata.utils.RISReader;
 import bibliodata.core.corpuses.CSVFactory;
@@ -35,48 +37,82 @@ public class AbstractSetRetriever {
 	 */
 	public static void main(String[] args) {
 		
-		if(args.length != 2){System.out.println("Usage : ... infile outfile");}
+		if(args.length == 0){
+			System.out.println("Usage --abstracts \n"+
+					" | --file $INFILE $OUTFILE \n"+
+					" | --mongo $DATABASE $NUMREFS");
+		}
 		else{
 
-			String refFile = args[0];
-			String outFile = args[1];
+			MendeleyAPI.setupAPI("conf/mendeley");
 
-			AlgorithmicSystematicReview.setup();
-			MendeleyAPI.setupAPI();
+			if(args[0].equals("--file")) {
 
-			Corpus initial = new DefaultCorpus();
-			if(refFile.endsWith(".ris")){
-				RISReader.read(refFile,-1);
-				initial = new DefaultCorpus(Reference.references.keySet());
-			}
-			if(refFile.endsWith(".csv")){
-				initial = new CSVFactory(refFile).getCorpus();
-			}
-			
-			//load out file to get refs already retrieved in a previous run
-			Corpus existing = new DefaultCorpus();
-			if(new File(outFile).exists()){
-				existing = new CSVFactory(outFile).getCorpus();
-			}
-			
-			
-			Corpus finalCorpus = new DefaultCorpus();
-			
-			for(Reference r : initial){
-				
-				Log.stdout(r.toString());
-				if(!existing.references.contains(r)){
-					Reference detailed = MendeleyAPI.getReference(r.title.title,r.year,r.scholarID);
-					if(detailed!=null){
-						finalCorpus.references.add(detailed);
-						// export the current corpus
-						finalCorpus.csvExport(outFile,true);
+				String refFile = args[0];
+				String outFile = args[1];
+
+				Corpus initial = new DefaultCorpus();
+				if (refFile.endsWith(".ris")) {
+					RISReader.read(refFile, -1);
+					initial = new DefaultCorpus(Reference.references.keySet());
+				}
+				if (refFile.endsWith(".csv")) {
+					initial = new CSVFactory(refFile).getCorpus();
+				}
+
+				//load out file to get refs already retrieved in a previous run
+				Corpus existing = new DefaultCorpus();
+				if (new File(outFile).exists()) {
+					existing = new CSVFactory(outFile).getCorpus();
+				}
+
+				Corpus finalCorpus = new DefaultCorpus();
+
+				for(Reference r : initial){
+
+					Log.stdout(r.toString());
+					if(!existing.references.contains(r)){
+						Reference detailed = MendeleyAPI.getReference(r.title.title,r.year,r.scholarID);
+						if(detailed!=null){
+							finalCorpus.references.add(detailed);
+							// export the current corpus
+							finalCorpus.csvExport(outFile,true);
+						}
 					}
 				}
+
+				// export final corpus csv
+				finalCorpus.csvExport(outFile,true);
 			}
+
 			
-			// export final corpus csv
-			finalCorpus.csvExport(outFile,true);
+			if(args[0].equals("--mongo")){
+
+				String database = args[1];
+				int numrefs = Integer.parseInt(args[2]);
+				String refcollection = "references";
+
+				MongoConnection.initMongo(database);
+
+				for(int i = 0;i<numrefs;i++){
+					Reference r = MongoConnection.getUnfilled(refcollection);
+					if(r==null){break;}
+					Log.stdout("Unfilled ref : "+r.toString());
+					Reference detailed = MendeleyAPI.getReference(r.title.title,r.year,r.scholarID);
+					if(detailed!=null){
+						MongoConnection.updateReference(r,refcollection);
+					}
+				}
+
+				// corpus need to be updated at each loop to iterate on depth !
+				//MongoConnection.updateCorpus(new DefaultCorpus(Reference.references.keySet()),refcollection,linkcollection);
+
+				MongoConnection.closeMongo();
+
+			}
+
+
+
 			
 		}
 		

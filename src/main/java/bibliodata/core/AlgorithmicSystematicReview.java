@@ -42,35 +42,39 @@ public class AlgorithmicSystematicReview {
 	 * Absolute path to file containing different API access ids and codes
 	 * File must ABSOLUTELY be protected (although readable by application), e.g. if in git repository, imperatively has to be put in .gitignore
 	 */
-	public static String mendeleyAppId;
+	/*public static String mendeleyAppId;
 	public static String mendeleyAppSecret;
 	public static String cortextUser;
 	public static String cortextUserID;
 	public static String cortextProjectID;
 	public static String cortextCorpusPath;
 	public static String cortextPassword;
-	
-	
+	*/
+
+
+	// FIXME no global setup -> do an AlgoSR specific setup
+	/*
 	public static void setup(){
 		setup("conf/default.conf");
-	}
+	}*/
 	
 	
 	/**
 	 * Set global variables.
 	 * 
 	 * TODO : refactorization/suppression of cortext requests -> not needed anymore ?
+	 *
+	 *  - 2019/03/20 : particularize setups to each module, remove global variables and setup
 	 * 
 	 * @param pathConfFile
 	 */
+	/*
 	public static void setup(String pathConfFile){
 		//read conf file of the form
-		/**
-		 * appId:id
-		 * appSecret:''
-		 * ...
-		 * 
-		 */
+		 // appId:id
+		 // appSecret:''
+		 // ...
+
 		try{
 			HashMap<String,String> confsMap = CSVReader.readMap(pathConfFile, ":","");
 			
@@ -100,7 +104,7 @@ public class AlgorithmicSystematicReview {
 			
 		}catch(Exception e){e.printStackTrace();}
 	}
-	
+	*/
 	
 	
 	
@@ -108,8 +112,7 @@ public class AlgorithmicSystematicReview {
 	 * Initialize references in that case.
 	 * 
 	 * (demi-iteration in fact)
-	 * 
-	 * @param referenceFile RIS ref file
+	 *
 	 * @param filePref prefix for ref,kw files
 	 * @return corresponding new query from extracted keywords.
 	 */
@@ -160,7 +163,7 @@ public class AlgorithmicSystematicReview {
 
 		// setup mendeley
 		Log.output("Setting up Mendeley...");
-		MendeleyAPI.setupAPI();
+		MendeleyAPI.setupAPI("conf/mendeley");
 		
 		// construct 100 references from catalog request
 		Log.output("Catalog request : "+searchQuery);
@@ -201,7 +204,8 @@ public class AlgorithmicSystematicReview {
 		Log.initLog();
 		
 		// setup configuration
-		setup(confFile);
+		// FIXME specific setup for the algo
+		//setup(confFile);
 		
 		//initial query
 		

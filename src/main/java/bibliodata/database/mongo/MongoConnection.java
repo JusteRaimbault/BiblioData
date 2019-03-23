@@ -352,11 +352,23 @@ public class MongoConnection {
     }
 
 
-
+    /**
+     * increase all depths
+     * @param collection
+     */
     public static void incrAllDepths(String collection){
         //List<Document> docs = mongoFind(collection);
         MongoCollection<Document> mongoCollection = mongoDatabase.getCollection(collection);
         mongoCollection.updateMany(gt("depth",-1),inc("depth",1));
+    }
+
+    /**
+     * set processing to false
+     * @param collection
+     */
+    public static void notProcessing(String collection){
+        MongoCollection<Document> mongoCollection = mongoDatabase.getCollection(collection);
+        mongoCollection.updateMany(gt("depth",-1),set("processing",false));
     }
 
 

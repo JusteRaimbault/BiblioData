@@ -63,7 +63,8 @@ public class SQLConverter {
 	
 	
 	public static void main(String[] args){
-		AlgorithmicSystematicReview.setup();
+		//FIXME sql setup
+		//AlgorithmicSystematicReview.setup();
 		sqlToCsv("cybfull","res/nwcsv/full");
 		//sqlToGexf("cybfull","/Users/Juste/Documents/ComplexSystems/Cybergeo/cybergeo20/CitationNetwork/Data/nw/full.gexf");
 	}

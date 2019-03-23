@@ -35,6 +35,11 @@ import bibliodata.utils.Log;
  */
 public class CortextAPI {
 
+	public static String cortextUser;
+	public static String cortextPassword;
+	public static String cortextCorpusPath;
+	public static String cortextProjectID;
+	public static String cortextUserID;
 
 	/**
 	 * Http client.
@@ -81,7 +86,7 @@ public class CortextAPI {
 			headers.put("Content-Type", "application/x-www-form-urlencoded");
 			headers.put("Connection", "keep-alive");
 			HashMap<String,String> data = new HashMap<String,String>();
-			data.put("signin[username]", AlgorithmicSystematicReview.cortextUser);data.put("signin[password]", AlgorithmicSystematicReview.cortextPassword);
+			data.put("signin[username]", cortextUser);data.put("signin[password]", cortextPassword);
 			data.put("signin[remember]","on");//necessary to get connexion cookie ?
 			HttpResponse resp = Connexion.post("http://manager.cortext.net/login", headers, data, client, context);
 			
@@ -121,10 +126,10 @@ public class CortextAPI {
 			 */
 			//String projectDir = (new BufferedReader(new FileReader("/Users/Juste/Documents/ComplexSystems/CityNetwork/Models/Biblio/AlgoSR/AlgoSRJavaApp/data/cortextCorpusPath"))).readLine();
 			
-			Log.output("Uploading corpus to path "+ AlgorithmicSystematicReview.cortextCorpusPath,"verbose");
+			Log.output("Uploading corpus to path "+ cortextCorpusPath,"verbose");
 			HashMap<String,String> data = new HashMap<String,String>();
 			//data.put("projectDir", projectDir);
-			data.put("projectDir", AlgorithmicSystematicReview.cortextCorpusPath);
+			data.put("projectDir", cortextCorpusPath);
 			HttpResponse resp = Connexion.postUpload("http://manager.cortext.net/jupload/server/php/index.php", data,corpusPath, client, context);
 			//consume resp
 			
@@ -149,7 +154,7 @@ public class CortextAPI {
 		try{
 			//String projectId = (new BufferedReader(new FileReader("/Users/Juste/Documents/ComplexSystems/CityNetwork/Models/Biblio/AlgoSR/AlgoSRJavaApp/data/cortextProjectID"))).readLine();
 			
-			String projectPagePath ="http://manager.cortext.net/project/"+ AlgorithmicSystematicReview.cortextProjectID;
+			String projectPagePath ="http://manager.cortext.net/project/"+ cortextProjectID;
 			Log.output(projectPagePath,"debug");
 			Document projectDom = Jsoup.parse(Connexion.get(projectPagePath, (new HashMap<String,String>()), client, context).getEntity().getContent(),"UTF-8",projectPagePath);
 			Element e1 =  projectDom.getElementsByAttributeValueStarting("href", "/corpu/download/id/").first();
@@ -163,7 +168,7 @@ public class CortextAPI {
 		try{
 			//String projectId = (new BufferedReader(new FileReader("/Users/Juste/Documents/ComplexSystems/CityNetwork/Models/Biblio/AlgoSR/AlgoSRJavaApp/data/cortextProjectID"))).readLine();
 			
-			String projectPagePath ="http://manager.cortext.net/project/"+ AlgorithmicSystematicReview.cortextProjectID;
+			String projectPagePath ="http://manager.cortext.net/project/"+ cortextProjectID;
 			Document projectDom = Jsoup.parse(Connexion.get(projectPagePath, (new HashMap<String,String>()), client, context).getEntity().getContent(),"UTF-8",projectPagePath);
 			return projectDom.getElementsByAttributeValueStarting("href", "/job/datasets/").attr("href").split("/")[3];
 			
@@ -175,7 +180,7 @@ public class CortextAPI {
 		try{
 			//String projectId = (new BufferedReader(new FileReader("/Users/Juste/Documents/ComplexSystems/CityNetwork/Models/Biblio/AlgoSR/AlgoSRJavaApp/data/cortextProjectID"))).readLine();
 			
-			String projectPagePath ="http://manager.cortext.net/project/"+ AlgorithmicSystematicReview.cortextProjectID;
+			String projectPagePath ="http://manager.cortext.net/project/"+ cortextProjectID;
 			Document projectDom = Jsoup.parse(Connexion.get(projectPagePath, (new HashMap<String,String>()), client, context).getEntity().getContent(),"UTF-8",projectPagePath);
 			Elements els = projectDom.getElementsByAttributeValueStarting("href", "/corpu/download/id/");
 			String[] res = new String[els.size()];int i=0;
@@ -247,7 +252,7 @@ public class CortextAPI {
 	 *     job[corpu_id]=CORPUSID === INPUT
 	 *     job[script_id]=8
 	 * 
-	 * @param corpusName
+	 * @param corpusID
 	 * @return id of parsed corpus as db file.
 	 */
 	public static String parseCorpus(String corpusID){
@@ -258,9 +263,9 @@ public class CortextAPI {
 		HashMap<String,String> data = new HashMap<String,String>();
 		data.put("job[id]", "");data.put("job[script_path]", "");data.put("job[result_path]", "");data.put("job[log_path]", "");data.put("job[upload_path]", "");data.put("job[state]", "");
 		//data.put("job[user_id]", (new BufferedReader(new FileReader("/Users/Juste/Documents/ComplexSystems/CityNetwork/Models/Biblio/AlgoSR/AlgoSRJavaApp/data/cortextUserID"))).readLine());
-		data.put("job[user_id]", AlgorithmicSystematicReview.cortextUserID);
+		data.put("job[user_id]", cortextUserID);
 		//data.put("job[project_id]", (new BufferedReader(new FileReader("/Users/Juste/Documents/ComplexSystems/CityNetwork/Models/Biblio/AlgoSR/AlgoSRJavaApp/data/cortextProjectID"))).readLine());
-		data.put("job[project_id]", AlgorithmicSystematicReview.cortextProjectID);
+		data.put("job[project_id]", cortextProjectID);
 		data.put("corpusorigin", "dataset");data.put("corpustype", "ris (scopus)");
 		data.put("formatting","tab separated");data.put("yearfield","");data.put("separator", "***");data.put("yearfieldjson", "");
 		data.put("weights_tablename_json", "");data.put("weights_tablename", "");
@@ -338,8 +343,8 @@ public class CortextAPI {
 			data.put("job[id]", "");data.put("job[script_path]", "");data.put("job[result_path]", "");data.put("job[log_path]", "");data.put("job[upload_path]", "");data.put("job[state]", "");
 			//data.put("job[user_id]", (new BufferedReader(new FileReader("/Users/Juste/Documents/ComplexSystems/CityNetwork/Models/Biblio/AlgoSR/AlgoSRJavaApp/data/cortextUserID"))).readLine());
 			//data.put("job[project_id]", (new BufferedReader(new FileReader("/Users/Juste/Documents/ComplexSystems/CityNetwork/Models/Biblio/AlgoSR/AlgoSRJavaApp/data/cortextProjectID"))).readLine());
-			data.put("job[user_id]", AlgorithmicSystematicReview.cortextUserID);
-			data.put("job[project_id]", AlgorithmicSystematicReview.cortextProjectID);
+			data.put("job[user_id]", cortextUserID);
+			data.put("job[project_id]", cortextProjectID);
 			
 			data.put("fields_2_index[Abstract]","");
 			//data.put("fields_2_index[Keywords]","");
