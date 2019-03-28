@@ -9,7 +9,8 @@ import bibliodata.core.AbstractSetRetriever;
 public class Main {
 
 
-    public static String usage = "Usage : java -jar bibliodata.jar $OPTION [...]; where $OPTION in {--database,--citation,--abstracts,--abstract,--keywords}";
+    public static final String usage = "Usage : java -jar bibliodata.jar $OPTION [...]\n"+
+            "where $OPTION in {--database,--citation,--abstracts,--abstract,--keywords}";
 
 
     public static void main(String[] args) {

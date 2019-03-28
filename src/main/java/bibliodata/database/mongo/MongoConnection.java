@@ -1,6 +1,7 @@
 
 package bibliodata.database.mongo;
 
+import bibliodata.Context;
 import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.reference.Reference;
 import bibliodata.utils.Log;
@@ -60,6 +61,8 @@ public class MongoConnection {
         try {
             mongoClient = new MongoClient( host , port );
             mongoDatabase = mongoClient.getDatabase(db);
+            // set logip option only in the case of mongo
+            Context.setLogips(true);
         } catch(Exception e){
             System.out.println("No mongo connection possible : ");
             e.printStackTrace();
@@ -369,6 +372,19 @@ public class MongoConnection {
     public static void notProcessing(String collection){
         MongoCollection<Document> mongoCollection = mongoDatabase.getCollection(collection);
         mongoCollection.updateMany(gt("depth",-1),set("processing",false));
+    }
+
+
+    /**
+     * log ip
+     * @param ip
+     * @param success
+     */
+    public static void logIP(String ip,boolean success) {
+        MongoCollection<Document> mongoCollection = mongoDatabase.getCollection(Context.getNetstatCollection());
+        String timestamp = new Long((new Date()).getTime()).toString();
+        Document toinsert = new Document("ip",ip).append("success",success).append("ts",timestamp);
+        mongoCollection.insertOne(toinsert);
     }
 
 

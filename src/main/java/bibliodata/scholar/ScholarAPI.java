@@ -9,11 +9,13 @@ import java.util.List;
 
 import javax.net.ssl.SSLContext;
 
+import bibliodata.Context;
 import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.reference.Abstract;
 import bibliodata.core.reference.Reference;
 import bibliodata.core.reference.Title;
 
+import bibliodata.database.mongo.MongoConnection;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.CookieStore;
@@ -76,7 +78,7 @@ public class ScholarAPI {
 	public static void init(){
 		try{
 
-			Log.stdout("(Re)-initializing scholar API...");
+			Log.stdout("Initializing scholar API...");
 
 		    client = new DefaultHttpClient();
 
@@ -107,7 +109,6 @@ public class ScholarAPI {
 			 try{Log.stdout("Accepted : "+(el.getElementsByClass("gs_r").size()>0));}catch(Exception e){e.printStackTrace();}
 
 			 //System.out.println(el.html());
-
 			 //System.out.println("Connected to scholar, persistent through cookies. ");
 			 //for(int i=0;i<cookieStore.getCookies().size();i++){System.out.println(cookieStore.getCookies().get(0).toString());}
 
@@ -349,8 +350,9 @@ public class ScholarAPI {
 					Log.stdout("Current IP failed ; switching currentTorThread.");
 
 				    // TODO : write ip in file for systematic stats of blocked adress (may have patterns in blocking policy)
+					if(Context.getLogips()) MongoConnection.logIP(TorPoolManager.currentIP,false);
 
-					// FIXME port exclusivity as a global parameter
+					// FIXME port exclusivity as a global parameter ?
 				    TorPoolManager.switchPort(true);
 
 					// reinit scholar API
@@ -361,6 +363,9 @@ public class ScholarAPI {
 					try{Log.stdout(dom.getElementsByClass("gs_alrt").first().text());}catch(Exception e){}
 				}
 			//}
+			// at this stage the ip is accepted
+			if(Context.getLogips()) MongoConnection.logIP(TorPoolManager.currentIP,true);
+
 		}catch(Exception e){e.printStackTrace();}
 		return dom;
 	}

@@ -2,6 +2,7 @@
 package bibliodata.core;
 
 
+import bibliodata.Context;
 import bibliodata.database.mongo.MongoConnection;
 import bibliodata.database.mongo.MongoImport;
 
@@ -27,19 +28,19 @@ public class DatabaseManager {
             if(args.length>=4){initDepth=Integer.parseInt(args[3]);}
             if(args.length>=5){origin=args[4];}
             if(args.length>=6){dropCols=Boolean.parseBoolean(args[5]);}
-            MongoImport.fileToMongo(args[1],"",args[2],"references","citations",initDepth,origin,dropCols);
+            MongoImport.fileToMongo(args[1],"",args[2], Context.getReferencesCollection(),Context.getCitationsCollection(),initDepth,origin,dropCols);
         }
 
         // increase depth
         if(action.equals("--incrdepth")){
             MongoConnection.initMongo(args[1]);
-            MongoConnection.incrAllDepths("references");
+            MongoConnection.incrAllDepths(Context.getReferencesCollection());
         }
 
         // set processing to false for all references (to be used after crashes or interrupted runs)
         if(action.equals("--notproc")){
             MongoConnection.initMongo(args[1]);
-            MongoConnection.notProcessing("references");
+            MongoConnection.notProcessing(Context.getReferencesCollection());
         }
 
 

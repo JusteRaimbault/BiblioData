@@ -22,19 +22,29 @@ import bibliodata.utils.Log;
  */
 public class TorPoolManager {
 
+
+	private static final String ipurl = "http://ipecho.net/plain";
+
+
 	/**
-	 * TODO : Concurrent access from diverse apps to a single pool ?
-	 * Difficult as would need listener on this side...
-	 * 
+	 * Concurrent access from diverse apps to a single pool ?
+	 *   -> achieved concurrently with portexclusivity option
 	 */
 	
 	/**
-	 * the port currently used.
+	 * the port currently used
 	 */
 	public static int currentPort=0;
-	
-	
+
+	/**
+	 * is there a running torpool
+	 */
 	public static boolean hasTorPoolConnexion = false;
+
+	/**
+	 * current IP
+	 */
+	public static String currentIP = "";
 
 
 	/**
@@ -128,6 +138,23 @@ public class TorPoolManager {
 			removeLock(".tor_tmp/lock");
 		}
 	}
+
+
+	/**
+	 * show and record IP
+	 */
+	private static void showIP(){
+		try{
+			BufferedReader r = new BufferedReader(new InputStreamReader(new URL(ipurl).openConnection().getInputStream()));
+			String currentLine=r.readLine();
+			while(currentLine!= null){Log.stdout("IP : "+currentLine);currentLine=r.readLine();}
+			currentIP = currentLine;
+		}catch(Exception e){
+			//e.printStackTrace();
+		}
+	}
+
+
 	
 	/**
 	 *
@@ -240,6 +267,11 @@ public class TorPoolManager {
 		return(res);
 	}
 
+
+
+
+
+
 	/*
 	// FIXME function not used ?
 	private static void removeInFileWithLock(String s,String file,String lock){
@@ -298,15 +330,7 @@ public class TorPoolManager {
 		}catch(Exception e){e.printStackTrace();}
 	}
 
-	private static void showIP(){
-		try{
-			BufferedReader r = new BufferedReader(new InputStreamReader(new URL("http://ipecho.net/plain").openConnection().getInputStream()));
-			String currentLine=r.readLine();
-			while(currentLine!= null){Log.stdout(currentLine);currentLine=r.readLine();}
-		}catch(Exception e){
-			//e.printStackTrace();
-		}
-	}
+
 	
 	
 	public static void main(String[] args){
