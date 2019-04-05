@@ -43,7 +43,7 @@ public class CitationNetwork {
 	 */
 	public static void fillCitationsMongo(String database,String refcollection,String linkcollection,int numrefs){
 
-		TorPoolManager.setupTorPoolConnexion(true);
+		TorPoolManager.setupTorPoolConnexion(true,true);
 		ScholarAPI.init();
 
 		Log.stdout("Filling mongobase "+database+" ; collections "+refcollection+","+linkcollection+" ; "+numrefs+" refs");
@@ -81,71 +81,7 @@ public class CitationNetwork {
 		}
 	}
 	
-	
-	/**
-	 * For different reference files, load each and constructs citation network.
-	 * Outputs "clustering coefs" in file.
-	 */
-	public static void buildGeneralizedNetwork(String prefix,String[] keywords,String outPrefix,int maxIt){
-		// setup
-		//AlgorithmicSystematicReview.setup("conf/default.conf");
-		
-		TorPool.setupConnectionPool(50,false);
-		
-		ScholarAPI.init();
-		
-		//initialize orig tables and load initial references
-		System.out.println("Reconstructing References from file");
-		LinkedList<HashSet<Reference>> originals = new LinkedList<HashSet<Reference>>();
-		for(int i=0;i<keywords.length;i++){originals.addLast(new HashSet<Reference>(RISReader.read(getLastIteration(prefix,keywords[i],maxIt),-1)));}
-	
-		// build the cit nw
-		buildCitationNetwork("",new DefaultCorpus());
-		
-		// fill cluster link table
-		// for each orig, look at all orig, number of citing
-		//mat of strings to be easily exported to csv
-		String[][] interClusterLinks = new String[keywords.length+1][keywords.length];
-		//first line is header
-		for(int j=0;j<keywords.length;j++){interClusterLinks[0][j]=keywords[j];}
-		// fill mat - beware : not symmetrical
-		for(int i=0;i<keywords.length;i++){
-			for(int j=0;j<keywords.length;j++){
-				int cit=0;
-				for(Reference r:originals.get(i)){for(Reference c:r.citing){if(originals.get(j).contains(c)){cit++;}}}
-				interClusterLinks[i+1][j]=(new Integer(cit)).toString();
-			}
-		}
-		
-		// output in csv file
-		CSVWriter.write(outPrefix+".csv", interClusterLinks, ";","");
-		
-		// output in GEXF to be used by graph processing softwares
-		GEXFWriter.writeCitationNetwork(outPrefix+".gexf", Reference.references.keySet());
-		
-		
-		
-	}
-	
-	
-	/**
-	 * Find last bib file.
-	 * Structure assumed : prefix+kw+"_"+num+".ris" ; all files with same prefix.
-	 * 
-	 * @param prefix
-	 * @param kw
-	 * @param maxIt
-	 * @return
-	 */
-	private static String getLastIteration(String prefix,String kw,int maxIt){
-		int num = 0;
-		File f = new File(prefix+kw+"_"+num+".ris");
-		while(f.exists()&&num<=maxIt){
-			f = new File(prefix+kw+"_"+num+".ris");
-			num++;
-		}
-		return prefix+kw+"_"+(num-2)+".ris";
-	}
+
 	
 	
 	/**

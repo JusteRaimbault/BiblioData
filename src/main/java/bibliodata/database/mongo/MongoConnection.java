@@ -376,15 +376,89 @@ public class MongoConnection {
 
 
     /**
+     * filter on maxHorizDepth
+     * @param originDB
+     * @param targetDB
+     * @param maxHorizDepth
+     */
+    public static void filterDatabase(String originDB,String targetDB,int maxHorizDepth,int maxVerticalDepth) {
+        initMongo(originDB);
+        MongoCollection<Document> origrefscol = mongoDatabase.getCollection(Context.getReferencesCollection());
+        MongoCollection<Document> origlinks = mongoDatabase.getCollection(Context.getCitationsCollection());
+
+        LinkedList<Document> newrefs = new LinkedList<Document>();
+        HashMap<String,Document> origrefs = new HashMap<String,Document>();
+        for(Document d: origrefscol.find()){origrefs.put(d.getString("id"),d);}
+
+        for(Document d:origrefs.values()){
+            // filter by hand : first level = max depth, maxHorizDepth
+            if(d.getInteger("depth").intValue()==maxVerticalDepth){
+                if(d.containsKey("horizontalDepth")){
+                    Document h = (Document) d.get("horizontalDepth");
+                    boolean toadd = false;
+                    for(String k:h.keySet()){toadd = toadd||(h.getInteger(k)<=maxHorizDepth);}
+                    if(toadd==true){newrefs.add(d);}
+                }
+            }
+        }
+
+        // use links to reconstruct nw
+        HashMap<String,LinkedList<String>> links = new HashMap<String,LinkedList<String>>();
+        for(Document l:origlinks.find()){
+            if(links.containsKey(l.getString("to"))){
+                links.get(l.getString("to")).add(l.getString("from"));
+            }
+            else{
+                LinkedList<String> citing = new LinkedList<String>();citing.add(l.getString("from"));
+                links.put(l.getString("to"),citing);}
+        }
+
+        LinkedList<Document> currentlevel = (LinkedList<Document>) newrefs.clone();
+        for(int depth = 0;depth < maxVerticalDepth;depth++){
+
+        }
+
+
+
+
+    }
+
+    private static LinkedList<Document> getCiting(LinkedList<Document> cited,HashMap<String,Document> alldocs,HashMap<String,LinkedList<String>> alllinks){
+        LinkedList<Document> res = new LinkedList<Document>();
+        for(Document d:cited){
+            LinkedList<String> links = alllinks.get(d.getString("id"));
+            for(String citing:links){
+                if(alldocs.containsKey(citing)){res.add(alldocs.get(citing));}
+            }
+        }
+        return(res);
+    }
+
+
+    /**
      * log ip
+     *
+     *  number of collected references : record with ts = -1 ?
+     *
      * @param ip
      * @param success
      */
-    public static void logIP(String ip,boolean success) {
+    public static void logIP(String ip,boolean success,int collectedRefs) {
         MongoCollection<Document> mongoCollection = mongoDatabase.getCollection(Context.getNetstatCollection());
         String timestamp = new Long((new Date()).getTime()).toString();
+
         Document toinsert = new Document("ip",ip).append("success",success).append("ts",timestamp);
         mongoCollection.insertOne(toinsert);
+
+        Document existingcount = mongoFindOne(Context.getNetstatCollection(),"ipcount",ip);
+        if(existingcount.keySet().size()>0){
+            mongoCollection.updateOne(eq("ipcount",ip),inc("docs",collectedRefs));
+        }else{
+            Document newcount = new Document("ipcount",ip).append("docs",collectedRefs);
+            mongoCollection.insertOne(newcount);
+        }
+
+
     }
 
 

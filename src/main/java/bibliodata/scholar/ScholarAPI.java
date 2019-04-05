@@ -148,7 +148,7 @@ public class ScholarAPI {
 	 *
 	 *
 	 * @param request : either title, keywords, or ID in citing case
-	 * @param maxNumResponses
+	 * @param maxNumResponses number of results - physical limit of 990
 	 * @param requestType "direct" or "cites"
 	 * @return
 	 */
@@ -303,8 +303,9 @@ public class ScholarAPI {
 							//r.scholarID=rr.scholarID;//no need as rr and r should be same pointer ?
 							if(!rr.equals(r)){Reference.references.remove(r);}
 							r=rr; //contradiction with hashconsing here : should delete the old one here
-							// TODO ; limit of max cit number ?
-							List<Reference> citing = scholarRequest(r.scholarID,10000,"cites");
+
+							//  limit of max cit number -> global parameter - shouldnt be larger than 1000 (failure in collection then)
+							List<Reference> citing = scholarRequest(r.scholarID,Context.getScholarMaxRequests(),"cites");
 							for(Reference c:citing){r.citing.add(c);}
 						}
 
@@ -349,8 +350,9 @@ public class ScholarAPI {
 					// swith TOR port
 					Log.stdout("Current IP failed ; switching currentTorThread.");
 
-				    // TODO : write ip in file for systematic stats of blocked adress (may have patterns in blocking policy)
-					if(Context.getLogips()) MongoConnection.logIP(TorPoolManager.currentIP,false);
+				    // store for systematic stats of blocked adress (may have patterns in blocking policy)
+					//  how to get ref retrieved by this ip only ? : store last increase
+					if(Context.getLogips()) MongoConnection.logIP(TorPoolManager.currentIP,false,0);
 
 					// FIXME port exclusivity as a global parameter ?
 				    TorPoolManager.switchPort(true);
@@ -364,7 +366,9 @@ public class ScholarAPI {
 				}
 			//}
 			// at this stage the ip is accepted
-			if(Context.getLogips()) MongoConnection.logIP(TorPoolManager.currentIP,true);
+			// tricky to get exact number of refs ? -> put counter with ip in base
+			// a supplementary dom corresponds roughly to 10 more (potential) references
+			if(Context.getLogips()) MongoConnection.logIP(TorPoolManager.currentIP,true,10);
 
 		}catch(Exception e){e.printStackTrace();}
 		return dom;

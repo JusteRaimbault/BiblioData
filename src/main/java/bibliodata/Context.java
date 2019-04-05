@@ -15,7 +15,7 @@ public class Context {
      * IPs logging
      */
 
-    private static boolean logips = false;
+    private static boolean logips = true;
 
     public static void setLogips(boolean logips) {
         Context.logips = logips;
@@ -40,5 +40,14 @@ public class Context {
     private static String netstatCollection = "netstat";
     public static void setNetstatCollection(String col){Context.netstatCollection=col;}
     public static String getNetstatCollection() {return(Context.netstatCollection);}
+
+
+    /**
+     * scholar api
+     */
+    private static int scholarMaxRequests = 1000;
+    public static int getScholarMaxRequests() {return(scholarMaxRequests);}
+
+
 
 }
