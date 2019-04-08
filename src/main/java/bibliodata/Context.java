@@ -26,20 +26,28 @@ public class Context {
 
 
     /**
-     * mongo collections
+     * Mongo
      */
 
     private static String referencesCollection = "references";
     public static void setReferencesCollection(String col){Context.referencesCollection = col;}
     public static String getReferencesCollection() {return(referencesCollection);}
 
-    private static String citationsCollection = "citations";
+    private static String citationsCollection = "links";
     public static void setCitationsCollection(String col){Context.citationsCollection=col;}
     public static String getCitationsCollection() {return(Context.citationsCollection);}
 
     private static String netstatCollection = "netstat";
     public static void setNetstatCollection(String col){Context.netstatCollection=col;}
     public static String getNetstatCollection() {return(Context.netstatCollection);}
+
+    private static String mongoHost = "127.0.0.1";
+    public static void setMongoHost(String host){Context.mongoHost=host;}
+    public static String getMongoHost(){return(Context.mongoHost);}
+
+    private static int mongoPort = 27017;
+    public static void setMongoPort(int port){Context.mongoPort=port;}
+    public static int getMongoPort(){return(Context.mongoPort);}
 
 
     /**
@@ -48,6 +56,8 @@ public class Context {
     private static int scholarMaxRequests = 1000;
     public static int getScholarMaxRequests() {return(scholarMaxRequests);}
 
+
+    public static int getMaxHorizontalDepth(){return(scholarMaxRequests);}
 
 
 }

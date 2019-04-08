@@ -16,7 +16,8 @@ public class DatabaseManager {
                 "Usage : --database\n"+
                 "| --import $FILE $DATABASE [$DEPTH] [$ORIGIN] [$DROP_COLLECTIONS]\n"+
                 "| --incrdepth $DATABASE\n"+
-                "| --notproc $DATABASE"
+                "| --notproc $DATABASE\n"+
+                "| --priority $DATABASE $MAXDEPTH"
         );}
 
         String action = args[0];
@@ -35,12 +36,20 @@ public class DatabaseManager {
         if(action.equals("--incrdepth")){
             MongoConnection.initMongo(args[1]);
             MongoConnection.incrAllDepths(Context.getReferencesCollection());
+            MongoConnection.closeMongo();
         }
 
         // set processing to false for all references (to be used after crashes or interrupted runs)
         if(action.equals("--notproc")){
             MongoConnection.initMongo(args[1]);
             MongoConnection.notProcessing(Context.getReferencesCollection());
+            MongoConnection.closeMongo();
+        }
+
+        if(action.equals("--priority")){
+            MongoConnection.initMongo(args[1]);
+            MongoConnection.computePriorities(Integer.parseInt(args[2]));
+            MongoConnection.closeMongo();
         }
 
 

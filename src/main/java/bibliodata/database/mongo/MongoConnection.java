@@ -70,7 +70,7 @@ public class MongoConnection {
     }
 
     public static void initMongo(String db) {
-        initMongo("127.0.0.1",27017,db);
+        initMongo(Context.getMongoHost(),Context.getMongoPort(),db);
     }
 
 
@@ -381,14 +381,13 @@ public class MongoConnection {
      * @param targetDB
      * @param maxHorizDepth
      */
+    // FIXME method not finished
     public static void filterDatabase(String originDB,String targetDB,int maxHorizDepth,int maxVerticalDepth) {
         initMongo(originDB);
-        MongoCollection<Document> origrefscol = mongoDatabase.getCollection(Context.getReferencesCollection());
-        MongoCollection<Document> origlinks = mongoDatabase.getCollection(Context.getCitationsCollection());
 
         LinkedList<Document> newrefs = new LinkedList<Document>();
-        HashMap<String,Document> origrefs = new HashMap<String,Document>();
-        for(Document d: origrefscol.find()){origrefs.put(d.getString("id"),d);}
+
+        HashMap<String,Document> origrefs = getAllRefs();
 
         for(Document d:origrefs.values()){
             // filter by hand : first level = max depth, maxHorizDepth
@@ -403,15 +402,7 @@ public class MongoConnection {
         }
 
         // use links to reconstruct nw
-        HashMap<String,LinkedList<String>> links = new HashMap<String,LinkedList<String>>();
-        for(Document l:origlinks.find()){
-            if(links.containsKey(l.getString("to"))){
-                links.get(l.getString("to")).add(l.getString("from"));
-            }
-            else{
-                LinkedList<String> citing = new LinkedList<String>();citing.add(l.getString("from"));
-                links.put(l.getString("to"),citing);}
-        }
+        HashMap<String,LinkedList<String>> links = getAllLinks();
 
         LinkedList<Document> currentlevel = (LinkedList<Document>) newrefs.clone();
         for(int depth = 0;depth < maxVerticalDepth;depth++){
@@ -423,15 +414,103 @@ public class MongoConnection {
 
     }
 
+    /**
+     * Add a priority field in a given db (collections by default, database assumed already init)
+     *
+     *  - for each max depth ref, get citing, compute min while constructing the graph
+     */
+    public static void computePriorities(int maxVerticalDepth){
+        HashMap<String,Document> allrefs = getAllRefs();
+        HashMap<String,LinkedList<String>> links = getAllLinks();
+
+        LinkedList<Document> currentDepth = new LinkedList<Document>();
+        for(Document d:allrefs.values()){if(d.getInteger("depth")==maxVerticalDepth){currentDepth.add(d);}}
+
+        Log.stdout("Total refs : "+allrefs.size());
+        Log.stdout("Total links : "+links.size());
+        Log.stdout("Refs at max depth : "+currentDepth.size());
+
+        for(int depth=maxVerticalDepth-1;depth>=0;depth=depth-1){
+            HashMap<String,Integer> priorities = new HashMap<String,Integer>();
+            LinkedList<Document> nextdepth = new LinkedList<Document>();
+
+            for(Document d: currentDepth){
+                LinkedList<Document> citing = getCiting(d,allrefs,links);
+                int currentPriority = Context.getMaxHorizontalDepth();
+                if(d.containsKey("horizontalDepth")){
+                    Document h = (Document) d.get("horizontalDepth");
+                    for(String k:h.keySet()){if(h.getInteger(k).intValue()<currentPriority){currentPriority=h.getInteger(k).intValue();}}
+                }
+                for(Document c:citing){
+                    nextdepth.add(c);// ! redundancy
+                    if(priorities.containsKey(c.getString("id"))){if(currentPriority<priorities.get(c.getString("id")).intValue()){priorities.put(c.getString("id"),currentPriority);}}
+                    else{priorities.put(c.getString("id"),currentPriority);}
+                }
+            }
+
+            // update in database
+            Log.stdout("Priorities : updating "+priorities.size()+" references");
+            for(String toupdate:priorities.keySet()){
+                mongoUpdate("references","id",toupdate, "priority", priorities.get(toupdate).intValue());
+            }
+
+            // next level
+            currentDepth = nextdepth;
+        }
+    }
+
+    /**
+     * get citing docs for a list of cited docs
+     * @param cited cited docs
+     * @param alldocs hashmap ID -> doc with all documents
+     * @param alllinks hashmap ID -> citing IDs
+     * @return
+     */
     private static LinkedList<Document> getCiting(LinkedList<Document> cited,HashMap<String,Document> alldocs,HashMap<String,LinkedList<String>> alllinks){
         LinkedList<Document> res = new LinkedList<Document>();
         for(Document d:cited){
             LinkedList<String> links = alllinks.get(d.getString("id"));
-            for(String citing:links){
-                if(alldocs.containsKey(citing)){res.add(alldocs.get(citing));}
+            if(links!=null) {// may be not cited
+                for (String citing : links) {
+                    if (alldocs.containsKey(citing)) {
+                        res.add(alldocs.get(citing));
+                    }
+                }
             }
         }
         return(res);
+    }
+
+    private static LinkedList<Document> getCiting(Document cited,HashMap<String,Document> alldocs,HashMap<String,LinkedList<String>> alllinks){
+        LinkedList<Document> docs = new LinkedList<Document>();
+        docs.add(cited);
+        return(getCiting(docs,alldocs,alllinks));
+    }
+
+
+    /**
+     * get all links as hashmap (default cit col)
+     * @return
+     */
+    private static HashMap<String,LinkedList<String>> getAllLinks(){
+        MongoCollection<Document> origlinks = mongoDatabase.getCollection(Context.getCitationsCollection());
+        HashMap<String,LinkedList<String>> links = new HashMap<String,LinkedList<String>>();
+        for(Document l:origlinks.find()){
+            if(links.containsKey(l.getString("to"))){
+                links.get(l.getString("to")).add(l.getString("from"));
+            }
+            else{
+                LinkedList<String> citing = new LinkedList<String>();citing.add(l.getString("from"));
+                links.put(l.getString("to"),citing);}
+        }
+        return(links);
+    }
+
+    private static HashMap<String,Document> getAllRefs(){
+        MongoCollection<Document> origrefscol = mongoDatabase.getCollection(Context.getReferencesCollection());
+        HashMap<String,Document> origrefs = new HashMap<String,Document>();
+        for(Document d: origrefscol.find()){origrefs.put(d.getString("id"),d);}
+        return(origrefs);
     }
 
 

@@ -314,11 +314,14 @@ public class ScholarAPI {
 						// update depth of citing refs
 						for(Reference citing:r.citing){citing.depth=r.depth-1;}
 
+						// FIXME generic inheritance of parents properties here ? (cf horizontalDepth)
+
 						Log.stdout("Citing refs : "+r.citing.size());
 
 					}catch(Exception e){e.printStackTrace();}
 				}
 
+				// FIXME does not make sense in Mongo mode (ref by ref)
 				Log.purpose("progress","Corpus "+corpus.name+" : citing refs : "+(100.0 * (1.0*p) / (1.0*totalRefs))+ " % ; ref "+r.toString());p++;
 
 			}
