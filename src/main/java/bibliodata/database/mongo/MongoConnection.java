@@ -336,13 +336,14 @@ public class MongoConnection {
      * @param collection
      * @return
      */
-    public static Reference getUnfilled(String collection) {
+    public static Reference getUnfilled(String collection,int maxPriority) {
         MongoCollection<Document> mongoCollection = mongoDatabase.getCollection(collection);
         try {
             Document queryres = mongoCollection.findOneAndUpdate(
                     and(
                         eq("citingFilled", false),
                         gt("depth",0),
+                        lt("priority",maxPriority),
                         or(not(exists("processing")),not(eq("processing",true)))
                     ),
                     set("processing",true)
@@ -353,6 +354,8 @@ public class MongoConnection {
             return (res);
         }catch(Exception e){return(null);}
     }
+
+
 
 
     /**

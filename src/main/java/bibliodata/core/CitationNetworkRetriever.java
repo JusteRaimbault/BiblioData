@@ -3,6 +3,7 @@
  */
 package bibliodata.core;
 
+import bibliodata.Context;
 import bibliodata.utils.Log;
 import bibliodata.utils.tor.TorPool;
 
@@ -14,31 +15,31 @@ public class CitationNetworkRetriever {
 
 	/**
 	 * @param args
-	 * 
-	 * Usage : [torpid1,torpid2] , refFile, outFile, depth
-	 * 
+	 *
 	 */
 		public static void main(String[] args) {
 
 			if(args.length==0){
 				System.out.println("Usage : --citation\n"+
-					"| --mongo $DATABASE $NUMREFS\n"+
+					"| --mongo $DATABASE $NUMREFS [$MAXPRIORITY]\n"+
 					"| --csv $CSVFILE $OUTPUT_PREFIX $DEPTH [$CITEDFOLDER]"
 			);}
 
 			String action = args[0];
 
 			/**
-			 * Usage : $DATABASENAME $NREFS
+			 * Usage : $DATABASENAME $NREFS [$MAXPRIORITY]
 			 */
 			if(action.equals("--mongo")){
 				Log.stdout("Citation network from mongo");
 				String mongodb = args[1];
 				//String collection = args[2];
-				String refcollection = "references";
-				String linkcollection = "links";
+				String refcollection = Context.getReferencesCollection();
+				String linkcollection = Context.getCitationsCollection();
 				int numrefs = Integer.parseInt(args[2]);
-				CitationNetwork.fillCitationsMongo(mongodb,refcollection,linkcollection,numrefs);
+				int maxPriority = Context.getMaxHorizontalDepth();
+				if(args.length==4){maxPriority=Integer.parseInt(args[3]);}
+				CitationNetwork.fillCitationsMongo(mongodb,refcollection,linkcollection,numrefs,maxPriority);
 			}
 
 

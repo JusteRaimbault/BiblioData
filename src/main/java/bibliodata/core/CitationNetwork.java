@@ -41,7 +41,7 @@ public class CitationNetwork {
 	 * @param linkcollection
 	 * @param numrefs
 	 */
-	public static void fillCitationsMongo(String database,String refcollection,String linkcollection,int numrefs){
+	public static void fillCitationsMongo(String database,String refcollection,String linkcollection,int numrefs,int maxPriority){
 
 		TorPoolManager.setupTorPoolConnexion(true,true);
 		ScholarAPI.init();
@@ -52,7 +52,7 @@ public class CitationNetwork {
 		MongoConnection.initMongo(database);
 
 		for(int i = 0;i<numrefs;i++){
-			Reference r = MongoConnection.getUnfilled(refcollection);
+			Reference r = MongoConnection.getUnfilled(refcollection,maxPriority);
 			if(r==null){break;}
 			Log.stdout("Unfilled ref : "+r.toString());
 			ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r));
