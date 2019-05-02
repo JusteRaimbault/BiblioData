@@ -42,8 +42,9 @@ public class MongoDocument {
 
     public static Reference fromDocument(Document document){
         String id = document.getString("id");
-        String title = document.getString("title");
+        String title = document.getString("title");// every doc should have title
         String year = document.getString("year");
+        if(year==null){year="NA";}
         Reference r = Reference.construct(id,title,year);
 
         // add additional attributes by hand
@@ -52,7 +53,7 @@ public class MongoDocument {
 
         if(document.containsKey("horizontalDepth")){
             String v = "";
-            for(String k :((Document) document.get("horizontalDepth")).keySet()){v=v+","+k+":"+((Document) document.get("horizontalDepth")).getString(k);}
+            for(String k :((Document) document.get("horizontalDepth")).keySet()){v=v+","+k+":"+((Document) document.get("horizontalDepth")).getInteger(k).toString();}
             r.addAttribute("horizontalDepth",v.substring(1));
         }
 

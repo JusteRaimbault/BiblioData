@@ -8,11 +8,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import bibliodata.scholar.ScholarAPI;
-import bibliodata.utils.BIBReader;
-import bibliodata.utils.CSVWriter;
-import bibliodata.utils.GEXFWriter;
+import bibliodata.utils.*;
 import bibliodata.core.reference.Reference;
-import bibliodata.utils.RISReader;
 
 import static bibliodata.utils.ConversionUtils.toArray;
 
@@ -119,6 +116,7 @@ public abstract class Corpus implements Iterable<Reference> {
 	public void csvExport(String prefix,boolean withAbstract,LinkedList<String> attributes){
 		LinkedList<String[]> datanodes = refsAsCSVRows(withAbstract,attributes);
 		LinkedList<String[]> dataedges = linksAsCSVRows();
+		Log.stdout("Exporting corpus with "+datanodes.size()+" refs, "+dataedges.size()+" links");
 		CSVWriter.write(prefix+".csv", datanodes, ";", "\"");
 		CSVWriter.write(prefix+"_links.csv", dataedges, ";", "\"");
 	}
@@ -135,7 +133,7 @@ public abstract class Corpus implements Iterable<Reference> {
 			LinkedList<String> row = new LinkedList<>();
 			row.add(r.scholarID);row.add(r.title.title);row.add(r.year);
 			if(withAbstract){row.add(r.resume.resume);row.add(r.getAuthorString());}
-			for(String attr:attributes){provheader.add(r.getAttribute(attr));}
+			for(String attr:attributes){row.add(r.getAttribute(attr));}
 			res.add(toArray(row));
 		}
 		return(res);
@@ -164,7 +162,7 @@ public abstract class Corpus implements Iterable<Reference> {
 
 
 
-
+	// TODO take into account different depths here ? (rq several files)
 	public static Corpus fromFile(String refFile, String citedFolder){
 		Corpus initial = new DefaultCorpus();
 

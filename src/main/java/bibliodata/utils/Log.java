@@ -22,7 +22,7 @@ import java.util.HashMap;
  */
 public class Log {
 	
-	private static String logLevel;
+	private static String logLevel="debug";
 	
 	
 	/** BufferedWriter to write */
