@@ -228,18 +228,33 @@ public class Reference {
 	public static Reference materialize(GhostReference ghost){
 		return construct(ghost,"");
 	}
-	
+
+	/**
+	 * Materialize a ghost ref with the given id
+	 * @param ghost
+	 * @param schID
+	 * @return
+	 */
 	public static Reference materialize(GhostReference ghost,String schID){
 		return construct(ghost,schID);
 	}
-	
-	
-	
+
+
+	/**
+	 * Add an attribute to the Reference
+	 * @param key
+	 * @param value
+	 */
 	public void addAttribute(String key,String value){
 		if(attributes==null){attributes=new HashMap<String,String>();}
 		attributes.put(key, value);
 	}
-	
+
+	/**
+	 * Get attribute (empty if attributes not set [!! unsecure] or attribute is not in the attribute table)
+	 * @param key
+	 * @return
+	 */
 	public String getAttribute(String key){
 		if(attributes==null||!attributes.containsKey(key))return "";
 		return attributes.get(key);
@@ -255,6 +270,11 @@ public class Reference {
 		// current set of authors assumed existing ; but creates it of called from ghost ref e.g.
 		if(authors==null){authors=new HashSet<String>();}
 		for(String s:a){authors.add(s);}
+	}
+
+	public HashSet<String> getAuthors(){
+		if(authors==null){return(new HashSet<>());}
+		return(authors);
 	}
 	
 	/**
@@ -275,9 +295,10 @@ public class Reference {
 	public String getAuthorString(){
 		try{
 			String res="";
-			for(String a:authors){res=res+";"+a;}
+			for(String a:authors){res=res+","+a;}
 			if(res.length()>0){res.substring(0, res.length()-1);}
 			return res;
+			// FIXME why could there be an exception here ? uninitialized authors ?
 		}catch(Exception e){return "";}
 	}
 

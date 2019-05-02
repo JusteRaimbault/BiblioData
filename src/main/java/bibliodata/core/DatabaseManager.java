@@ -5,6 +5,7 @@ package bibliodata.core;
 import bibliodata.Context;
 import bibliodata.database.mongo.MongoConnection;
 import bibliodata.database.mongo.MongoImport;
+import bibliodata.database.mongo.MongoExport;
 
 public class DatabaseManager {
 
@@ -17,7 +18,8 @@ public class DatabaseManager {
                 "| --import $FILE $DATABASE [$DEPTH] [$ORIGIN] [$DROP_COLLECTIONS]\n"+
                 "| --incrdepth $DATABASE\n"+
                 "| --notproc $DATABASE\n"+
-                "| --priority $DATABASE $MAXDEPTH"
+                "| --priority $DATABASE $MAXDEPTH\n"+
+                "| --export $DATABASE $FILE [$MAXPRIORITY] [$WITHABSTRACTS]"
         );}
 
         String action = args[0];
@@ -49,6 +51,16 @@ public class DatabaseManager {
         if(action.equals("--priority")){
             MongoConnection.initMongo(args[1]);
             MongoConnection.computePriorities(Integer.parseInt(args[2]));
+            MongoConnection.closeMongo();
+        }
+
+        if(action.equals("--export")){
+            MongoConnection.initMongo(args[1]);
+            int maxPriority = -1;
+            if(args.length>=4){maxPriority=Integer.parseInt(args[3]);}
+            boolean withAbstracts = false;
+            if(args.length==5){withAbstracts=true;}
+            MongoExport.export(maxPriority,withAbstracts,args[2]);
             MongoConnection.closeMongo();
         }
 

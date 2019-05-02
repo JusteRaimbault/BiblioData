@@ -3,6 +3,7 @@ package bibliodata.database.mongo;
 
 import bibliodata.Context;
 import bibliodata.core.corpuses.Corpus;
+import bibliodata.core.corpuses.DefaultCorpus;
 import bibliodata.core.reference.Reference;
 import bibliodata.utils.Log;
 import com.mongodb.MongoClient;
@@ -463,6 +464,41 @@ public class MongoConnection {
     }
 
     /**
+     * reconstruct corpus for export
+     *
+     * @return
+     */
+    public static Corpus getCorpus(int maxPriority){
+        HashMap<String,Document> refs = new HashMap<String,Document>();
+        if(maxPriority==-1) {refs = getAllRefs();}else {
+            refs = getRefsPriority(maxPriority);
+        }
+
+        HashMap<String,Reference> corpus = new HashMap<String,Reference>();
+
+        for(String id:refs.keySet()){
+            Reference ref = MongoDocument.fromDocument(refs.get(id));
+            corpus.put(id,ref);
+        }
+
+        // fill the citing sets by going through the links
+        HashMap<String,LinkedList<String>> links = getAllLinks();
+        for(String to:links.keySet()){
+            for(String from:links.get(to)) {
+                // add links with two ends both in refs
+                // -> filter links if maxPriority is provided
+                if (refs.containsKey(to) && refs.containsKey(from)) {
+                    Reference toRef = corpus.get(to);
+                    Reference fromRef = corpus.get(from);
+                    toRef.citing.add(fromRef);
+                }
+            }
+        }
+        return(new DefaultCorpus(new HashSet<Reference>(corpus.values())));
+    }
+
+
+    /**
      * get citing docs for a list of cited docs
      * @param cited cited docs
      * @param alldocs hashmap ID -> doc with all documents
@@ -509,11 +545,39 @@ public class MongoConnection {
         return(links);
     }
 
+    /**
+     * links as to,from
+     * @return
+     */
+    private static HashMap<String,String> getALlRawLinks(boolean from){
+        MongoCollection<Document> origlinks = mongoDatabase.getCollection(Context.getCitationsCollection());
+        HashMap<String,String> links = new HashMap<String,String>();
+        for(Document l:origlinks.find()){
+            if(l.containsKey("to")&&l.containsKey("from")){
+                if(from==true) {
+                    links.put(l.getString("from"),l.getString("to"));
+                }else{
+                    links.put(l.getString("to"),l.getString("from"));
+                }
+            }
+        }
+        return(links);
+    }
+
     private static HashMap<String,Document> getAllRefs(){
         MongoCollection<Document> origrefscol = mongoDatabase.getCollection(Context.getReferencesCollection());
         HashMap<String,Document> origrefs = new HashMap<String,Document>();
         for(Document d: origrefscol.find()){origrefs.put(d.getString("id"),d);}
         return(origrefs);
+    }
+
+    private static HashMap<String,Document>  getRefsPriority(int maxPriority){
+        MongoCollection<Document> mongoCollection = mongoDatabase.getCollection(Context.getReferencesCollection());
+        HashMap<String,Document> res = new HashMap<String,Document>();
+        for(Document queryres :mongoCollection.find(lt("priority",maxPriority))){
+            res.put(queryres.getString("id"),queryres);
+        }
+        return(res);
     }
 
 

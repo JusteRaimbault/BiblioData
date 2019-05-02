@@ -14,6 +14,8 @@ import bibliodata.utils.GEXFWriter;
 import bibliodata.core.reference.Reference;
 import bibliodata.utils.RISReader;
 
+import static bibliodata.utils.ConversionUtils.toArray;
+
 /**
  * A corpus is a set of references
  * 
@@ -102,22 +104,47 @@ public abstract class Corpus implements Iterable<Reference> {
 	 * @param withAbstract
 	 */
 	public void csvExport(String prefix,boolean withAbstract){
-		LinkedList<String[]> datanodes = new LinkedList<String[]>();
-		LinkedList<String[]> dataedges = new LinkedList<String[]>();
-		if(!withAbstract){String[] header = {"title","id","year"};datanodes.add(header);}else{String[] header = {"title","id","year","abstract","year"};datanodes.add(header);}
-		for(Reference r:references){
-			String[] row = {""};
-			if(!withAbstract){String[] tmp = {r.title.title,r.scholarID,r.year};row=tmp;}
-			else{
-				String authorstr = "";for(String s:r.authors){authorstr=authorstr+s+",";}
-				String[] tmp = {r.title.title,r.scholarID,r.year,r.resume.resume,authorstr};
-				row=tmp;
-			}
-			datanodes.add(row);
-			for(Reference rc:r.citing){String[] edge = {rc.scholarID,r.scholarID};dataedges.add(edge);}	
-		}
+		LinkedList<String[]> datanodes = refsAsCSVRows(withAbstract,new LinkedList<>());
+		LinkedList<String[]> dataedges = linksAsCSVRows();
 		CSVWriter.write(prefix+".csv", datanodes, ";", "\"");
 		CSVWriter.write(prefix+"_links.csv", dataedges, ";", "\"");
+	}
+
+	/**
+	 * Export to csv with attributes
+	 * @param prefix
+	 * @param withAbstract
+	 * @param attributes
+	 */
+	public void csvExport(String prefix,boolean withAbstract,LinkedList<String> attributes){
+		LinkedList<String[]> datanodes = refsAsCSVRows(withAbstract,attributes);
+		LinkedList<String[]> dataedges = linksAsCSVRows();
+		CSVWriter.write(prefix+".csv", datanodes, ";", "\"");
+		CSVWriter.write(prefix+"_links.csv", dataedges, ";", "\"");
+	}
+
+	private LinkedList<String[]> refsAsCSVRows(boolean withAbstract,LinkedList<String> attributes){
+		LinkedList<String[]> res = new LinkedList<>();
+
+		LinkedList<String> provheader = new LinkedList<String>();provheader.add("id");provheader.add("title");provheader.add("year");
+		if(withAbstract){provheader.add("abstract");provheader.add("authors");}
+		for(String attr:attributes){provheader.add(attr);}
+		res.add(toArray(provheader));
+
+		for(Reference r:references){
+			LinkedList<String> row = new LinkedList<>();
+			row.add(r.scholarID);row.add(r.title.title);row.add(r.year);
+			if(withAbstract){row.add(r.resume.resume);row.add(r.getAuthorString());}
+			for(String attr:attributes){provheader.add(r.getAttribute(attr));}
+			res.add(toArray(row));
+		}
+		return(res);
+	}
+
+	private LinkedList<String[]> linksAsCSVRows(){
+		LinkedList<String[]> dataedges = new LinkedList<String[]>();
+		for(Reference r:references){for(Reference rc:r.citing){String[] edge = {rc.scholarID,r.scholarID};dataedges.add(edge);}}
+		return(dataedges);
 	}
 	
 	
@@ -160,6 +187,13 @@ public abstract class Corpus implements Iterable<Reference> {
 
 		return(initial);
 	}
+
+
+	/*
+	public static Corpus fromMongo() {
+		-> implemented in mongoimport
+	}
+	*/
 
 
 	

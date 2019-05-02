@@ -13,6 +13,13 @@ public class Main {
             "where $OPTION in {--database,--citation,--abstracts,--abstract,--keywords}";
 
 
+    /**
+     * final steps always done at exception ?
+     */
+    public static void close() {
+
+    }
+
     public static void main(String[] args) {
 
         if(args.length==0){System.out.println(usage);}

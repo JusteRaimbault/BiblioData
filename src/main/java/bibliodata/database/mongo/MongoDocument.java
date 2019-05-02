@@ -40,6 +40,33 @@ public class MongoDocument {
         return(res);
     }
 
+    public static Reference fromDocument(Document document){
+        String id = document.getString("id");
+        String title = document.getString("title");
+        String year = document.getString("year");
+        Reference r = Reference.construct(id,title,year);
+
+        // add additional attributes by hand
+        // FIXME data structure is messy and not secure - either systematize setters/getters, or go to scala ?
+        // -> case class : immutable references / Links ? easy to combine with mongo cursors ?
+
+        if(document.containsKey("horizontalDepth")){
+            String v = "";
+            for(String k :((Document) document.get("horizontalDepth")).keySet()){v=v+","+k+":"+((Document) document.get("horizontalDepth")).getString(k);}
+            r.addAttribute("horizontalDepth",v.substring(1));
+        }
+
+        if(document.containsKey("depth")){
+            r.addAttribute("depth",Integer.toString(document.getInteger("depth")));
+        }
+
+        if(document.containsKey("priority")){
+            r.addAttribute("priority",Integer.toString(document.getInteger("priority")));
+        }
+
+        return(r);
+    }
+
     public static LinkedList<Document> citationLinksFromReference(Reference reference) {
         LinkedList<Document> links = new LinkedList<Document>();
         if(reference.citing.size()>0){

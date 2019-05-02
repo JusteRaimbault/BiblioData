@@ -43,5 +43,9 @@ public class CSVWriter {
 		}
 		write(filePath,res,delimiter,textQuote);
 	}
+
+	// FIXME Iterable ?
+	//public static void write(String filePath,LinkedList<LinkedList<String>> data,String delimiter,String textQuote) {
+	//}
 	
 }

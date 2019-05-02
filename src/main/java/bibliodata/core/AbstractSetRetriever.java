@@ -6,6 +6,7 @@ package bibliodata.core;
 import java.io.File;
 import java.util.HashSet;
 
+import bibliodata.Context;
 import bibliodata.core.AlgorithmicSystematicReview;
 
 import bibliodata.database.mongo.MongoConnection;
@@ -95,7 +96,7 @@ public class AbstractSetRetriever {
 				MongoConnection.initMongo(database);
 
 				for(int i = 0;i<numrefs;i++){
-					Reference r = MongoConnection.getUnfilled(refcollection);
+					Reference r = MongoConnection.getUnfilled(refcollection, Context.getMaxHorizontalDepth());
 					if(r==null){break;}
 					Log.stdout("Unfilled ref : "+r.toString());
 					Reference detailed = MendeleyAPI.getReference(r.title.title,r.year,r.scholarID);
