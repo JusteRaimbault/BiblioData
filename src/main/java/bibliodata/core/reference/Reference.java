@@ -133,7 +133,7 @@ public class Reference {
 		biblio=new Bibliography();
 		attributes = new HashMap<String,String>();
 		citingFilled = false;
-		depth = 0;
+		depth = -1;
 		horizontalDepth=new HashMap<String,Integer>();
 		origin="";
 	}
@@ -315,6 +315,34 @@ public class Reference {
 			return res;
 		}catch(Exception e){return "";}
 	}
+
+
+	/**
+	 * propagates depth into the citation network
+	 * FIXME not secure to reciprocal citations
+	 * @param initialDepth
+	 */
+	public void setDepth(int initialDepth){
+		depth = Math.max(depth,initialDepth);
+		for(Reference c: citing){
+			c.setDepth(depth-1);
+		}
+	}
+
+	/**
+	 * set and propagates horizontal depth into the citation network
+	 * FIXME not secure to reciprocal citations
+	 * @param origin
+	 * @param depth
+	 */
+	public void setHorizontalDepth(String origin,int depth){
+		if(horizontalDepth.containsKey(origin)){horizontalDepth.put(origin,new Integer(Math.min(depth,horizontalDepth.get(origin).intValue())));}
+		else {horizontalDepth.put(origin,new Integer(depth));}
+		for(Reference c: citing){
+			c.setHorizontalDepth(origin,depth);
+		}
+	}
+
 	
 	
 	/**

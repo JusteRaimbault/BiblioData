@@ -48,9 +48,9 @@ public class CSVFactory implements CorpusFactory {
 	 * @see main.corpuses.CorpusFactory#getCorpus()
 	 */
 	@Override
-	public Corpus getCorpus() {
+	public OrderedCorpus getCorpus() {
 		// assumes a simple csv file : title,ID
-		Corpus res = new DefaultCorpus();
+		OrderedCorpus res = new OrderedCorpus();
 		String[][] refs = CSVReader.read(bibfile, ";","\"");
 		if(refs[0].length>1){
 			if(numRefs==-1){numRefs=refs.length;}
@@ -58,7 +58,7 @@ public class CSVFactory implements CorpusFactory {
 				String id = refs[i][1];
 				if(id!="NA"){
 					Reference r = Reference.construct("",new Title(refs[i][0]),new Abstract(), "",id);
-					res.references.add(r);
+					res.addReference(r);
 					if(citedFolder!=""){//if must construct cited corpus
 						r.biblio.cited = (new CSVFactory(citedFolder+(new Integer(i+1)).toString(),-1)).getCorpus().references;
 					}

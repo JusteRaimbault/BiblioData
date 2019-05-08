@@ -96,7 +96,7 @@ public class CitationNetwork {
 		
 		System.out.println("Reconstructing References from file "+refFile);
 		
-		Corpus initial = Corpus.fromFile(refFile,citedFolder);
+		Corpus initial = Corpus.fromNodeFile(refFile,citedFolder);
 
 		System.out.println("Number of References : "+Reference.references.keySet().size());
 

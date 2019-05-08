@@ -15,7 +15,8 @@ import java.util.LinkedList;
  */
 public class CSVReader {
 
-	
+
+	// FIXME incorrect parser, does not actually uses quotes
 	public static String[][] read(String filePath,String delimiter,String quote){
 		try{
 		   BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)));

@@ -55,6 +55,11 @@ public class OrderedCorpus extends Corpus {
         }
     }
 
+    public void addReference(Reference r){
+        references.add(r);
+        orderedRefs.add(r);
+    }
+
 
     /**
      * Export to csv

@@ -3,6 +3,7 @@ package bibliodata.database.mongo;
 
 
 import bibliodata.core.corpuses.Corpus;
+import bibliodata.core.corpuses.OrderedCorpus;
 import bibliodata.core.reference.Reference;
 import bibliodata.utils.Log;
 
@@ -16,7 +17,8 @@ public class MongoImport {
     /**
      * Import a corpus from file to mongo
      *
-     * @param file
+     * @param file csv corpus file
+     * @param orderFile csv corpus giving request order for the first level
      * @param citedFolder
      * @param db
      * @param refcollection
@@ -25,14 +27,17 @@ public class MongoImport {
      * @param origin
      * @param dropCollections
      */
-    public static void fileToMongo(String file,String citedFolder,String db, String refcollection, String citcollection,int initDepth,String origin,boolean dropCollections){
-        Corpus initial = Corpus.fromFile(file,citedFolder);
-        Log.stdout("Imported corpus of size "+initial.references.size());
-        //update the depth
-        for(Reference r:initial){
-            r.depth=initDepth;
-            r.origin=origin;
-        }
+    public static void fileToMongo(String file,
+                                   String orderFile,
+                                   String citationFile,
+                                   String citedFolder,
+                                   String db,
+                                   String refcollection,
+                                   String citcollection,
+                                   int initDepth,
+                                   String origin,
+                                   boolean dropCollections){
+        Corpus initial = Corpus.fromCSV(file,orderFile,citationFile,citedFolder,initDepth,origin);
 
         corpusToMongo(initial,db,refcollection,citcollection,dropCollections);
 

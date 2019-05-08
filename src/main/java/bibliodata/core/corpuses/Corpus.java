@@ -163,7 +163,14 @@ public abstract class Corpus implements Iterable<Reference> {
 
 
 	// TODO take into account different depths here ? (rq several files)
-	public static Corpus fromFile(String refFile, String citedFolder){
+
+	/**
+	 * Import from file an "initial corpus", i.e. with no links besides an optional cited folder
+	 * @param refFile
+	 * @param citedFolder
+	 * @return
+	 */
+	public static Corpus fromNodeFile(String refFile, String citedFolder){
 		Corpus initial = new DefaultCorpus();
 
 		if(refFile.endsWith(".ris")){
@@ -186,12 +193,51 @@ public abstract class Corpus implements Iterable<Reference> {
 		return(initial);
 	}
 
-
-	/*
-	public static Corpus fromMongo() {
-		-> implemented in mongoimport
+	public static OrderedCorpus fromCSV(String file){
+		return(new CSVFactory(file).getCorpus());
 	}
-	*/
+
+	public static Corpus fromCSV(String file,
+								 String orderFile,
+								 String citationFile,
+								 String citedFolder,
+								 int initDepth,
+								 String origin){
+		Corpus initial = Corpus.fromNodeFile(file,citedFolder);
+		Log.stdout("Imported corpus of size "+initial.references.size());
+
+		//update the origin
+		for(Reference r:initial){
+			//if(orderFile.length()!=0){r.depth=initDepth;} // done later
+			r.origin=origin;
+		}
+
+		// add citations
+		if(citationFile.length()>0) {
+			String[][] rawlinks = CSVReader.read(citationFile, ";", "\"");
+			for (String[] link : rawlinks) {
+				String from = link[0];
+				String to = link[1];
+				Reference.references.get(to).citing.add(Reference.references.get(from));
+			}
+		}
+
+
+		// add order if needed
+		if(orderFile.length()!=0){
+			OrderedCorpus order = Corpus.fromCSV(orderFile);
+			for(int i = 0 ; i<order.orderedRefs.size();i++){
+				//order.orderedRefs.get(i).horizontalDepth.put(origin,new Integer(i));
+				order.orderedRefs.get(i).setHorizontalDepth(origin,i);
+				order.orderedRefs.get(i).setDepth(initDepth);
+			}
+		}
+
+		return(initial);
+	}
+
+
+
 
 
 	
