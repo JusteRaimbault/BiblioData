@@ -22,6 +22,8 @@ public class MongoExport {
         Corpus fullCorpus = MongoConnection.getCorpus(maxPriority);
         LinkedList<String> attributes = new LinkedList<>();attributes.add("depth");attributes.add("priority");attributes.add("horizontalDepth");
         fullCorpus.csvExport(file,withAbstracts,attributes);
+
+        // FIXME add attributes export in csv export !!!
     }
 
     // not useful

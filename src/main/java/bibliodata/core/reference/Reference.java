@@ -198,6 +198,31 @@ public class Reference {
 	public static Reference construct(String id,String title, String year){
 		return construct("",new Title(title),new Abstract(),year,id);
 	}
+
+	/**
+	 * construct a ref and merge attributes (following specific merging rules - as in [[MongoConnection]] we are strongly
+	 *  limited by java and the lack of functional programming - so merging strategies are not parametrized as arguments
+	 *
+	 *  -- also this manual hashconsing is heavy - should we go full scala asap ? -- java legacy is finally a pain -- see NetLogo nighmares
+	 * @param id
+	 * @param title
+	 * @param year
+	 * @param attributes
+	 * @return
+	 */
+	public static Reference construct(String id,String title, String year,HashMap<String,String> attributes){
+		Reference res = construct(id,title,year);
+		// merge attributes
+		// first add default in attr map if not present - fuck to not have the getOrElse
+		if(!attributes.containsKey("depth")){attributes.put("depth",Integer.toString(Integer.MAX_VALUE));}
+		if(!attributes.containsKey("priority")){attributes.put("priority",Integer.toString(Integer.MAX_VALUE));}
+		if(!attributes.containsKey("horizontalDepth")){attributes.put("horizontalDepth","");}
+		if(res.getAttribute("depth").length()>0){Math.min(Integer.parseInt(res.attributes.get("depth")),Integer.parseInt(attributes.get("depth")));} else {res.attributes.put("depth",attributes.get("depth"));}
+		if(res.getAttribute("priority").length()>0){Math.min(Integer.parseInt(res.attributes.get("priority")),Integer.parseInt(attributes.get("priority")));} else {res.attributes.put("priority",attributes.get("priority"));}
+		// merging horizdepths : reparse and merge hashmaps - ultra dirty - should have a generic trait Mergeable and different implementations
+		// TODO
+	}
+
 	
 	public static Reference construct(String schID){
 		return construct("",new Title(""),new Abstract(),"",schID);

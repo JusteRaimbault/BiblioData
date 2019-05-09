@@ -5,10 +5,12 @@ package bibliodata.database.mongo;
 import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.corpuses.OrderedCorpus;
 import bibliodata.core.reference.Reference;
+import bibliodata.utils.CSVReader;
 import bibliodata.utils.Log;
 
 import org.bson.Document;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class MongoImport {
@@ -41,6 +43,32 @@ public class MongoImport {
 
         corpusToMongo(initial,db,refcollection,citcollection,dropCollections);
 
+    }
+
+
+    /**
+     * Import citations only from a csv file
+     * @param citationFile
+     * @param db
+     * @param citcollection
+     */
+    public static void citationsToMongo(String citationFile,String db,String citcollection,boolean dropCollection){
+        String[][] rawlinks = CSVReader.read(citationFile, ";", "\"");
+        Log.stdout("Links to import : "+rawlinks.length);
+
+        MongoConnection.initMongo(db);
+
+        if(dropCollection){MongoConnection.mongoDatabase.getCollection(citcollection).drop();}
+
+        LinkedList<Document> links = new LinkedList<Document>();
+
+        for (String[] link : rawlinks) {
+            String from = link[0];
+            String to = link[1];
+            links.add(new Document("from",from).append("to",to));
+        }
+
+        MongoConnection.mongoInsert(citcollection,links);
     }
 
     /**

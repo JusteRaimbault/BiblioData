@@ -70,8 +70,22 @@ public class MongoConnection {
         }
     }
 
+    /**
+     * new mongo with standard params
+     * @param db
+     */
     public static void initMongo(String db) {
         initMongo(Context.getMongoHost(),Context.getMongoPort(),db);
+    }
+
+    /**
+     * switch the database
+     *
+     * @param newdb
+     */
+    public static void switchMongo(String newdb){
+        closeMongo();
+        initMongo(newdb);
     }
 
 
@@ -178,7 +192,8 @@ public class MongoConnection {
         if(documents.size()>0){mongoCollection.insertMany(documents);}
     }
 
-    public void mongoInsert(List<Document> documents){collection.insertMany(documents);}
+    // FIXME do not instantiate objects of this class ? (should be a scala object)
+    //public void mongoInsert(List<Document> documents){collection.insertMany(documents);}
 
     /**
      * insert document if do not exist
@@ -463,9 +478,33 @@ public class MongoConnection {
         }
     }
 
+
+    /**
+     * Consolidate a corpus from several databases
+     *
+     * @param databases
+     * @param maxPriority
+     * @return
+     */
+    public static Corpus getConsolidatedCorpus(LinkedList<String> databases,int maxPriority){
+        if(databases.size()==0){return(new DefaultCorpus());}
+
+        initMongo(databases.get(0));
+        for(String database: databases){
+            switchMongo(database);
+            Corpus currentcorpus = getCorpus(maxPriority);
+            Log.stdout("For database "+database+" : "+currentcorpus.references.size()+" references ; total refs "+Reference.references.size());
+        }
+
+        return(new DefaultCorpus(Reference.references.keySet()));
+    }
+
+
     /**
      * reconstruct corpus for export
      *
+     * @param maxPriority max priority to be exported
+     * @requires mongo db is initialized
      * @return
      */
     public static Corpus getCorpus(int maxPriority){

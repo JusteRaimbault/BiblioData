@@ -16,6 +16,7 @@ public class DatabaseManager {
             System.out.println(
                 "Usage : --database\n"+
                 "| --import $FILE $DATABASE [$DEPTH] [$ORIGIN] [$DROP_COLLECTIONS] [$ORDERFILE] [$CITATIONFILE]\n"+
+                "| --importcit $CITFILE $DATABASE [$DROP_COLLECTIONS]\n"+
                 "| --incrdepth $DATABASE\n"+
                 "| --notproc $DATABASE\n"+
                 "| --priority $DATABASE $MAXDEPTH\n"+
@@ -42,6 +43,14 @@ public class DatabaseManager {
                 if (args.length >= 7) { orderFile = args[6]; }
                 if (args.length >= 8) { orderFile = args[7]; }
                 MongoImport.fileToMongo(args[1],orderFile,citationFile, "", args[2], Context.getReferencesCollection(), Context.getCitationsCollection(), initDepth, origin, dropCols);
+            }
+
+            if (action.equals("--importcit")){
+                String citfile = args[1];
+                String db = args[2];
+                boolean dropCollections = false;
+                if(args.length >= 4){dropCollections=Boolean.parseBoolean(args[3]);}
+                MongoImport.citationsToMongo(citfile,db,Context.getCitationsCollection(),dropCollections);
             }
 
             // increase depth

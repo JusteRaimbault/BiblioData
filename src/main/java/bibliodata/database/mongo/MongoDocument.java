@@ -5,6 +5,7 @@ import bibliodata.core.reference.Reference;
 import bibliodata.utils.Log;
 import org.bson.Document;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -45,25 +46,39 @@ public class MongoDocument {
         String title = document.getString("title");// every doc should have title
         String year = document.getString("year");
         if(year==null){year="NA";}
-        Reference r = Reference.construct(id,title,year);
 
         // add additional attributes by hand
         // FIXME data structure is messy and not secure - either systematize setters/getters, or go to scala ?
         // -> case class : immutable references / Links ? easy to combine with mongo cursors ?
 
+        String horizDepth = "";
         if(document.containsKey("horizontalDepth")){
-            String v = "";
-            for(String k :((Document) document.get("horizontalDepth")).keySet()){v=v+","+k+":"+((Document) document.get("horizontalDepth")).getInteger(k).toString();}
-            r.addAttribute("horizontalDepth",v.substring(1));
+            for(String k :((Document) document.get("horizontalDepth")).keySet()){horizDepth=horizDepth+","+k+":"+((Document) document.get("horizontalDepth")).getInteger(k).toString();}
+            //r.addAttribute("horizontalDepth",v.substring(1));
         }
 
+        String depth = "";
         if(document.containsKey("depth")){
-            r.addAttribute("depth",Integer.toString(document.getInteger("depth")));
+            depth = Integer.toString(document.getInteger("depth"));
+            //r.addAttribute("depth",Integer.toString(document.getInteger("depth")));
         }
 
+        String priority = "";
         if(document.containsKey("priority")){
-            r.addAttribute("priority",Integer.toString(document.getInteger("priority")));
+            priority = Integer.toString(document.getInteger("priority"));
+            //r.addAttribute("priority",Integer.toString(document.getInteger("priority")));
         }
+
+        // construct attributes
+        HashMap<String,String> attrs = new HashMap<>();
+        attrs.put("horizontalDepth",horizDepth);
+        attrs.put("depth",depth);
+        attrs.put("priority",priority);
+
+        // TODO add in Reference.construct : depth / horizdepth
+        Reference r = Reference.construct(id,title,year,attrs);
+
+
 
         return(r);
     }
