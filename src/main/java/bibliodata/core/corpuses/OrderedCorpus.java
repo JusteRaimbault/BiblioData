@@ -17,6 +17,8 @@ public class OrderedCorpus extends Corpus {
 
     public LinkedList<Reference> orderedRefs;
 
+    //public LinkedList<Reference> getOrderedRefs =
+
     /**
      * Empty corpus
      */

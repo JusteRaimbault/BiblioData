@@ -41,6 +41,11 @@ public class MongoDocument {
         return(res);
     }
 
+    /**
+     * mongo document to Reference
+     * @param document
+     * @return
+     */
     public static Reference fromDocument(Document document){
         String id = document.getString("id");
         String title = document.getString("title");// every doc should have title
@@ -55,6 +60,7 @@ public class MongoDocument {
         if(document.containsKey("horizontalDepth")){
             for(String k :((Document) document.get("horizontalDepth")).keySet()){horizDepth=horizDepth+","+k+":"+((Document) document.get("horizontalDepth")).getInteger(k).toString();}
             //r.addAttribute("horizontalDepth",v.substring(1));
+            if(horizDepth.length()>0){horizDepth = horizDepth.substring(1);}// remove first comma
         }
 
         String depth = "";
@@ -75,9 +81,7 @@ public class MongoDocument {
         attrs.put("depth",depth);
         attrs.put("priority",priority);
 
-        // TODO add in Reference.construct : depth / horizdepth
-        //Reference r = Reference.construct(id,title,year,attrs);
-        Reference r = Reference.construct(id,title,year);
+        Reference r = Reference.construct(id,title,year,attrs);
 
         return(r);
     }

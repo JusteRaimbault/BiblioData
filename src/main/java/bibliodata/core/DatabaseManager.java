@@ -6,6 +6,9 @@ import bibliodata.Context;
 import bibliodata.database.mongo.MongoConnection;
 import bibliodata.database.mongo.MongoImport;
 import bibliodata.database.mongo.MongoExport;
+import bibliodata.utils.Log;
+
+import java.util.LinkedList;
 
 public class DatabaseManager {
 
@@ -20,7 +23,8 @@ public class DatabaseManager {
                 "| --incrdepth $DATABASE\n"+
                 "| --notproc $DATABASE\n"+
                 "| --priority $DATABASE $MAXDEPTH\n"+
-                "| --export $DATABASE $FILE [$MAXPRIORITY] [$WITHABSTRACTS]"
+                "| --export $DATABASE $FILE [$MAXPRIORITY] [$WITHABSTRACTS]\n"+
+                "| --exportconso $FILE $MAXPRIORITY $D1 $D2 ..."
         );}else {
 
             String action = args[0];
@@ -41,7 +45,7 @@ public class DatabaseManager {
                     dropCols = Boolean.parseBoolean(args[5]);
                 }
                 if (args.length >= 7) { orderFile = args[6]; }
-                if (args.length >= 8) { orderFile = args[7]; }
+                if (args.length >= 8) { citationFile = args[7]; }
                 MongoImport.fileToMongo(args[1],orderFile,citationFile, "", args[2], Context.getReferencesCollection(), Context.getCitationsCollection(), initDepth, origin, dropCols);
             }
 
@@ -85,6 +89,22 @@ public class DatabaseManager {
                 }
                 MongoExport.export(maxPriority, withAbstracts, args[2]);
                 MongoConnection.closeMongo();
+            }
+
+            if (action.equals("--exportconso $FILE $MAXPRIORITY $D1 $D2")){
+                if (args.length<4) {
+                    Log.stdout("No db to export");
+                }else {
+                    String file = args[1];
+                    int maxPriority = Integer.parseInt(args[2]);
+                    LinkedList<String> dbs = new LinkedList<>();
+                    for (int i = 3; i < args.length;i++){
+                        dbs.add(args[i]);
+                    }
+
+                    MongoExport.exportConsolidated(maxPriority,dbs,file);
+                }
+
             }
 
 

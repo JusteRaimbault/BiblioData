@@ -20,16 +20,23 @@ public class MongoExport {
      */
     public static void export(int maxPriority,boolean withAbstracts,String file) {
         Corpus fullCorpus = MongoConnection.getCorpus(maxPriority);
-        LinkedList<String> attributes = new LinkedList<>();attributes.add("depth");attributes.add("priority");attributes.add("horizontalDepth");
+        LinkedList<String> attributes = new LinkedList<>();attributes.add("depth");attributes.add("priority");attributes.add("horizontalDepth");attributes.add("citingFilled");
         fullCorpus.csvExport(file,withAbstracts,attributes);
-
-        // FIXME add attributes export in csv export !!!
     }
 
-    // not useful
-    /*public static Corpus corpusFromMongo() {
-        return(MongoConnection.getCorpus());
-    }*/
+    /**
+     * export consolidated corpus from different databases
+     * @param maxPriority
+     * @param databases
+     * @param file
+     */
+    public static void exportConsolidated(int maxPriority,LinkedList<String> databases,String file) {
+        Corpus consolidated = MongoConnection.getConsolidatedCorpus(databases,maxPriority);
+        LinkedList<String> attributes = new LinkedList<>();attributes.add("depth");attributes.add("priority");attributes.add("horizontalDepth");attributes.add("citingFilled");
+        consolidated.csvExport(file,false,attributes);
+    }
+
+
 
 
 }

@@ -59,8 +59,8 @@ public class CybergeoImport {
 			   Reference r = Reference.construct(id,title, getAbstract(sqlrefs.getString(3)), sqlrefs.getString(4), "");
 				
 			   r.date= sqlrefs.getString(4);
-			   r.addAttribute("langue", sqlrefs.getString(6));
-			   r.addAttribute("translated",new Boolean(title.translated).toString());
+			   r.setAttribute("langue", sqlrefs.getString(6));
+			   r.setAttribute("translated",new Boolean(title.translated).toString());
 			   
 			   // get authors
 			   ResultSet authorsIds = SQLConnection.sqlDB.createStatement().executeQuery("SELECT `id2` FROM  `relations` WHERE  `id1` = " +sqlrefs.getString(5)+" AND  `nature` LIKE  'G' ORDER BY  `degree` ASC ;");
@@ -83,7 +83,7 @@ public class CybergeoImport {
 			      ResultSet kw = SQLConnection.sqlDB.createStatement().executeQuery("SELECT `g_name` FROM `entries` WHERE `id` = "+kwFRIds.getString(1)+" AND `idtype`=33 ;");
 			      while(kw.next()){if(keywords_fr.length()>0){keywords_fr+=",";}keywords_fr+=kw.getString(1);}
 			   }
-			   r.addAttribute("keywords_fr", keywords_fr);
+			   r.setAttribute("keywords_fr", keywords_fr);
 			   
 			   
 			   r.biblio = new CybergeoBiblioParser().parse(biblio);
@@ -320,7 +320,7 @@ public class CybergeoImport {
 		String[][] stats = CSVReader.read(System.getenv("CS_HOME")+"/CyberGeo/cybergeo20/Data/raw/prov_ids.csv", "\t","");
 		for(int i=0;i<stats.length;i++){
 			Reference r = Reference.construct("", new Title(stats[i][1]), new Abstract(), "", "");
-			r.addAttribute("UID", stats[i][0]);
+			r.setAttribute("UID", stats[i][0]);
 			System.out.println(r);
 		}
 		count=0;

@@ -496,8 +496,6 @@ public class MongoConnection {
             Log.stdout("For database "+database+" : "+currentcorpus.references.size()+" references ; total refs "+Reference.getNumberOfReferences());
         }
 
-        // read only access
-        //return(new DefaultCorpus(Reference.references.keySet()));
         return(new DefaultCorpus(Reference.getReferences()));
     }
 

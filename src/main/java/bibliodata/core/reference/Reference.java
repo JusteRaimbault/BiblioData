@@ -233,18 +233,25 @@ public class Reference {
 	 * @param attributes
 	 * @return
 	 */
-	/*public static Reference construct(String id,String title, String year,HashMap<String,String> attributes){
+	public static Reference construct(String id,String title, String year,HashMap<String,String> attributes){
 		Reference res = construct(id,title,year);
 		// merge attributes
 		// first add default in attr map if not present - fuck to not have the getOrElse
 		if(!attributes.containsKey("depth")){attributes.put("depth",Integer.toString(Integer.MAX_VALUE));}
 		if(!attributes.containsKey("priority")){attributes.put("priority",Integer.toString(Integer.MAX_VALUE));}
 		if(!attributes.containsKey("horizontalDepth")){attributes.put("horizontalDepth","");}
-		if(res.getAttribute("depth").length()>0){Math.min(Integer.parseInt(res.attributes.get("depth")),Integer.parseInt(attributes.get("depth")));} else {res.attributes.put("depth",attributes.get("depth"));}
-		if(res.getAttribute("priority").length()>0){Math.min(Integer.parseInt(res.attributes.get("priority")),Integer.parseInt(attributes.get("priority")));} else {res.attributes.put("priority",attributes.get("priority"));}
+		if(!attributes.containsKey("citingFilled")){attributes.put("citingFilled","false");}
+		if(res.getAttribute("depth").length()>0){res.attributes.put("depth",Integer.toString(Math.min(Integer.parseInt(res.getAttribute("depth")),Integer.parseInt(attributes.get("depth")))));} else {res.attributes.put("depth",attributes.get("depth"));}
+		if(res.getAttribute("priority").length()>0){res.attributes.put("priority",Integer.toString(Math.min(Integer.parseInt(res.getAttribute("priority")),Integer.parseInt(attributes.get("priority")))));} else {res.attributes.put("priority",attributes.get("priority"));}
 		// merging horizdepths : reparse and merge hashmaps - ultra dirty - should have a generic trait Mergeable and different implementations
-		// TODO
-	}*/
+		if(res.getAttribute("horizontalDepth").length()>0){
+			res.attributes.put("horizontalDepth",mergeHorizDepths(res.getAttribute("horizontalDepth"),attributes.get("horizontalDepth")));
+		}else{
+			res.attributes.put("horizontalDepth",attributes.get("horizontalDepth"));
+		}
+		if(res.getAttribute("citingFilled").length()>0){res.setAttribute("citingFilled",Boolean.toString(Boolean.parseBoolean(res.getAttribute("citingFilled"))||Boolean.parseBoolean(attributes.get("citingFilled"))));}else{res.setAttribute("citingFilled",attributes.get("citingFilled"));}
+		return(res);
+	}
 
 	
 	public static Reference construct(String schID){
@@ -293,7 +300,7 @@ public class Reference {
 	 * @param key
 	 * @param value
 	 */
-	public void addAttribute(String key,String value){
+	public void setAttribute(String key,String value){
 		if(attributes==null){attributes=new HashMap<String,String>();}
 		attributes.put(key, value);
 	}
@@ -306,6 +313,27 @@ public class Reference {
 	public String getAttribute(String key){
 		if(attributes==null||!attributes.containsKey(key))return "";
 		return attributes.get(key);
+	}
+
+
+	private static String mergeHorizDepths(String hd1,String hd2){
+		HashMap<String,Integer> hd = new HashMap<>();
+		// do not resole conflict ? yes otherwise just concatenation would be enough
+		if (hd1.length()>0) {
+			for(String k1:hd1.split(",")){String[] k1s = k1.split(":");hd.put(k1s[0],Integer.parseInt(k1s[1]));}
+		}
+		if (hd2.length()>0) {
+			for (String k2 : hd2.split(",")) {
+				String[] k2s = k2.split(":");
+				if (hd.containsKey(k2s[0])){hd.put(k2s[0],Math.min(Integer.parseInt(k2s[1]),hd.get(k2s[0])));}
+				else {hd.put(k2s[0],Integer.parseInt(k2s[1]));}
+			}
+		}
+
+		// hd.toSeq.map{_._1+":"+_._2}.mkString(",")
+		String res = "";
+		for (String k: hd.keySet()){res=res+","+k+":"+hd.get(k).toString();}
+		return(res.substring(1));
 	}
 	
 	
