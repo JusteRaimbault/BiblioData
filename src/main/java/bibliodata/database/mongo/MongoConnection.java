@@ -493,10 +493,12 @@ public class MongoConnection {
         for(String database: databases){
             switchMongo(database);
             Corpus currentcorpus = getCorpus(maxPriority);
-            Log.stdout("For database "+database+" : "+currentcorpus.references.size()+" references ; total refs "+Reference.references.size());
+            Log.stdout("For database "+database+" : "+currentcorpus.references.size()+" references ; total refs "+Reference.getNumberOfReferences());
         }
 
-        return(new DefaultCorpus(Reference.references.keySet()));
+        // read only access
+        //return(new DefaultCorpus(Reference.references.keySet()));
+        return(new DefaultCorpus(Reference.getReferences()));
     }
 
 

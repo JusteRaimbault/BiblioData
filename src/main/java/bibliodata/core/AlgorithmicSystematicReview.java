@@ -166,11 +166,11 @@ public class AlgorithmicSystematicReview {
 		// construct 100 references from catalog request
 		Log.output("Catalog request : "+searchQuery);
 		MendeleyAPI.catalogRequest(searchQuery,100,false);
-		Log.output(Reference.references.keySet().size()+" refs in table");
+		Log.output(Reference.getNumberOfReferences()+" refs in table");
 		
 		//export them to ris and zip
 		Log.output("Writing to ris and zipping...");
-		RISWriter.write(filePref+".ris", Reference.references.keySet(),false);
+		RISWriter.write(filePref+".ris", Reference.getReferences(),false);
 		Zipper.zip(filePref+".ris");
 		
 		//Cortext
@@ -224,7 +224,7 @@ public class AlgorithmicSystematicReview {
 			//get query and extract keywords
 			Log.newLine(1);Log.output("Iteration "+t);Log.output("===================");
 			
-			int currentRefNumber = Reference.references.size();
+			int currentRefNumber = Reference.getNumberOfReferences();
 			iteration(query,resFold+"/refs_"+initialQuery+"_"+t);
 			
 			//read kw from file, construct new query
@@ -260,13 +260,14 @@ public class AlgorithmicSystematicReview {
 			
 			//memorize stats
 			// num of refs ; num kws ; C-values (of all ?)
-			numRefs[t] = Reference.references.size();
+			numRefs[t] = Reference.getNumberOfReferences();
 						
 			for(int k=0;k<kwLimit;k++){Log.output(keywords[t][k]+" : "+occs[t][k],"debug");}
 			
 			// check stopping condition AFTER storing kws
-			if(Reference.references.size()==currentRefNumber){
-				Log.output("Convergence criteria : no new ref reached - "+Reference.references.size()+" refs.");
+			// FIXME error in algo before, using hashmap.size ?
+			if(Reference.getNumberOfReferences()==currentRefNumber){
+				Log.output("Convergence criteria : no new ref reached - "+Reference.getNumberOfReferences()+" refs.");
 				Log.output("Stopping algorithm");
 				iterationMax = t;
 				break;
@@ -326,7 +327,7 @@ public class AlgorithmicSystematicReview {
 		CSVWriter.write(outPrefix+".csv", interClusterLinks, ";","");
 
 		// output in GEXF to be used by graph processing softwares
-		GEXFWriter.writeCitationNetwork(outPrefix+".gexf", Reference.references.keySet());
+		GEXFWriter.writeCitationNetwork(outPrefix+".gexf", new DefaultCorpus(Reference.getReferences()));
 
 
 

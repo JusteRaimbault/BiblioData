@@ -301,8 +301,10 @@ public class ScholarAPI {
 						if(rr!=null){
 							Log.stdout("ID : "+rr.scholarID);
 							//r.scholarID=rr.scholarID;//no need as rr and r should be same pointer ?
-							if(!rr.equals(r)){Reference.references.remove(r);}
-							r=rr; //contradiction with hashconsing here : should delete the old one here
+							// FIXME with unique ids, this never happens
+							//if(!rr.equals(r)){Reference.references.remove(r);} //contradiction with hashconsing ?
+							if(!rr.equals(r)){Reference.removeReference(r);}
+							r=rr;
 
 							//  limit of max cit number -> global parameter - shouldnt be larger than 1000 (failure in collection then)
 							List<Reference> citing = scholarRequest(r.scholarID,Context.getScholarMaxRequests(),"cites");

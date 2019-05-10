@@ -19,13 +19,36 @@ import org.apache.commons.lang3.StringUtils;
  *
  */
 public class Reference {
-	
+
+	/**
+	 * Static management of all references
+	 */
+
 	/**
 	 * Static set of all references.
 	 */
-	public static final HashMap<Reference,Reference> references = new HashMap<Reference,Reference>();
-	
-	
+	private static final HashMap<Reference,Reference> references = new HashMap<Reference,Reference>();
+
+	/**
+	 * get a copy of HashSet of current references
+	 * FIXME making the consing map private must be done checking no mutable operation operated on it from outside !
+	 * @return
+	 */
+	public static HashSet<Reference> getReferences(){return(new HashSet<>(references.keySet()));};
+
+	/**
+	 * current number of references
+	 * @return
+	 */
+	public static int getNumberOfReferences(){return(references.keySet().size());}
+
+	/**
+	 * forget a reference
+	 * @param r
+	 */
+	public static void removeReference(Reference r){references.remove(r);}
+
+
 	/**
 	 * Dynamic fields
 	 * 
@@ -210,7 +233,7 @@ public class Reference {
 	 * @param attributes
 	 * @return
 	 */
-	public static Reference construct(String id,String title, String year,HashMap<String,String> attributes){
+	/*public static Reference construct(String id,String title, String year,HashMap<String,String> attributes){
 		Reference res = construct(id,title,year);
 		// merge attributes
 		// first add default in attr map if not present - fuck to not have the getOrElse
@@ -221,7 +244,7 @@ public class Reference {
 		if(res.getAttribute("priority").length()>0){Math.min(Integer.parseInt(res.attributes.get("priority")),Integer.parseInt(attributes.get("priority")));} else {res.attributes.put("priority",attributes.get("priority"));}
 		// merging horizdepths : reparse and merge hashmaps - ultra dirty - should have a generic trait Mergeable and different implementations
 		// TODO
-	}
+	}*/
 
 	
 	public static Reference construct(String schID){

@@ -76,9 +76,8 @@ public class MongoDocument {
         attrs.put("priority",priority);
 
         // TODO add in Reference.construct : depth / horizdepth
-        Reference r = Reference.construct(id,title,year,attrs);
-
-
+        //Reference r = Reference.construct(id,title,year,attrs);
+        Reference r = Reference.construct(id,title,year);
 
         return(r);
     }

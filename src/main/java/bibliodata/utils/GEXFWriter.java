@@ -3,6 +3,7 @@
  */
 package bibliodata.utils;
 
+import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.reference.Reference;
 import it.uniroma1.dis.wsngroup.gexf4j.core.EdgeType;
 import it.uniroma1.dis.wsngroup.gexf4j.core.Gexf;
@@ -37,12 +38,10 @@ public class GEXFWriter{
 	 * @param filepath
 	 * @param refs
 	 */
-	public static void writeCitationNetwork(String filepath,Set<Reference> refs){
-		
-		// ids can be unfilled or non-consistent : we must copy the set and add consistent ids
-		//refs = new HashSet<Reference>(refs);
-		int currentID=1;//start at 1
-		for(Reference r:Reference.references.keySet()){// do on hashconsing table ? DIRTYYYY
+	public static void writeCitationNetwork(String filepath, Corpus refs){
+
+		int currentID=1;//numeric id for nodes start at 1
+		for(Reference r:Reference.getReferences()){
 			r.id = new Integer(currentID).toString();currentID++;
 		}
 		

@@ -68,15 +68,16 @@ public class CitationNetwork {
 	
 	/**
 	 * Build first order network : foreach ref, find citing refs
+	 * FIXME this function is totally unoptimal, exporting the csv at each step - use mongo for performance
 	 */
 	public static void buildCitationNetwork(String outFile,Corpus existing){
-		Corpus base = new DefaultCorpus(Reference.references.keySet());
+		Corpus base = new DefaultCorpus(Reference.getReferences());
 		
 		for(Reference r:base){
 			if(!existing.references.contains(r)){
 			  ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r));
 			  // export
-			  new DefaultCorpus(Reference.references.keySet()).csvExport(outFile,false);
+			  new DefaultCorpus(Reference.getReferences()).csvExport(outFile,false);
 			}
 		}
 	}
@@ -98,7 +99,7 @@ public class CitationNetwork {
 		
 		Corpus initial = Corpus.fromNodeFile(refFile,citedFolder);
 
-		System.out.println("Number of References : "+Reference.references.keySet().size());
+		System.out.println("Number of References : "+Reference.getNumberOfReferences());
 
 		//load out file to get refs already retrieved in a previous run
 		Corpus existing = new DefaultCorpus();
@@ -115,7 +116,8 @@ public class CitationNetwork {
 		  buildCitationNetwork(outFile,existing);
 		}
 
-		for(Reference r:Reference.references.keySet()){System.out.println(r.toString());}
+		// debug ?
+		//for(Reference r:Reference.references.keySet()){System.out.println(r.toString());}
 
 		/*
 		System.out.println("Getting Abstracts...");
@@ -146,13 +148,13 @@ public class CitationNetwork {
 		System.out.println("Setting up from sql...");
 		SQLConnection.setupSQL("Cybergeo");
 		Set<Reference> initialRefs = CybergeoImport.importBase("WHERE  `datepubli` >=  '2003-01-01' AND  `resume` !=  '' AND  `titre` != ''");
-		System.out.println("References :  : "+Reference.references.size());
+		System.out.println("References :  : "+Reference.getNumberOfReferences());
 		
 		
 		// construct network
 		buildCitationNetwork("",new DefaultCorpus());
 		
-        GEXFWriter.writeCitationNetwork(outFile, Reference.references.keySet());
+        GEXFWriter.writeCitationNetwork(outFile, new DefaultCorpus(Reference.getReferences()));
 		
 		TorPool.stopPool();
 		

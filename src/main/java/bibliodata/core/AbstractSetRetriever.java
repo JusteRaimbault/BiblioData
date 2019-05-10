@@ -55,7 +55,7 @@ public class AbstractSetRetriever {
 				Corpus initial = new DefaultCorpus();
 				if (refFile.endsWith(".ris")) {
 					RISReader.read(refFile, -1);
-					initial = new DefaultCorpus(Reference.references.keySet());
+					initial = new DefaultCorpus(Reference.getReferences());
 				}
 				if (refFile.endsWith(".csv")) {
 					initial = new CSVFactory(refFile).getCorpus();

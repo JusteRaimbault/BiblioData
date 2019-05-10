@@ -26,7 +26,7 @@ public class SQLConverter {
 	 */
 	public static void sqlToGexf(String database,String outfile){
 		Corpus corpus = SQLImporter.sqlImport(database, "cybergeo", "refs", "links",-1, false);
-		GEXFWriter.writeCitationNetwork(outfile, corpus.references);
+		GEXFWriter.writeCitationNetwork(outfile, corpus);
 	}
 	
 	/**

@@ -109,7 +109,7 @@ public class Cybergeo {
 
 	public static void testCitingRefs(String bibFile){
 		 CybergeoCorpus cybergeo = (CybergeoCorpus) setup(bibFile,-1);
-		 System.out.println("Corpus size : "+Reference.references.keySet().size());
+		 System.out.println("Corpus size : "+Reference.getNumberOfReferences());
 		 cybergeo.fillCitingRefs();
 		 cybergeo.gexfExport(System.getenv("CS_HOME")+"/Cybergeo/cybergeo20/Data/processed/networks/test_citingNW_"+(new Date().toString().replaceAll(" ", "-"))+".gexf");
 
@@ -150,7 +150,7 @@ public class Cybergeo {
 		cybergeo.fillCitingRefs();
 		Corpus citingCited = citedCorpus.getCitingCorpus();citingCited.name="citing-cited";
 		citingCited.fillCitingRefs();
-		System.out.println("Final refs : "+Reference.references.keySet().size());
+		System.out.println("Final refs : "+Reference.getNumberOfReferences());
 
 		HashSet<Corpus> all = new HashSet<Corpus>();
 		all.add(cybergeo);all.add(citedCorpus);all.add(citedCorpus.getCitingCorpus());
