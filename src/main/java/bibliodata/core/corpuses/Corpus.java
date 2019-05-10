@@ -90,7 +90,7 @@ public abstract class Corpus implements Iterable<Reference> {
 	 * Write this corpus to gexf file
 	 */
 	public void gexfExport(String file){
-		GEXFWriter.writeCitationNetwork(file,references);
+		GEXFWriter.writeCitationNetwork(file,new DefaultCorpus(references));
 	}
 	
 	
@@ -175,7 +175,9 @@ public abstract class Corpus implements Iterable<Reference> {
 
 		if(refFile.endsWith(".ris")){
 			RISReader.read(refFile,-1);
-			initial = new DefaultCorpus(Reference.references.keySet());
+			// possible unexpected behavior as corpus set was the map keyset ? no as default corpus copies in a new HashSet - but mistake in principle
+			//initial = new DefaultCorpus(Reference.references.keySet());
+			initial = new DefaultCorpus(Reference.getReferences());
 		}
 		if(refFile.endsWith(".csv")){
 			if(citedFolder.length()==0){
@@ -187,7 +189,8 @@ public abstract class Corpus implements Iterable<Reference> {
 
 		if(refFile.endsWith(".bib")){
 			BIBReader.read(refFile);
-			initial = new DefaultCorpus(Reference.references.keySet());
+			// idem
+			initial = new DefaultCorpus(Reference.getReferences());
 		}
 
 		return(initial);
@@ -218,7 +221,9 @@ public abstract class Corpus implements Iterable<Reference> {
 			for (String[] link : rawlinks) {
 				String from = link[0];
 				String to = link[1];
-				Reference.references.get(to).citing.add(Reference.references.get(from));
+				// ! do not access Reference.references directly -> use construct instead (done for that)
+				//Reference.references.get(to).citing.add(Reference.references.get(from));
+				Reference.construct(to).citing.add(Reference.construct(from));
 			}
 		}
 
