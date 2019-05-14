@@ -23,6 +23,7 @@ public abstract class Corpus implements Iterable<Reference> {
 	
 	/**
 	 * References in the corpus
+	 * FIXME make this private as for the global hashmap ?
 	 */
 	public HashSet<Reference> references;
 
@@ -58,9 +59,7 @@ public abstract class Corpus implements Iterable<Reference> {
 	public Corpus getCitingCorpus(){
 		HashSet<Reference> citing = new HashSet<Reference>();
 		for(Reference r:references){
-			for(Reference c:r.citing){
-				citing.add(c);
-			}
+			citing.addAll(r.getCiting());
 		}
 		return new DefaultCorpus(citing);
 	}
@@ -131,8 +130,8 @@ public abstract class Corpus implements Iterable<Reference> {
 
 		for(Reference r:references){
 			LinkedList<String> row = new LinkedList<>();
-			row.add(r.scholarID);row.add(r.title.title);row.add(r.year);
-			if(withAbstract){row.add(r.resume.resume);row.add(r.getAuthorString());}
+			row.add(r.getId());row.add(r.getTitle().title);row.add(r.getYear());
+			if(withAbstract){row.add(r.getResume().resume);row.add(r.getAuthorString());}
 			for(String attr:attributes){row.add(r.getAttribute(attr));}
 			res.add(toArray(row));
 		}
@@ -141,7 +140,7 @@ public abstract class Corpus implements Iterable<Reference> {
 
 	private LinkedList<String[]> linksAsCSVRows(){
 		LinkedList<String[]> dataedges = new LinkedList<String[]>();
-		for(Reference r:references){for(Reference rc:r.citing){String[] edge = {rc.scholarID,r.scholarID};dataedges.add(edge);}}
+		for(Reference r:references){for(Reference rc:r.getCiting()){String[] edge = {rc.getId(),r.getId()};dataedges.add(edge);}}
 		return(dataedges);
 	}
 	
@@ -212,7 +211,7 @@ public abstract class Corpus implements Iterable<Reference> {
 		//update the origin
 		for(Reference r:initial){
 			//if(orderFile.length()!=0){r.depth=initDepth;} // done later
-			r.origin=origin;
+			r.setOrigin(origin);
 		}
 
 		// add citations
@@ -223,7 +222,7 @@ public abstract class Corpus implements Iterable<Reference> {
 				String to = link[1];
 				// ! do not access Reference.references directly -> use construct instead (done for that)
 				//Reference.references.get(to).citing.add(Reference.references.get(from));
-				Reference.construct(to).citing.add(Reference.construct(from));
+				Reference.construct(to).setCiting(Reference.construct(from));
 			}
 		}
 
@@ -231,6 +230,8 @@ public abstract class Corpus implements Iterable<Reference> {
 		// add order if needed
 		if(orderFile.length()!=0){
 			OrderedCorpus order = Corpus.fromCSV(orderFile);
+			Log.stdout("Setting depths from order file for "+order.references);
+
 			for(int i = 0 ; i<order.orderedRefs.size();i++){
 				//order.orderedRefs.get(i).horizontalDepth.put(origin,new Integer(i));
 				order.orderedRefs.get(i).setHorizontalDepth(origin,i);

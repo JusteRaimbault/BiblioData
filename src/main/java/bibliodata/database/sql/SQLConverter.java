@@ -43,12 +43,12 @@ public class SQLConverter {
 		
 		for(Reference r:corpus){
 			String prim = "0";if(r.attributes.containsKey("primary")){prim="1";}
-			String year="1000";if(r.year.length()>0){year=r.year;}
-			String[] ref = {r.scholarID,r.title.title,year,prim}; 
+			String year="1000";if(r.getYear().length()>0){year=r.getYear();}
+			String[] ref = {r.getId(),r.getTitle().title,year,prim};
 			// check if title formatting causes a pb in csv import -> only ID and prim
 			//String[] ref = {r.scholarID,prim};
 			refs.add(ref);
-			for(Reference rc:r.citing){String[] link = {rc.scholarID,r.scholarID};links.add(link);}
+			for(Reference rc:r.getCiting()){String[] link = {rc.getId(),r.getId()};links.add(link);}
 		}
 		
 		String[][] linksTab = new String[links.size()][2];

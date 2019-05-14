@@ -56,7 +56,7 @@ public class CitationNetwork {
 			if(r==null){break;}
 			Log.stdout("Unfilled ref : "+r.toString());
 			ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r));
-			MongoConnection.updateCorpus(new DefaultCorpus(r,r.citing),refcollection,linkcollection);
+			MongoConnection.updateCorpus(new DefaultCorpus(r,r.getCiting()),refcollection,linkcollection);
 		}
 
 		// corpus need to be updated at each loop to iterate on depth !

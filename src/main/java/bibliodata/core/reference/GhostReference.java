@@ -25,24 +25,25 @@ public class GhostReference extends Reference {
 	
 	public GhostReference(String t,String y){
 		super(t);
-		year=y;
+		setYear(y);
 	}
 	
 	public GhostReference(String i,String t,String r,String y){
 		super(t);
-		id=i;resume = new Abstract(r);
-		if(y!=null){year=y;}else{year="";}
+		this.setId(i);
+		this.setResume(r);
+		if(y!=null){setYear(y);}else{setYear("");}
 	}
 	
 	
 	@Override
 	public int hashCode(){
-		return title.title.hashCode();
+		return getTitle().title.hashCode();
 	}
 	
 	@Override
 	public boolean equals(Object o){
-		return(o instanceof GhostReference)&&(((Reference)o).title.title.equals(title.title));
+		return(o instanceof GhostReference)&&(((Reference)o).getTitle().title.equals(getTitle().title));
 	}
 	
 }

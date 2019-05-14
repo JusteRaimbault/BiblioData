@@ -42,7 +42,7 @@ public class GEXFWriter{
 
 		int currentID=1;//numeric id for nodes start at 1
 		for(Reference r:Reference.getReferences()){
-			r.id = new Integer(currentID).toString();currentID++;
+			r.setSecondaryId(new Integer(currentID).toString());currentID++;
 		}
 		
 		
@@ -82,19 +82,20 @@ public class GEXFWriter{
 		
 		//int i=0;
 		for(Reference ref:refs){
-			String authors = "";for(String a:ref.authors){authors=authors+a+" and ";}if(authors.length()>5)authors=authors.substring(0, authors.length()-5);
-			String keywords = "";for(String k:ref.keywords){keywords=keywords+k+" ; ";}if(keywords.length()>3)keywords=keywords.substring(0, keywords.length()-3);
+			String authors = "";for(String a:ref.getAuthors()){authors=authors+a+" and ";}if(authors.length()>5)authors=authors.substring(0, authors.length()-5);
+			String keywords = "";for(String k:ref.getKeywords()){keywords=keywords+k+" ; ";}if(keywords.length()>3)keywords=keywords.substring(0, keywords.length()-3);
 			//ref.id=new Integer(i).toString();
-			
-			Node node = graph.createNode(ref.id).setLabel(ref.title.title);
+
+			// FIXME do not use main id as node name ?
+			Node node = graph.createNode(ref.getSecondaryId()).setLabel(ref.getTitle().title);
 			node.getAttributeValues()
-			  .addValue(attID, ref.id)
-			  .addValue(attSchID, ref.scholarID)
-			  .addValue(attTitle, ref.title.title)
+			  .addValue(attID, ref.getSecondaryId())
+			  .addValue(attSchID, ref.getId())
+			  .addValue(attTitle, ref.getTitle().title)
 			  .addValue(attAuthors, authors)
-			  .addValue(attResume,ref.resume.resume)
+			  .addValue(attResume,ref.getResume().resume)
 			  .addValue(attKeywords,keywords)
-			  .addValue(attYear, ref.year)
+			  .addValue(attYear, ref.getYear())
 			  ;
 			
 			for(String addAttName:additionalAttributes.keySet()){
@@ -112,15 +113,15 @@ public class GEXFWriter{
 		// before creating links, add nodes corresponding to citing refs.
 		HashMap<Reference,Node> prov = new HashMap<Reference,Node>();
 		for(Reference ref:nodes.keySet()){
-			for(Reference c:ref.citing){
+			for(Reference c:ref.getCiting()){
 				if(!nodes.containsKey(c)){
-					Node node = graph.createNode(c.id).setLabel(c.title.title);
+					Node node = graph.createNode(c.getSecondaryId()).setLabel(c.getTitle().title);
 					node.getAttributeValues()
-					  .addValue(attID, c.id)
-					  .addValue(attSchID, c.scholarID)
-					  .addValue(attTitle, c.title.title)
-					  .addValue(attResume,c.resume.resume)
-					  .addValue(attYear, c.year)
+					  .addValue(attID, c.getSecondaryId())
+					  .addValue(attSchID, c.getId())
+					  .addValue(attTitle, c.getTitle().title)
+					  .addValue(attResume,c.getResume().resume)
+					  .addValue(attYear, c.getYear())
 					  ;
 					prov.put(c, node);
 				}
@@ -131,8 +132,8 @@ public class GEXFWriter{
 		// create citation links
 		for(Reference ref:nodes.keySet()){
 			Node d = nodes.get(ref);
-			for(Reference c:ref.citing){
-				if(!d.hasEdgeTo(c.id)){nodes.get(c).connectTo(d);}
+			for(Reference c:ref.getCiting()){
+				if(!d.hasEdgeTo(c.getSecondaryId())){nodes.get(c).connectTo(d);}
 			}
 		}
 		

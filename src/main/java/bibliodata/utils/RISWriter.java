@@ -39,26 +39,26 @@ public class RISWriter {
 			
 			
 			for(Reference r:refs){
-				if(strictIDPolicy&&(r.scholarID==null||r.scholarID=="")){continue;}
-				writer.write("TY  - JOUR\nAB  - "+r.resume.resume+"\n");
-				for(String a:r.authors){
+				if(strictIDPolicy&&(r.getId()==null||r.getId()=="")){continue;}
+				writer.write("TY  - JOUR\nAB  - "+r.getResume().resume+"\n");
+				for(String a:r.getAuthors()){
 					writer.write("AU  - "+a+"\n");
 				}
-				for(String k:r.keywords){
+				for(String k:r.getKeywords()){
 					writer.write("KW  - "+k+"\n");
 				}
 				//writer.write("KW  -\n");
 				
-				writer.write("T1  - "+r.title.title+"\n");
-				if(r.title.translated){
-					writer.write("TT  - "+r.title.en_title+"\n");
+				writer.write("T1  - "+r.getTitle().title+"\n");
+				if(r.getTitle().translated){
+					writer.write("TT  - "+r.getTitle().en_title+"\n");
 				}
 				
 				// year
-				writer.write("PY  - "+r.year+"\n");
+				writer.write("PY  - "+r.getYear()+"\n");
 				
 				// write scholar ID
-				writer.write("ID  - "+r.scholarID+"\n");
+				writer.write("ID  - "+r.getId()+"\n");
 				
 				//customized tag : references
 				for(Reference t:r.biblio.cited){

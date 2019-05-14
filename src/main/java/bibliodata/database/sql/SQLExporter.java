@@ -40,21 +40,21 @@ public class SQLExporter {
 			HashSet<String> statusTodoIDs = new HashSet<String>();
 			
 			for(Reference r:corpus.references){
-				primaryRefs.add(r);statusOkIDs.add(r.scholarID);
+				primaryRefs.add(r);statusOkIDs.add(r.getId());
 				// not generic in levels for now
-				for(Reference rc:r.citing){
+				for(Reference rc:r.getCiting()){
 					System.out.println("citing : "+rc);
-					secondaryRefs.add(rc);statusOkIDs.add(rc.scholarID);
-					citations.add(new MutablePair<String,String>(rc.scholarID,r.scholarID));
+					secondaryRefs.add(rc);statusOkIDs.add(rc.getId());
+					citations.add(new MutablePair<String,String>(rc.getId(),r.getId()));
 				}
 				for(Reference rcited:r.biblio.cited){
 					System.out.println("cited : "+rcited);
-					secondaryRefs.add(rcited);statusOkIDs.add(rcited.scholarID);
-					citations.add(new MutablePair<String,String>(r.scholarID, rcited.scholarID));
-					for(Reference rc1:rcited.citing){
-						statusTodoIDs.add(rc1.scholarID);
-						secondaryRefs.add(rc1);citations.add(new MutablePair<String,String>(rc1.scholarID, rcited.scholarID));
-						for(Reference rc2:rc1.citing){secondaryRefs.add(rc2);citations.add(new MutablePair<String,String>(rc2.scholarID, rc1.scholarID));}
+					secondaryRefs.add(rcited);statusOkIDs.add(rcited.getId());
+					citations.add(new MutablePair<String,String>(r.getId(), rcited.getId()));
+					for(Reference rc1:rcited.getCiting()){
+						statusTodoIDs.add(rc1.getId());
+						secondaryRefs.add(rc1);citations.add(new MutablePair<String,String>(rc1.getId(), rcited.getId()));
+						for(Reference rc2:rc1.getCiting()){secondaryRefs.add(rc2);citations.add(new MutablePair<String,String>(rc2.getId(), rc1.getId()));}
 					}
 				}
 				
@@ -129,7 +129,7 @@ public class SQLExporter {
 	private static String insertDetailsRequest(Reference r,String descTableName){
 		if(r==null){return "";}	
 		String req = "INSERT INTO "+descTableName+" (id,abstract,authors,keywords) VALUES ('";
-		req = req+r.scholarID+"','"+legalSQLString(r.resume.resume)+"','"+legalSQLString(r.getAuthorString())+"','"+legalSQLString(r.getKeywordString());
+		req = req+r.getId()+"','"+legalSQLString(r.getResume().resume)+"','"+legalSQLString(r.getAuthorString())+"','"+legalSQLString(r.getKeywordString());
 		req = req+"') ON DUPLICATE KEY UPDATE id = VALUES(id);";
 		return(req);
 	}
@@ -147,8 +147,8 @@ public class SQLExporter {
 		
 		String req = "INSERT INTO "+table+" (id,title,year) VALUES ";
 		for(Reference rp:r){
-			String year = rp.year;if(year==null||year.length()==0){year="0000";}
-			req+="('"+rp.scholarID+"','"+legalSQLString(rp.title.title)+"',"+year+"),";
+			String year = rp.getYear();if(year==null||year.length()==0){year="0000";}
+			req+="('"+rp.getId()+"','"+legalSQLString(rp.getTitle().title)+"',"+year+"),";
 		}
 		req=req.substring(0, req.length()-1)+" ON DUPLICATE KEY UPDATE id = VALUES(id);";
 

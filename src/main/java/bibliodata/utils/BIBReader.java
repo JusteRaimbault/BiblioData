@@ -32,7 +32,7 @@ public class BIBReader {
                 try {
                     String t = latexPrinter.print(latexParser.parse((entry.getField(BibTeXEntry.KEY_TITLE)).toUserString()));
                     String y = latexPrinter.print(latexParser.parse((entry.getField(BibTeXEntry.KEY_YEAR)).toUserString()));
-                    refs.add(Reference.construct("", new Title(t), new Abstract(""), y, ""));
+                    refs.add(Reference.construct("", new Title(t), new Abstract(""), y));
                 }catch (Exception e) {}
             }
 

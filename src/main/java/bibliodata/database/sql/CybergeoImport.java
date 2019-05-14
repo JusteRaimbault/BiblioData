@@ -56,9 +56,10 @@ public class CybergeoImport {
 			   String id = sqlrefs.getString(5);
 			   String biblio = sqlrefs.getString(7);
 			   Title title = getTitle(sqlrefs.getString(1),sqlrefs.getString(2),sqlrefs.getString(6));
-			   Reference r = Reference.construct(id,title, getAbstract(sqlrefs.getString(3)), sqlrefs.getString(4), "");
-				
-			   r.date= sqlrefs.getString(4);
+			   Reference r = Reference.construct("",title, getAbstract(sqlrefs.getString(3)), sqlrefs.getString(4));
+			   r.setSecondaryId(id);
+
+			   r.setDate(sqlrefs.getString(4));
 			   r.setAttribute("langue", sqlrefs.getString(6));
 			   r.setAttribute("translated",new Boolean(title.translated).toString());
 			   
@@ -66,14 +67,14 @@ public class CybergeoImport {
 			   ResultSet authorsIds = SQLConnection.sqlDB.createStatement().executeQuery("SELECT `id2` FROM  `relations` WHERE  `id1` = " +sqlrefs.getString(5)+" AND  `nature` LIKE  'G' ORDER BY  `degree` ASC ;");
 			   while(authorsIds.next()){
 			      ResultSet author = SQLConnection.sqlDB.createStatement().executeQuery("SELECT `nomfamille`,`prenom` FROM `auteurs` WHERE `idperson` = "+authorsIds.getString(1)+" ;");
-			      if(author.next()){r.authors.add(author.getString(2)+" , "+author.getString(1));}
+			      if(author.next()){r.setAuthor(author.getString(2)+" , "+author.getString(1));}
 			   }
 			   
 			   // get keywords
 			   ResultSet keywordsIds = SQLConnection.sqlDB.createStatement().executeQuery("SELECT `id2` FROM  `relations` WHERE  `id1` = " +sqlrefs.getString(5)+" AND  `nature` LIKE  'E' ORDER BY  `degree` ASC ;");
 			   while(keywordsIds.next()){
 			      ResultSet keywords = SQLConnection.sqlDB.createStatement().executeQuery("SELECT `nom` FROM `indexes` WHERE `identry` = "+keywordsIds.getString(1)+" ;");
-			      while(keywords.next()){r.keywords.add(keywords.getString(1));}
+			      while(keywords.next()){r.setKeyword(keywords.getString(1));}
 			   }
 			   
 			// keywords fr
@@ -307,19 +308,19 @@ public class CybergeoImport {
 		
 		for(Reference r:cybnetwork){
 			// get corresponding old
-			Reference clone = Reference.construct("", r.title, new Abstract(), "", "");
-			clone.scholarID=r.scholarID;
+			Reference clone = Reference.construct("", r.getTitle(), new Abstract(), "");
+			clone.setId(r.getId());
 			System.out.println(clone);
 		}
 		
 		int count=0;
-		for(Reference r:res){if(r.scholarID!=null&&r.scholarID.length()>0){count++;}}
+		for(Reference r:res){if(r.getId()!=null&&r.getId().length()>0){count++;}}
 		System.out.println("WITH SCHID : "+count);
 		
 		// import stats id - match with title
 		String[][] stats = CSVReader.read(System.getenv("CS_HOME")+"/CyberGeo/cybergeo20/Data/raw/prov_ids.csv", "\t","");
 		for(int i=0;i<stats.length;i++){
-			Reference r = Reference.construct("", new Title(stats[i][1]), new Abstract(), "", "");
+			Reference r = Reference.construct("", new Title(stats[i][1]), new Abstract(), "");
 			r.setAttribute("UID", stats[i][0]);
 			System.out.println(r);
 		}
@@ -351,7 +352,7 @@ public class CybergeoImport {
 		LinkedList<String[]> data = new LinkedList<String[]>();
 		for(Reference r:cybnetwork){
 			if(r.getAttribute("primary").length()>0){
-				String[] row={r.scholarID,new Integer(r.citing.size()).toString(),new Integer(r.biblio.cited.size()).toString()};
+				String[] row={r.getId(),new Integer(r.getCiting().size()).toString(),new Integer(r.biblio.cited.size()).toString()};
 				data.add(row);
 			}
 		}
@@ -460,9 +461,9 @@ public class CybergeoImport {
 		// export info :
 		// "id","UID","SCHID","Title","Title_en","keywords_en","keywords_fr","authors","date","langue","translated",numciting,numcited
 	    String[] res = new String[13];
-	    res[0]=r.id;res[1]=r.getAttribute("UID");res[2]=r.scholarID;res[3]=r.title.title;
-	    res[4]=r.title.en_title;res[5]=r.getKeywordString();res[6]=r.getAttribute("keywords_fr");res[7]=r.getAuthorString();res[8]=r.date;
-	    res[9]=r.getAttribute("langue");res[10]=r.getAttribute("translated");res[11]=new Integer(r.citing.size()).toString();res[12]=new Integer(r.biblio.cited.size()).toString();
+	    res[0]=r.getSecondaryId();res[1]=r.getAttribute("UID");res[2]=r.getId();res[3]=r.getTitle().title;
+	    res[4]=r.getTitle().en_title;res[5]=r.getKeywordString();res[6]=r.getAttribute("keywords_fr");res[7]=r.getAuthorString();res[8]=r.getDate();
+	    res[9]=r.getAttribute("langue");res[10]=r.getAttribute("translated");res[11]=new Integer(r.getCiting().size()).toString();res[12]=new Integer(r.biblio.cited.size()).toString();
 	    
 	    return res;
 	}

@@ -23,8 +23,8 @@ public class DatabaseManager {
                 "| --incrdepth $DATABASE\n"+
                 "| --notproc $DATABASE\n"+
                 "| --priority $DATABASE $MAXDEPTH\n"+
-                "| --export $DATABASE $FILE [$MAXPRIORITY] [$WITHABSTRACTS]\n"+
-                "| --exportconso $FILE $MAXPRIORITY $D1 $D2 ..."
+                "| --export $DATABASE $FILE [$MAXPRIORITY] [$MAXDEPTH] [$WITHABSTRACTS]\n"+
+                "| --exportconso $FILE $MAXPRIORITY $MAXDEPTH $D1 $D2 ..."
         );}else {
 
             String action = args[0];
@@ -83,26 +83,32 @@ public class DatabaseManager {
                 if (args.length >= 4) {
                     maxPriority = Integer.parseInt(args[3]);
                 }
+                int maxDepth = -1;
+                if (args.length >= 5) {
+                    maxDepth = Integer.parseInt(args[4]);
+                }
+
                 boolean withAbstracts = false;
-                if (args.length == 5) {
+                if (args.length == 6) {
                     withAbstracts = true;
                 }
-                MongoExport.export(maxPriority, withAbstracts, args[2]);
+                MongoExport.export(maxPriority,maxDepth, withAbstracts, args[2]);
                 MongoConnection.closeMongo();
             }
 
-            if (action.equals("--exportconso $FILE $MAXPRIORITY $D1 $D2")){
-                if (args.length<4) {
+            if (action.equals("--exportconso")){
+                if (args.length<5) {
                     Log.stdout("No db to export");
                 }else {
                     String file = args[1];
                     int maxPriority = Integer.parseInt(args[2]);
+                    int maxDepth = Integer.parseInt(args[3]);
                     LinkedList<String> dbs = new LinkedList<>();
-                    for (int i = 3; i < args.length;i++){
+                    for (int i = 4; i < args.length;i++){
                         dbs.add(args[i]);
                     }
 
-                    MongoExport.exportConsolidated(maxPriority,dbs,file);
+                    MongoExport.exportConsolidated(maxPriority,maxDepth,dbs,file);
                 }
 
             }

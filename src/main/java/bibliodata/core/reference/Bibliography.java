@@ -43,7 +43,7 @@ public class Bibliography {
 	public Bibliography(HashSet<Reference> c){
 		cited = c;
 		citedTitles = new HashSet<String>();
-		for(Reference r:c){citedTitles.add(r.title.title);}
+		for(Reference r:c){citedTitles.add(r.getTitle().title);}
 		// no raw
 		citedRaw = new HashSet<String>();
 	}

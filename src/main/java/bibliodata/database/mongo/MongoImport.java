@@ -41,6 +41,8 @@ public class MongoImport {
                                    boolean dropCollections){
         Corpus initial = Corpus.fromCSV(file,orderFile,citationFile,citedFolder,initDepth,origin);
 
+        // FIXME priorities are not computed -> can be done directly from horizontalDepth
+
         corpusToMongo(initial,db,refcollection,citcollection,dropCollections);
 
     }
@@ -96,6 +98,13 @@ public class MongoImport {
         MongoConnection.closeMongo();
     }
 
+
+    /**
+     *
+     */
+    public static void consolidateMongoDatabases(){
+
+    }
 
 
 

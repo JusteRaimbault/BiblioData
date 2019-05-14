@@ -44,8 +44,8 @@ public class RISReader {
 			   if(currentLine.startsWith("TY")&&currentTitle.length()>0){
 				   //
 				   //
-				   Reference newRef = Reference.construct("", new Title(currentTitle), new Abstract(currentAbstract), currentYear, currentID);
-				   for(String s:currentKeywords){newRef.keywords.add(s);};
+				   Reference newRef = Reference.construct(currentID, new Title(currentTitle), new Abstract(currentAbstract), currentYear);
+				   for(String s:currentKeywords){newRef.setKeyword(s);};
 				   for(Reference r:currentCitedGhostRefs){newRef.biblio.cited.add(r);}
 				   
 				   currentKeywords.clear();
@@ -94,11 +94,11 @@ public class RISReader {
 		   
 		   //add the last ref
 		   if(refs.size()<size||size==-1){
-			   Reference newRef = Reference.construct("", new Title(currentTitle), new Abstract(currentAbstract), currentYear, currentID);
+			   Reference newRef = Reference.construct(currentID, new Title(currentTitle), new Abstract(currentAbstract), currentYear);
 			   // add additionary fields by hand. Dirty dirty, must have set/get methods
-			   newRef.keywords=currentKeywords;
+			   newRef.setKeywords(currentKeywords);
 			   newRef.biblio.cited=currentCitedGhostRefs;
-			   newRef.title.en_title=currentENTitle;
+			   newRef.getTitle().en_title=currentENTitle; // FIXME this is absurd to have setters/getters at the first level and being mutable at the second level
 			   refs.add(newRef);
 		   }
 		   

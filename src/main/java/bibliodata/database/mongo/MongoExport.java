@@ -18,8 +18,8 @@ public class MongoExport {
      * Export the current database (default parameters in Context) to a file
      * @param file
      */
-    public static void export(int maxPriority,boolean withAbstracts,String file) {
-        Corpus fullCorpus = MongoConnection.getCorpus(maxPriority);
+    public static void export(int maxPriority,int maxDepth,boolean withAbstracts,String file) {
+        Corpus fullCorpus = MongoConnection.getCorpus(maxPriority,maxDepth);
         LinkedList<String> attributes = new LinkedList<>();attributes.add("depth");attributes.add("priority");attributes.add("horizontalDepth");attributes.add("citingFilled");
         fullCorpus.csvExport(file,withAbstracts,attributes);
     }
@@ -30,8 +30,8 @@ public class MongoExport {
      * @param databases
      * @param file
      */
-    public static void exportConsolidated(int maxPriority,LinkedList<String> databases,String file) {
-        Corpus consolidated = MongoConnection.getConsolidatedCorpus(databases,maxPriority);
+    public static void exportConsolidated(int maxPriority,int maxDepth,LinkedList<String> databases,String file) {
+        Corpus consolidated = MongoConnection.getConsolidatedCorpus(databases,maxPriority,maxDepth);
         LinkedList<String> attributes = new LinkedList<>();attributes.add("depth");attributes.add("priority");attributes.add("horizontalDepth");attributes.add("citingFilled");
         consolidated.csvExport(file,false,attributes);
     }

@@ -73,7 +73,7 @@ public class AbstractSetRetriever {
 
 					Log.stdout(r.toString());
 					if(!existing.references.contains(r)){
-						Reference detailed = MendeleyAPI.getReference(r.title.title,r.year,r.scholarID);
+						Reference detailed = MendeleyAPI.getReference(r.getTitle().title,r.getYear(),r.getId());
 						if(detailed!=null){
 							finalCorpus.references.add(detailed);
 							// export the current corpus
@@ -99,7 +99,7 @@ public class AbstractSetRetriever {
 					Reference r = MongoConnection.getUnfilled(refcollection, Context.getMaxHorizontalDepth());
 					if(r==null){break;}
 					Log.stdout("Unfilled ref : "+r.toString());
-					Reference detailed = MendeleyAPI.getReference(r.title.title,r.year,r.scholarID);
+					Reference detailed = MendeleyAPI.getReference(r.getTitle().title,r.getYear(),r.getId());
 					if(detailed!=null){
 						MongoConnection.updateReference(r,refcollection);
 					}

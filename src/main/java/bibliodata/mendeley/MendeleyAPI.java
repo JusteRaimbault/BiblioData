@@ -201,7 +201,8 @@ public class MendeleyAPI{
 					// ghost ref with fields id, title, abstract, year
 					newref = new GhostReference(entry.getString("id"),entry.getString("title"),entry.getString("abstract"),Integer.toString(entry.getInt("year")));
 				}else{
-					newref = Reference.construct(entry.getString("id"), new Title(entry.getString("title")), new Abstract(entry.getString("abstract")),Integer.toString(entry.getInt("year")),"");		
+					newref = Reference.construct("", new Title(entry.getString("title")), new Abstract(entry.getString("abstract")),Integer.toString(entry.getInt("year")));
+					newref.setSecondaryId(entry.getString("id"));
 				}
 				// in any case set authors and keywords
 				newref.setAuthors(getAuthors(entry));
@@ -330,8 +331,8 @@ public class MendeleyAPI{
 	public static Reference matchRef(String title,String author,String year,HashSet<Reference> refs){
 		Reference res = null;
 		for(Reference nr:refs){
-			Log.stdout(nr.year+"  --  "+year);
-			String t1 = StringUtils.lowerCase(nr.title.title).replaceAll("[^\\p{L}\\p{Nd}]+", "");
+			Log.stdout(nr.getYear()+"  --  "+year);
+			String t1 = StringUtils.lowerCase(nr.getTitle().title).replaceAll("[^\\p{L}\\p{Nd}]+", "");
 			String t2 = StringUtils.lowerCase(title).replaceAll("[^\\p{L}\\p{Nd}]+", "");
 			//Log.stdout(nr.toString());
 			Log.stdout("      "+t1);

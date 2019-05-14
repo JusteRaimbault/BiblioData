@@ -38,18 +38,18 @@ public class BIBWriter {
 			
 			
 			for(Reference r:refs){
-				writer.write("TY  - JOUR\nAB  - "+r.resume+"\n");
-				for(String a:r.authors){
+				writer.write("TY  - JOUR\nAB  - "+r.getResume()+"\n");
+				for(String a:r.getAuthors()){
 					writer.write("AU  - "+a+"\n");
 				}
-				for(String k:r.keywords){
+				for(String k:r.getKeywords()){
 					writer.write("AU  - "+k+"\n");
 				}
 				writer.write("KW  -\n");
 				
-				writer.write("T1  - "+r.title+"\n");
+				writer.write("T1  - "+r.getTitle()+"\n");
 				
-				writer.write("PY  - "+r.year+"\n");
+				writer.write("PY  - "+r.getYear()+"\n");
 				
 				//do not forget the end of ref tag
 				writer.write("ER  -\n");
@@ -71,7 +71,7 @@ public class BIBWriter {
 	 * @return
 	 */
 	public static String minimalBibTeXString(Reference r){
-		return("@ref{title={"+r.title.title+"},year={"+r.year+"}}");
+		return("@ref{title={"+r.getTitle().title+"},year={"+r.getYear()+"}}");
 	}
 	
 	

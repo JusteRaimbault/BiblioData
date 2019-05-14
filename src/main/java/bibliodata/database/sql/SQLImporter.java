@@ -6,6 +6,7 @@ package bibliodata.database.sql;
 import java.sql.ResultSet;
 import java.util.HashSet;
 
+import bibliodata.utils.Log;
 import bibliodata.utils.tor.TorPoolManager;
 import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.corpuses.DefaultCorpus;
@@ -40,7 +41,7 @@ public class SQLImporter {
 			ResultSet resprim = SQLConnection.executeQuery(primaryQuery);
 			int primRefs = 0;
 			while(resprim.next()){
-				Reference r = Reference.construct("",new Title(resprim.getString(2)),new Abstract(),resprim.getString(3), resprim.getString(1));
+				Reference r = Reference.construct(resprim.getString(1),new Title(resprim.getString(2)),new Abstract(),resprim.getString(3));
 				refs.add(r);
 				System.out.println(r);
 				primRefs++;
@@ -52,7 +53,7 @@ public class SQLImporter {
 			
 			ResultSet ressec = SQLConnection.executeQuery("SELECT * FROM "+secondaryTableName+";");		
 			while(ressec.next()){
-				Reference r = Reference.construct("",new Title(ressec.getString(2)),new Abstract(),ressec.getString(3), ressec.getString(1));
+				Reference r = Reference.construct(ressec.getString(1),new Title(ressec.getString(2)),new Abstract(),ressec.getString(3));
 				refs.add(r);
 				System.out.println(r);
 			}
@@ -62,8 +63,8 @@ public class SQLImporter {
 			while(rescit.next()){
 				Reference citing = Reference.construct(rescit.getString(1));
 				Reference cited = Reference.construct(rescit.getString(2));
-				System.out.println(citing.scholarID+" - "+cited.scholarID);
-				cited.citing.add(citing);
+				Log.stdout(citing.getId() + " - " + cited.getId());
+				cited.setCiting(citing);
 				citing.biblio.cited.add(cited);
 			}
 			
@@ -83,7 +84,7 @@ public class SQLImporter {
 			if(numRefs != -1){query=query+" LIMIT "+numRefs;}
 			query = query + ";";
 			ResultSet resprim = SQLConnection.executeQuery(query);		
-			while(resprim.next()){refs.add(Reference.construct("",new Title(resprim.getString(2)),new Abstract(),resprim.getString(3), resprim.getString(1)));}
+			while(resprim.next()){refs.add(Reference.construct(resprim.getString(1),new Title(resprim.getString(2)),new Abstract(),resprim.getString(3)));}
 			if(reconnectTorPool){TorPoolManager.setupTorPoolConnexion(true);}
 		}catch(Exception e){e.printStackTrace();}
 		

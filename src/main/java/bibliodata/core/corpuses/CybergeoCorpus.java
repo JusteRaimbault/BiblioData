@@ -46,11 +46,11 @@ public class CybergeoCorpus extends Corpus {
 		for(Reference r:references){
 			HashSet<Reference> verifiedCited=new HashSet<Reference>();
 			for(Reference ghost:r.biblio.cited){
-				System.out.println("     Cited : "+ghost.title.title);
-				Reference cr = ScholarAPI.getScholarRef(ghost.title.title,"",ghost.year);
+				Log.stdout("     Cited : "+ghost.getTitle().title);
+				Reference cr = ScholarAPI.getScholarRef(ghost.getTitle().title,"",ghost.getYear());
 				if(cr!=null){
 					verifiedCited.add(cr);
-					cr.citing.add(r);
+					cr.setCiting(r);
 				}
 			}
 			
@@ -63,7 +63,7 @@ public class CybergeoCorpus extends Corpus {
 			
 			//recompute citedTitles : may slightly differ after scholar request
 			r.biblio.citedTitles.clear();
-			for(Reference cr:r.biblio.cited){r.biblio.citedTitles.add(cr.title.title);}
+			for(Reference cr:r.biblio.cited){r.biblio.citedTitles.add(cr.getTitle().title);}
 			
 			Log.purpose("progress","Corpus "+name+" : cited refs : "+(100.0 * (1.0*p) / (1.0*totalRefs))+ " % ; ref : "+r.toString());p++;
 		}

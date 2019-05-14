@@ -57,7 +57,7 @@ public class CSVFactory implements CorpusFactory {
 			for(int i = 0;i<numRefs;i++){
 				String id = refs[i][1];
 				if(id!="NA"){
-					Reference r = Reference.construct("",new Title(refs[i][0]),new Abstract(), "",id);
+					Reference r = Reference.construct(id,new Title(refs[i][0]),new Abstract(), "");
 					res.addReference(r);
 					if(citedFolder!=""){//if must construct cited corpus
 						r.biblio.cited = (new CSVFactory(citedFolder+(new Integer(i+1)).toString(),-1)).getCorpus().references;

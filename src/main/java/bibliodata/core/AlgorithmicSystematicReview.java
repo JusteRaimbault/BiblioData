@@ -318,7 +318,7 @@ public class AlgorithmicSystematicReview {
 		for(int i=0;i<keywords.length;i++){
 			for(int j=0;j<keywords.length;j++){
 				int cit=0;
-				for(Reference r:originals.get(i)){for(Reference c:r.citing){if(originals.get(j).contains(c)){cit++;}}}
+				for(Reference r:originals.get(i)){for(Reference c:r.getCiting()){if(originals.get(j).contains(c)){cit++;}}}
 				interClusterLinks[i+1][j]=(new Integer(cit)).toString();
 			}
 		}

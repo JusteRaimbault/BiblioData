@@ -56,7 +56,7 @@ public class BibTeXParser implements BiblioParser {
 		// test the bibtexString parser
 		try{
 		Reference r=parseBibtexString("@article{title={titre test},year={2016}}");
-		System.out.println(r);System.out.println(r.year);
+		System.out.println(r);System.out.println(r.getYear());
 		}catch(Exception e){}
 	}
 	

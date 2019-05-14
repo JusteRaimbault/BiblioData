@@ -126,7 +126,7 @@ public class MongoConnection {
 
         // FIXME should merge docs with a merge strategy - but functional programming in java is more than a pain
         // do not insert if already at a higher depth
-        mongoUpsert(collection,"id",r.scholarID,MongoDocument.fromReference(r).append("processing",false));
+        mongoUpsert(collection,"id",r.getId(),MongoDocument.fromReference(r).append("processing",false));
     }
 
     /**
@@ -366,7 +366,7 @@ public class MongoConnection {
             );
             Log.stdout(queryres.toJson());
             Reference res = Reference.construct(queryres.getString("id"), queryres.getString("title"));
-            res.depth = queryres.getInteger("depth");
+            res.setDepth(queryres.getInteger("depth"));
             return (res);
         }catch(Exception e){return(null);}
     }
@@ -406,7 +406,7 @@ public class MongoConnection {
 
         LinkedList<Document> newrefs = new LinkedList<Document>();
 
-        HashMap<String,Document> origrefs = getAllRefs();
+        HashMap<String,Document> origrefs = getAllRefs(maxVerticalDepth);
 
         for(Document d:origrefs.values()){
             // filter by hand : first level = max depth, maxHorizDepth
@@ -439,7 +439,7 @@ public class MongoConnection {
      *  - for each max depth ref, get citing, compute min while constructing the graph
      */
     public static void computePriorities(int maxVerticalDepth){
-        HashMap<String,Document> allrefs = getAllRefs();
+        HashMap<String,Document> allrefs = getAllRefs(maxVerticalDepth);
         HashMap<String,LinkedList<String>> links = getAllLinks();
 
         LinkedList<Document> currentDepth = new LinkedList<Document>();
@@ -449,8 +449,10 @@ public class MongoConnection {
         Log.stdout("Total links : "+links.size());
         Log.stdout("Refs at max depth : "+currentDepth.size());
 
+        HashMap<String,Integer> priorities = new HashMap<String,Integer>();
+
         for(int depth=maxVerticalDepth-1;depth>=0;depth=depth-1){
-            HashMap<String,Integer> priorities = new HashMap<String,Integer>();
+
             LinkedList<Document> nextdepth = new LinkedList<Document>();
 
             for(Document d: currentDepth){
@@ -460,21 +462,33 @@ public class MongoConnection {
                     Document h = (Document) d.get("horizontalDepth");
                     for(String k:h.keySet()){if(h.getInteger(k).intValue()<currentPriority){currentPriority=h.getInteger(k).intValue();}}
                 }
+
+                if (!d.containsKey("priority")){
+                    if(priorities.containsKey(d.getString("id"))){if(currentPriority<priorities.get(d.getString("id")).intValue()){priorities.put(d.getString("id"),currentPriority);}}
+                    else{priorities.put(d.getString("id"),currentPriority);}
+                }
+
                 for(Document c:citing){
                     nextdepth.add(c);// ! redundancy
-                    if(priorities.containsKey(c.getString("id"))){if(currentPriority<priorities.get(c.getString("id")).intValue()){priorities.put(c.getString("id"),currentPriority);}}
-                    else{priorities.put(c.getString("id"),currentPriority);}
+                    if (!c.containsKey("priority")) {
+                        if (priorities.containsKey(c.getString("id"))) {
+                            if (currentPriority < priorities.get(c.getString("id")).intValue()) {
+                                priorities.put(c.getString("id"), currentPriority);
+                            }
+                        } else {
+                            priorities.put(c.getString("id"), currentPriority);
+                        }
+                    }
                 }
-            }
-
-            // update in database
-            Log.stdout("Priorities : updating "+priorities.size()+" references");
-            for(String toupdate:priorities.keySet()){
-                mongoUpdate("references","id",toupdate, "priority", priorities.get(toupdate).intValue());
             }
 
             // next level
             currentDepth = nextdepth;
+        }
+        // update in database
+        Log.stdout("Priorities : updating "+priorities.size()+" references");
+        for(String toupdate:priorities.keySet()){
+            mongoUpdate("references","id",toupdate, "priority", priorities.get(toupdate).intValue());
         }
     }
 
@@ -486,13 +500,13 @@ public class MongoConnection {
      * @param maxPriority
      * @return
      */
-    public static Corpus getConsolidatedCorpus(LinkedList<String> databases,int maxPriority){
+    public static Corpus getConsolidatedCorpus(LinkedList<String> databases,int maxPriority,int maxDepth){
         if(databases.size()==0){return(new DefaultCorpus());}
 
         initMongo(databases.get(0));
         for(String database: databases){
             switchMongo(database);
-            Corpus currentcorpus = getCorpus(maxPriority);
+            Corpus currentcorpus = getCorpus(maxPriority,maxDepth);
             Log.stdout("For database "+database+" : "+currentcorpus.references.size()+" references ; total refs "+Reference.getNumberOfReferences());
         }
 
@@ -507,10 +521,10 @@ public class MongoConnection {
      * @requires mongo db is initialized
      * @return
      */
-    public static Corpus getCorpus(int maxPriority){
+    public static Corpus getCorpus(int maxPriority,int maxDepth){
         HashMap<String,Document> refs = new HashMap<String,Document>();
-        if(maxPriority==-1) {refs = getAllRefs();}else {
-            refs = getRefsPriority(maxPriority);
+        if(maxPriority==-1) {refs = getAllRefs(maxDepth);}else {
+            refs = getRefsPriority(maxPriority,maxDepth);
         }
 
         HashMap<String,Reference> corpus = new HashMap<String,Reference>();
@@ -529,7 +543,7 @@ public class MongoConnection {
                 if (refs.containsKey(to) && refs.containsKey(from)) {
                     Reference toRef = corpus.get(to);
                     Reference fromRef = corpus.get(from);
-                    toRef.citing.add(fromRef);
+                    toRef.setCiting(fromRef);
                 }
             }
         }
@@ -603,17 +617,25 @@ public class MongoConnection {
         return(links);
     }
 
-    private static HashMap<String,Document> getAllRefs(){
+    private static HashMap<String,Document> getAllRefs(int maxDepth){
         MongoCollection<Document> origrefscol = mongoDatabase.getCollection(Context.getReferencesCollection());
         HashMap<String,Document> origrefs = new HashMap<String,Document>();
-        for(Document d: origrefscol.find()){origrefs.put(d.getString("id"),d);}
+        //  require that priority exists ? NO
+        for(Document d: origrefscol.find(
+                gt("depth",maxDepth)
+                //and(gt("depth",maxDepth),exists("priority")))
+        )
+        ){
+            origrefs.put(d.getString("id"),d);
+        }
         return(origrefs);
     }
 
-    private static HashMap<String,Document>  getRefsPriority(int maxPriority){
+    private static HashMap<String,Document>  getRefsPriority(int maxPriority,int maxDepth){
         MongoCollection<Document> mongoCollection = mongoDatabase.getCollection(Context.getReferencesCollection());
         HashMap<String,Document> res = new HashMap<String,Document>();
-        for(Document queryres :mongoCollection.find(lt("priority",maxPriority))){
+        // FIXME priority not always defined ?
+        for(Document queryres :mongoCollection.find(and(lt("priority",maxPriority),gt("depth",maxDepth)))){
             res.put(queryres.getString("id"),queryres);
         }
         return(res);

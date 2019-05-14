@@ -78,14 +78,14 @@ public class OrderedCorpus extends Corpus {
         int ind = 1;
         for(Reference r:orderedRefs){
             String[] row = {""};
-            if(!withAbstract){String[] tmp = {ind+"",r.title.title,r.scholarID,r.year};row=tmp;}
+            if(!withAbstract){String[] tmp = {ind+"",r.getTitle().title,r.getId(),r.getYear()};row=tmp;}
             else{
-                String authorstr = "";for(String s:r.authors){authorstr=authorstr+s+",";}
-                String[] tmp = {ind+"",r.title.title,r.scholarID,r.year,r.resume.resume,authorstr};
+                String authorstr = "";for(String s:r.getAuthors()){authorstr=authorstr+s+",";}
+                String[] tmp = {ind+"",r.getTitle().title,r.getId(),r.getYear(),r.getResume().resume,authorstr};
                 row=tmp;
             }
             datanodes.add(row);
-            for(Reference rc:r.citing){String[] edge = {rc.scholarID,r.scholarID};dataedges.add(edge);}
+            for(Reference rc:r.getCiting()){String[] edge = {rc.getId(),r.getId()};dataedges.add(edge);}
           ind++;
         }
         CSVWriter.write(prefix+".csv", datanodes, ";", "\"");

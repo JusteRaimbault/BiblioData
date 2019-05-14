@@ -93,9 +93,9 @@ public class KeywordsRequest {
 				// add additional info
 				int hdepth = 0;
 				for(Reference r:currentrefs){
-					r.depth=initdepth;
-					r.origin=reqname;
-					r.horizontalDepth.put(reqname,new Integer(hdepth));
+					r.setDepth(initdepth);
+					r.setOrigin(reqname);
+					r.setHorizontalDepth(reqname,new Integer(hdepth));
 					hdepth++;
 				}
 

@@ -23,19 +23,19 @@ public class MongoDocument {
      */
     public static Document fromReference(Reference reference){
         //Log.stdout(reference.toString());
-        Document res = new Document("id", reference.scholarID);
-        res.append("title",reference.title.title);
-        if(reference.authors.size()>0){res.append("author",reference.getAuthorString());}
-        if(reference.resume.resume.length()>0){res.append("abstract",reference.resume.resume);}
-        if(reference.resume.en_resume.length()>0){res.append("abstract_en",reference.resume.en_resume);}
-        if(reference.keywords.size()>0){res.append("keywords",reference.getKeywordString());}
-        if(reference.year.length()>0){res.append("year",reference.year);}
-        if(reference.date.length()>0){res.append("date",reference.date);}
-        res.append("citingFilled",reference.citingFilled);
-        res.append("depth",reference.depth);
-        res.append("origin",reference.origin);
-        if(reference.horizontalDepth.keySet().size()>0){
-            Document hdepth = new Document((Map) reference.horizontalDepth);
+        Document res = new Document("id", reference.getId());
+        res.append("title",reference.getTitle().title);
+        if(reference.getAuthors().size()>0){res.append("author",reference.getAuthorString());}
+        if(reference.getResume().resume.length()>0){res.append("abstract",reference.getResume().resume);}
+        if(reference.getResume().en_resume.length()>0){res.append("abstract_en",reference.getResume().en_resume);}
+        if(reference.getKeywords().size()>0){res.append("keywords",reference.getKeywordString());}
+        if(reference.getYear().length()>0){res.append("year",reference.getYear());}
+        //if(reference.date.length()>0){res.append("date",reference.date);}
+        res.append("citingFilled",reference.isCitingFilled());
+        res.append("depth",reference.getDepth());
+        res.append("origin",reference.getOrigin());
+        if(reference.getHorizontalDepthMap().keySet().size()>0){
+            Document hdepth = new Document((Map) reference.getHorizontalDepthMap());
             res.append("horizontalDepth",hdepth);
         }
         return(res);
@@ -70,7 +70,7 @@ public class MongoDocument {
         }
 
         String priority = "";
-        if(document.containsKey("priority")){
+        if(document.containsKey("priority")&&document.get("priority").toString().length()>0){
             priority = Integer.toString(document.getInteger("priority"));
             //r.addAttribute("priority",Integer.toString(document.getInteger("priority")));
         }
@@ -88,17 +88,17 @@ public class MongoDocument {
 
     public static LinkedList<Document> citationLinksFromReference(Reference reference) {
         LinkedList<Document> links = new LinkedList<Document>();
-        if(reference.citing.size()>0){
-            for(Reference citing:reference.citing){
-                Document link = new Document("from",citing.scholarID);
-                link.append("to",reference.scholarID);
+        if(reference.getCiting().size()>0){
+            for(Reference citing:reference.getCiting()){
+                Document link = new Document("from",citing.getId());
+                link.append("to",reference.getId());
                 links.add(link);
             }
         }
         if(reference.biblio.cited.size()>0){
             for(Reference cited: reference.biblio.cited){
-                Document link = new Document("to",cited.scholarID);
-                link.append("from",reference.scholarID);
+                Document link = new Document("to",cited.getId());
+                link.append("from",reference.getId());
                 links.add(link);
             }
         }

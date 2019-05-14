@@ -127,10 +127,10 @@ public class ScholarAPI {
 
 		for(Reference r:references){
 			try{
-				if(r.scholarID==null||r.scholarID==""){
+				if(r.getId()==null||r.getId()==""){
 					Reference rr = getScholarRef(r);
 					if(rr!=null){
-						r.scholarID=rr.scholarID;
+						r.setId(rr.getId());
 						Log.stdout("Retrieved ID for Ref "+r);
 					}
 				}
@@ -223,10 +223,10 @@ public class ScholarAPI {
 	 * @return
 	 */
 	public static Reference getScholarRef(Reference ref){
-		String authors = "";for(String a:ref.authors){authors = authors+" "+a;}
-		String year = ref.year;
+		String authors = "";for(String a:ref.getAuthors()){authors = authors+" "+a;}
+		String year = ref.getYear();
 		if(year.contains("-")){year = year.split("-")[0];}
-		Reference res = getScholarRef(ref.title.title,authors,year);
+		Reference res = getScholarRef(ref.getTitle().title,authors,year);
 		if(res==null){
 			ref.attributes.put("failed_req", "1");
 		}else{
@@ -245,12 +245,12 @@ public class ScholarAPI {
 	public static Reference matchRef(String title,String author,String year,List<Reference> refs){
 		Reference res = null;
 		for(Reference nr:refs){
-			Log.stdout(nr.year+"  --  "+year);
-			String t1 = StringUtils.lowerCase(nr.title.title).replaceAll("[^\\p{L}\\p{Nd}]+", "");
+			Log.stdout(nr.getYear()+"  --  "+year);
+			String t1 = StringUtils.lowerCase(nr.getTitle().title).replaceAll("[^\\p{L}\\p{Nd}]+", "");
 			String t2 = StringUtils.lowerCase(title).replaceAll("[^\\p{L}\\p{Nd}]+", "");
 			Log.stdout("      "+t1);
 			Log.stdout("      "+t2);
-			if(StringUtils.getLevenshteinDistance(t1,t2)<3&&nr.scholarID!=""&&year.compareTo(nr.year)==0){
+			if(StringUtils.getLevenshteinDistance(t1,t2)<3&&nr.getId()!=""&&year.compareTo(nr.getYear())==0){
 			   res=nr;
 			}
 		};
@@ -277,8 +277,9 @@ public class ScholarAPI {
 			for(Reference r:corpus.references){
 				Log.stdout("Getting cit for ref "+r.toString());
 
-				if(r.citing.size()>1||r.citingFilled){
-					Log.stdout("Citing refs already filled : "+r.citing.size()+" refs");
+				// FIXME first condition is not correct, could refill refs at a more recent date
+				if(r.getCiting().size()>1||r.isCitingFilled()){
+					Log.stdout("Citing refs already filled : "+r.getCiting().size()+" refs");
 				}
 				else{
 					try{
@@ -296,10 +297,11 @@ public class ScholarAPI {
 						Reference rr;
 
 						// FIXME require ref details only if no ID -> should be an option to get other available fields
-						if(r.scholarID==null||r.scholarID==""){rr = getScholarRef(r);}else{rr=r;}
+						// FIXME also we should not have null pointers
+						if(r.getId()==null||r.getId()==""){rr = getScholarRef(r);}else{rr=r;}
 
 						if(rr!=null){
-							Log.stdout("ID : "+rr.scholarID);
+							Log.stdout("ID : "+rr.getId());
 							//r.scholarID=rr.scholarID;//no need as rr and r should be same pointer ?
 							// FIXME with unique ids, this never happens
 							//if(!rr.equals(r)){Reference.references.remove(r);} //contradiction with hashconsing ?
@@ -307,18 +309,18 @@ public class ScholarAPI {
 							r=rr;
 
 							//  limit of max cit number -> global parameter - shouldnt be larger than 1000 (failure in collection then)
-							List<Reference> citing = scholarRequest(r.scholarID,Context.getScholarMaxRequests(),"cites");
-							for(Reference c:citing){r.citing.add(c);}
+							List<Reference> citing = scholarRequest(r.getId(),Context.getScholarMaxRequests(),"cites");
+							for(Reference c:citing){r.setCiting(c);}
 						}
 
-						r.citingFilled = true;
+						r.setCitingFilled(true);
 
 						// update depth of citing refs
-						for(Reference citing:r.citing){citing.depth=r.depth-1;}
+						for(Reference citing:r.getCiting()){citing.setDepth(r.getDepth()-1);}
 
 						// FIXME generic inheritance of parents properties here ? (cf horizontalDepth)
 
-						Log.stdout("Citing refs : "+r.citing.size());
+						Log.stdout("Citing refs : "+r.getCiting().size());
 
 					}catch(Exception e){e.printStackTrace();}
 				}
@@ -399,7 +401,7 @@ public class ScholarAPI {
 				// TODO add author collection (-> cocitation networks)
 				// for exact citation/all authors/bibtex -> needs js emulation (out of question for now for perf reasons)
 				if(id!=null&&id.length()>0){
-					Reference toadd = Reference.construct("", getTitle(r), new Abstract(), getYear(r), id);
+					Reference toadd = Reference.construct(id, getTitle(r), new Abstract(), getYear(r));
 					//toadd.horizontalDepth.put(origin,new Integer(pageHorizDepth+i));
 	    		  	refs.add(toadd);
 	    		  	resultsNumber++;

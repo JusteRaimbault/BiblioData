@@ -270,8 +270,8 @@ public class Cybergeo {
 		// first cyb corpus
 		for(Reference r:cybergeo){
 			Log.stdout(r.toString());
-			if(!existing.contains(r.scholarID)){
-				Reference detailed = MendeleyAPI.getReference(r.title.title,r.year,r.scholarID);
+			if(!existing.contains(r.getId())){
+				Reference detailed = MendeleyAPI.getReference(r.getTitle().title,r.getYear(),r.getId());
 				if(detailed!=null){
 					//export the ref
 					SQLExporter.exportRefDetails(detailed,database,"refdesc");
@@ -284,8 +284,8 @@ public class Cybergeo {
 
 		for(Reference r:corpus){
 			Log.stdout(r.toString());
-			if(!existing.contains(r.scholarID)){
-				Reference detailed = MendeleyAPI.getReference(r.title.title,r.year,r.scholarID);
+			if(!existing.contains(r.getId())){
+				Reference detailed = MendeleyAPI.getReference(r.getTitle().title,r.getYear(),r.getId());
 				if(detailed!=null){
 					//export the ref
 					SQLExporter.exportRefDetails(detailed,database,"refdesc");
@@ -323,7 +323,7 @@ public class Cybergeo {
 
 		for(Reference prim:primary){
 			for(Reference cited:prim.biblio.cited){
-				for(Reference citingcited:cited.citing){
+				for(Reference citingcited:cited.getCiting()){
 					updateStatus(citingcited);
 				}
 			}
