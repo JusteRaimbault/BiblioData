@@ -39,6 +39,7 @@ public class MongoImport {
                                    int initDepth,
                                    String origin,
                                    boolean dropCollections){
+        Log.stdout("Importing file "+file+" to db "+db);
         Corpus initial = Corpus.fromCSV(file,orderFile,citationFile,citedFolder,initDepth,origin);
 
         // FIXME priorities are not computed -> can be done directly from horizontalDepth

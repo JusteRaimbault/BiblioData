@@ -23,6 +23,7 @@ public class DatabaseManager {
                 "| --incrdepth $DATABASE\n"+
                 "| --notproc $DATABASE\n"+
                 "| --priority $DATABASE $MAXDEPTH\n"+
+                "| --timestamp $DATABASE $TIMESTAMP\n"+
                 "| --export $DATABASE $FILE [$MAXPRIORITY] [$MAXDEPTH] [$WITHABSTRACTS]\n"+
                 "| --exportconso $FILE $MAXPRIORITY $MAXDEPTH $D1 $D2 ..."
         );}else {
@@ -75,6 +76,10 @@ public class DatabaseManager {
                 MongoConnection.initMongo(args[1]);
                 MongoConnection.computePriorities(Integer.parseInt(args[2]));
                 MongoConnection.closeMongo();
+            }
+
+            if (action.equals("--timestamp")) {
+                // TODO
             }
 
             if (action.equals("--export")) {

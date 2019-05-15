@@ -25,7 +25,7 @@ public class CybergeoCorpus extends Corpus {
 		
 		// add attribute
 		for(Reference r:references){
-			r.attributes.put("cybergeo", "1");
+			r.setAttribute("cybergeo", "1");
 		}
 	}
 
@@ -45,7 +45,7 @@ public class CybergeoCorpus extends Corpus {
 		int totalRefs = references.size();int p=0;
 		for(Reference r:references){
 			HashSet<Reference> verifiedCited=new HashSet<Reference>();
-			for(Reference ghost:r.biblio.cited){
+			for(Reference ghost:r.getBiblio().cited){
 				Log.stdout("     Cited : "+ghost.getTitle().title);
 				Reference cr = ScholarAPI.getScholarRef(ghost.getTitle().title,"",ghost.getYear());
 				if(cr!=null){
@@ -55,15 +55,15 @@ public class CybergeoCorpus extends Corpus {
 			}
 			
 			// dirty dirty
-			r.biblio.cited = verifiedCited;
+			r.getBiblio().cited = verifiedCited;
 			
 			/**
 			 * TODO : write a generic constructor from ref title, combining mendeley and scholar requests to have most info possible ?
 			 */
 			
 			//recompute citedTitles : may slightly differ after scholar request
-			r.biblio.citedTitles.clear();
-			for(Reference cr:r.biblio.cited){r.biblio.citedTitles.add(cr.getTitle().title);}
+			r.getBiblio().citedTitles.clear();
+			for(Reference cr:r.getBiblio().cited){r.getBiblio().citedTitles.add(cr.getTitle().title);}
 			
 			Log.purpose("progress","Corpus "+name+" : cited refs : "+(100.0 * (1.0*p) / (1.0*totalRefs))+ " % ; ref : "+r.toString());p++;
 		}

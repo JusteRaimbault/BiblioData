@@ -46,7 +46,7 @@ public class RISReader {
 				   //
 				   Reference newRef = Reference.construct(currentID, new Title(currentTitle), new Abstract(currentAbstract), currentYear);
 				   for(String s:currentKeywords){newRef.setKeyword(s);};
-				   for(Reference r:currentCitedGhostRefs){newRef.biblio.cited.add(r);}
+				   for(Reference r:currentCitedGhostRefs){newRef.setCited(r);}
 				   
 				   currentKeywords.clear();
 				   currentCitedGhostRefs.clear();
@@ -97,7 +97,7 @@ public class RISReader {
 			   Reference newRef = Reference.construct(currentID, new Title(currentTitle), new Abstract(currentAbstract), currentYear);
 			   // add additionary fields by hand. Dirty dirty, must have set/get methods
 			   newRef.setKeywords(currentKeywords);
-			   newRef.biblio.cited=currentCitedGhostRefs;
+			   newRef.setCited(currentCitedGhostRefs); // cited set should not be null
 			   newRef.getTitle().en_title=currentENTitle; // FIXME this is absurd to have setters/getters at the first level and being mutable at the second level
 			   refs.add(newRef);
 		   }
@@ -116,8 +116,8 @@ public class RISReader {
 		HashSet<Reference> refs = read(System.getenv("CS_HOME")+"/Cybergeo/cybergeo20/Data/bib/fullbase_refsAsBib.ris",3);
 		for(Reference r:refs){
 			System.out.println(r);
-			for(Reference t:r.biblio.cited){
-				System.out.println(t);
+			for(Reference t:r.getCited()){
+				Log.stdout(t.toString());
 			}
 		}
 	}

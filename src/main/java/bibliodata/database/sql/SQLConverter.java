@@ -42,7 +42,7 @@ public class SQLConverter {
 		HashSet<String[]> refs = new HashSet<String[]>();
 		
 		for(Reference r:corpus){
-			String prim = "0";if(r.attributes.containsKey("primary")){prim="1";}
+			String prim = "0";if(r.getAttributes().containsKey("primary")){prim="1";}
 			String year="1000";if(r.getYear().length()>0){year=r.getYear();}
 			String[] ref = {r.getId(),r.getTitle().title,year,prim};
 			// check if title formatting causes a pb in csv import -> only ID and prim

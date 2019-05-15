@@ -1,6 +1,3 @@
-/**
- * 
- */
 package bibliodata.database.sql;
 
 import java.sql.ResultSet;
@@ -11,25 +8,33 @@ import bibliodata.utils.tor.TorPoolManager;
 import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.corpuses.DefaultCorpus;
 import bibliodata.core.reference.Abstract;
-import bibliodata.core.reference.Bibliography;
 import bibliodata.core.reference.Reference;
 import bibliodata.core.reference.Title;
 
 /**
+ *
+ * Import corpus from sql
+ *
  * @author Raimbault Juste <br/> <a href="mailto:juste.raimbault@polytechnique.edu">juste.raimbault@polytechnique.edu</a>
  *
  */
 public class SQLImporter {
-	
+
 	/**
+	 *
 	 * imports a corpus from simple database.
-	 * marks principal refs with "principal" attribute
-	 * 
-	 * @param database
-	 * @return
+	 * 	 * marks principal refs with "principal" attribute
+	 *
+	 * @param database db name
+	 * @param principalTableName principal table name
+	 * @param secondaryTableName secondary table name (revues.org specification) ! may be deprecated now ?
+	 * @param citationTableName citation links table
+	 * @param numRefs number of references to get
+	 * @param reconnectTorPool should the torpool be reconnected after the import (local ports conflict)
+	 * @return imported corpus
 	 */
 	public static Corpus sqlImport(String database,String principalTableName,String secondaryTableName,String citationTableName,int numRefs,boolean reconnectTorPool){
-		HashSet<Reference> refs = new HashSet<Reference>();
+		HashSet<Reference> refs = new HashSet<>();
 		
 		try{
 			SQLConnection.setupSQL(database);
@@ -39,15 +44,15 @@ public class SQLImporter {
 			if(numRefs!=-1){primaryQuery=primaryQuery+" LIMIT "+numRefs;}
 			primaryQuery=primaryQuery+";";
 			ResultSet resprim = SQLConnection.executeQuery(primaryQuery);
-			int primRefs = 0;
+			//int primRefs = 0;
 			while(resprim.next()){
 				Reference r = Reference.construct(resprim.getString(1),new Title(resprim.getString(2)),new Abstract(),resprim.getString(3));
 				refs.add(r);
-				System.out.println(r);
-				primRefs++;
+				Log.stdout(r.toString());
+				//primRefs++;
 			}
 			//set prim attribute
-			for(Reference r:refs){r.attributes.put("primary", "1");}
+			for(Reference r:refs){r.setAttribute("primary", "1");}
 			
 			//secondary refs
 			
@@ -55,7 +60,7 @@ public class SQLImporter {
 			while(ressec.next()){
 				Reference r = Reference.construct(ressec.getString(1),new Title(ressec.getString(2)),new Abstract(),ressec.getString(3));
 				refs.add(r);
-				System.out.println(r);
+				Log.stdout(r.toString());
 			}
 			
 			// add citations -> refs already constructed, construct method gives refs
@@ -65,7 +70,7 @@ public class SQLImporter {
 				Reference cited = Reference.construct(rescit.getString(2));
 				Log.stdout(citing.getId() + " - " + cited.getId());
 				cited.setCiting(citing);
-				citing.biblio.cited.add(cited);
+				citing.getBiblio().cited.add(cited);
 			}
 			
 			if(reconnectTorPool){TorPoolManager.setupTorPoolConnexion(true);}
@@ -76,7 +81,7 @@ public class SQLImporter {
 	
 	
 	public static Corpus sqlImportPrimary(String database,String table,String status,int numRefs,boolean reconnectTorPool){
-		HashSet<Reference> refs = new HashSet<Reference>();
+		HashSet<Reference> refs = new HashSet<>();
 		try{
 			SQLConnection.setupSQL(database);
 			String query = "SELECT "+table+".id,title,year,status FROM "+table+" JOIN status ON status.id=cybergeo.id";
@@ -93,7 +98,7 @@ public class SQLImporter {
 	
 	
 	public static HashSet<String> sqlSingleColumn(String database,String table, String column,boolean reconnectTorPool){
-		HashSet<String> res = new HashSet<String>();
+		HashSet<String> res = new HashSet<>();
 		try{
 			SQLConnection.setupSQL(database);
 			String query = "SELECT "+column+" FROM "+table+";";

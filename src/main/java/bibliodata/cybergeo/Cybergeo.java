@@ -25,8 +25,9 @@ import bibliodata.utils.RISWriter;
 import bibliodata.utils.tor.TorPoolManager;
 
 /**
- * @author Raimbault Juste <br/> <a href="mailto:juste.raimbault@polytechnique.edu">juste.raimbault@polytechnique.edu</a>
+ * Management of the Cybergeo corpus
  *
+ * @author Raimbault Juste <br/> <a href="mailto:juste.raimbault@polytechnique.edu">juste.raimbault@polytechnique.edu</a>
  */
 public class Cybergeo {
 
@@ -102,7 +103,7 @@ public class Cybergeo {
 		 cybergeo.fillCitedRefs();
 
 		 //
-		 for(Reference r:cybergeo.references){System.out.println(r.toString()+"\n CITES : ");for(Reference cr:r.biblio.cited){System.out.println(cr.toString());}}
+		 for(Reference r:cybergeo.references){System.out.println(r.toString()+"\n CITES : ");for(Reference cr:r.getBiblio().cited){System.out.println(cr.toString());}}
 
 	}
 
@@ -115,7 +116,7 @@ public class Cybergeo {
 
 		 int s = 0;
 		 for(Reference r:cybergeo.references){
-			 if(r.attributes.get("failed_req").compareTo("1")==0){s++;}
+			 if(r.getAttributes().get("failed_req").compareTo("1")==0){s++;}
 		 }
 		 System.out.println("Failed : "+(s*1.0/cybergeo.references.size()));
 
@@ -137,7 +138,7 @@ public class Cybergeo {
 		HashSet<Reference> cited = new HashSet<Reference>();
 		for(Reference r:cybergeo.references){
 			//Corpus cited = new DefaultCorpus(r.biblio.cited);
-			for(Reference c:r.biblio.cited){cited.add(c);}
+			for(Reference c:r.getBiblio().cited){cited.add(c);}
 		}
 		Corpus citedCorpus = new DefaultCorpus(cited);
 		citedCorpus.name="cited";
@@ -322,7 +323,7 @@ public class Cybergeo {
 		Corpus primary = SQLImporter.sqlImportPrimary(database, "cybergeo","1",-1,false);
 
 		for(Reference prim:primary){
-			for(Reference cited:prim.biblio.cited){
+			for(Reference cited:prim.getBiblio().cited){
 				for(Reference citingcited:cited.getCiting()){
 					updateStatus(citingcited);
 				}

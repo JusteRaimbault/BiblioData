@@ -67,7 +67,7 @@ public abstract class Corpus implements Iterable<Reference> {
 	public Corpus getCitedCorpus(){
 		HashSet<Reference> cited = new HashSet<Reference>();
 		for(Reference r:references){
-			for(Reference rc:r.biblio.cited){
+			for(Reference rc:r.getBiblio().cited){
 				cited.add(rc);
 			}
 		}
@@ -205,6 +205,7 @@ public abstract class Corpus implements Iterable<Reference> {
 								 String citedFolder,
 								 int initDepth,
 								 String origin){
+		Log.stdout("Importing corpus from csv "+file);
 		Corpus initial = Corpus.fromNodeFile(file,citedFolder);
 		Log.stdout("Imported corpus of size "+initial.references.size());
 
@@ -216,6 +217,7 @@ public abstract class Corpus implements Iterable<Reference> {
 
 		// add citations
 		if(citationFile.length()>0) {
+			Log.stdout("Adding citations");
 			String[][] rawlinks = CSVReader.read(citationFile, ";", "\"");
 			for (String[] link : rawlinks) {
 				String from = link[0];
@@ -230,13 +232,22 @@ public abstract class Corpus implements Iterable<Reference> {
 		// add order if needed
 		if(orderFile.length()!=0){
 			OrderedCorpus order = Corpus.fromCSV(orderFile);
-			Log.stdout("Setting depths from order file for "+order.references);
+			Log.stdout("Setting depths from order file for "+order.references.size());
 
 			for(int i = 0 ; i<order.orderedRefs.size();i++){
 				//order.orderedRefs.get(i).horizontalDepth.put(origin,new Integer(i));
-				order.orderedRefs.get(i).setHorizontalDepth(origin,i);
-				order.orderedRefs.get(i).setDepth(initDepth);
+				Log.stdout("hdepth ordered ref "+Integer.toString(i));
+				order.orderedRefs.get(i).setHorizontalDepth0(origin,i);
 			}
+
+			Log.stdout("horizontalDepth ok");
+
+			for(int i = 0 ; i<order.orderedRefs.size();i++) {
+				Log.stdout("depth ordered ref "+Integer.toString(i));
+				order.orderedRefs.get(i).setDepth0(initDepth);
+			}
+
+			Log.stdout("depth ok");
 		}
 
 		return(initial);

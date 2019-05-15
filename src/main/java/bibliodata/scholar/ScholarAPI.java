@@ -228,9 +228,9 @@ public class ScholarAPI {
 		if(year.contains("-")){year = year.split("-")[0];}
 		Reference res = getScholarRef(ref.getTitle().title,authors,year);
 		if(res==null){
-			ref.attributes.put("failed_req", "1");
+			ref.getAttributes().put("failed_req", "1");
 		}else{
-			ref.attributes.put("failed_req", "0");
+			ref.getAttributes().put("failed_req", "0");
 		}
 		return res;
 	}
@@ -314,9 +314,10 @@ public class ScholarAPI {
 						}
 
 						r.setCitingFilled(true);
+						r.setTimestamp(Log.currentTimestamp());
 
 						// update depth of citing refs
-						for(Reference citing:r.getCiting()){citing.setDepth(r.getDepth()-1);}
+						for(Reference citing:r.getCiting()){citing.setDepth(Math.max(r.getDepth()-1,citing.getDepth()));}
 
 						// FIXME generic inheritance of parents properties here ? (cf horizontalDepth)
 

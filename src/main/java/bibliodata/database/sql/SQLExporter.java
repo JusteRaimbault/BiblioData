@@ -47,7 +47,7 @@ public class SQLExporter {
 					secondaryRefs.add(rc);statusOkIDs.add(rc.getId());
 					citations.add(new MutablePair<String,String>(rc.getId(),r.getId()));
 				}
-				for(Reference rcited:r.biblio.cited){
+				for(Reference rcited:r.getCited()){
 					System.out.println("cited : "+rcited);
 					secondaryRefs.add(rcited);statusOkIDs.add(rcited.getId());
 					citations.add(new MutablePair<String,String>(r.getId(), rcited.getId()));

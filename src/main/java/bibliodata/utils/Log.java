@@ -7,9 +7,11 @@ package bibliodata.utils;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 /**
@@ -21,7 +23,7 @@ import java.util.HashMap;
  *
  */
 public class Log {
-	
+
 	private static String logLevel="debug";
 	
 	
@@ -181,6 +183,11 @@ public class Log {
 			BufferedWriter w = new BufferedWriter(new FileWriter(f,true));
 			for(int i=0;i<n;i++)w.newLine();w.close();}
 		catch(Exception e){System.out.println();}
+	}
+
+	public static long currentTimestamp(){
+		Instant i = Instant.now();
+		return(i.toEpochMilli());
 	}
 
 

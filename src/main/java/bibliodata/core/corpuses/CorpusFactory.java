@@ -17,15 +17,15 @@ public interface CorpusFactory {
 	/**
 	 * Setup the factory with the given options (proper to each factory).
 	 * 
-	 * @param options
+	 * @param options setup options as an attribute map
 	 */
-	public void setup(HashMap<String,String> options);
+	void setup(HashMap<String,String> options);
 	
 	/**
 	 * Constructs the corpus and retrieves it.
 	 * 
-	 * @return
+	 * @return the corpus
 	 */
-	public Corpus getCorpus();
+	Corpus getCorpus();
 	
 }

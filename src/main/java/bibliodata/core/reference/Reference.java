@@ -1,15 +1,10 @@
-/**
- * 
- */
 package bibliodata.core.reference;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 
-import bibliodata.mendeley.MendeleyAPI;
-
+import bibliodata.utils.Log;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -31,29 +26,25 @@ public class Reference {
 
 	/**
 	 * get a copy of HashSet of current references
-	 * FIXME making the consing map private must be done checking no mutable operation operated on it from outside !
-	 * @return
+	 *
+	 * @return hashset containing current references
 	 */
 	public static HashSet<Reference> getReferences(){return(new HashSet<>(references.keySet()));};
 
 	/**
 	 * current number of references
-	 * @return
+	 * @return number of references
 	 */
 	public static int getNumberOfReferences(){return(references.keySet().size());}
 
 	/**
 	 * forget a reference
-	 * @param r
+	 * @param r remove a given reference from map of all refs
+	 *
 	 */
 	public static void removeReference(Reference r){references.remove(r);}
 
 
-	/**
-	 * Dynamic fields
-	 * 
-	 */
-	
 	/**
 	 * Secondary id
 	 *  - for exampld UUID retrieved from mendeley.
@@ -87,7 +78,7 @@ public class Reference {
 	/**
 	 * Authors
 	 */
-	private HashSet<String> authors;
+	private HashSet<String> authors = new HashSet<>();
 	public HashSet<String> getAuthors(){
 		if(authors==null){return(new HashSet<>());}
 		return(authors);
@@ -95,11 +86,11 @@ public class Reference {
 	/**
 	 * Set keywords from an existing collection.
 	 *
-	 * @param a
+	 * @param a collection of authors to add
 	 */
 	public void setAuthors(Collection<String> a){
 		// current set of authors assumed existing ; but creates it of called from ghost ref e.g.
-		if(authors==null){authors=new HashSet<String>();}
+		//if(authors==null){authors=new HashSet<>();} // cannot be null as initialized
 		for(String s:a){authors.add(s);}
 	}
 
@@ -111,9 +102,10 @@ public class Reference {
 	 */
 	public String getAuthorString(){
 		try{
-			String res="";
-			for(String a:authors){res=res+","+a;}
-			if(res.length()>0){res.substring(0, res.length()-1);}
+			StringBuilder sb = new StringBuilder();
+			for(String a:authors){sb.append(","+a);}
+			String res = sb.toString();
+			if(res.length()>0){res = res.substring(0, res.length()-1);}
 			return res;
 			// FIXME why could there be an exception here ? uninitialized authors ?
 		}catch(Exception e){return "";}
@@ -132,37 +124,33 @@ public class Reference {
 	/**
 	 * Keywords
 	 */
-	private HashSet<String> keywords;
+	private HashSet<String> keywords = new HashSet<>();
 
-	public HashSet<String> getKeywords() {
-		if (authors == null) {
-			return (new HashSet<>());
-		}
-		return (authors);
-	}
+	public HashSet<String> getKeywords() {return keywords;}
 
 	public void setKeyword(String k){keywords.add(k);}
 
 	/**
 	 * Set keywords from an existing set.
 	 *
-	 * @param k
+	 * @param k collection of keywords to add
 	 */
 	public void setKeywords(Collection<String> k){
 		// current set of authors assumed existing ; but creates it of called from ghost ref e.g.
-		if(keywords==null){keywords=new HashSet<String>();}
-		for(String s:k){keywords.add(s);}
+		//if(keywords==null){keywords=new HashSet<>();}
+		keywords.addAll(k);
 	}
 
 	/**
 	 * Keywords as string.
 	 *
-	 * @return
+	 * @return aggregated string of keywords
 	 */
 	public String getKeywordString(){
 		try{
-			String res="";
-			for(String a:keywords){res=res+";"+a;}
+			StringBuilder sb = new StringBuilder();
+			for(String a:keywords){sb.append(";"+a);}
+			String res = sb.toString();
 			if(res.length()>0){res = res.substring(0, res.length()-1);}
 			return res;
 		}catch(Exception e){return "";}
@@ -173,13 +161,13 @@ public class Reference {
 	 */
 	private String year;
 	public String getYear(){return(year);}
-	public void setYear(String newyear){newyear = year;}
+	public void setYear(String newyear){year=newyear;}
 
 
 	/**
 	 * publication date - not used
 	 */
-	private String date;
+	private String date = "";
 	public String getDate(){return(date);}
 	public void setDate(String newdate){date=newdate;}
 
@@ -187,20 +175,20 @@ public class Reference {
 	/**
 	 * Refs citing this ref
 	 */
-	private HashSet<Reference> citing;
+	private HashSet<Reference> citing = new HashSet<>();
 	public HashSet<Reference> getCiting(){return(citing);}
 	public void setCiting(Reference r){citing.add(r);}
 	public void setCiting(HashSet<Reference> refs){for(Reference r:refs){setCiting(r);}}
 
 
-	private boolean citingFilled;
+	private boolean citingFilled = false;
 	public boolean isCitingFilled(){return(citingFilled);}
 	public void setCitingFilled(boolean b){citingFilled=b;}
 
 	/**
 	 * relative vertical depth in the citation network
 	 */
-	private int depth;
+	private int depth = -1;
 	public int getDepth(){return(depth);}
 	public void setDepth(int newdepth){depth=newdepth;}
 
@@ -209,7 +197,7 @@ public class Reference {
 	 *   - keyword request (from several simultaneously) map reqString -> depth
 	 *   - ~order in citing : map citing ID -> depth~
 	 */
-	private HashMap<String,Integer> horizontalDepth;
+	private HashMap<String,Integer> horizontalDepth = new HashMap<>();
 	public int getHorizontalDepth(String key){if(horizontalDepth.containsKey(key)){return(horizontalDepth.get(key));}else{return(-1);}}
     public HashMap<String,Integer> getHorizontalDepthMap(){return(horizontalDepth);}
 	public void setHorizontalDepth(String key,int value){
@@ -220,35 +208,63 @@ public class Reference {
 
 
 	/**
-	 * where originated from in the case of multiple corpuses
+	 * where did the reference originated from in the case of multiple corpuses
 	 */
-	private String origin;
+	private String origin = "";
 	public String getOrigin(){return(origin);}
 	public void setOrigin(String newOrigin){origin = newOrigin;}
 
 
 	/**
 	 * Bibliography
-	 * // FIXME privatize
 	 */
-	public Bibliography biblio;
-	
+	private Bibliography biblio = new Bibliography();
+	public Bibliography getBiblio(){return(biblio);}
+	public void setBiblio(Bibliography newbib){biblio = newbib;}
+	public HashSet<Reference> getCited(){return(biblio.cited);}
+	public void setCited(Reference r){biblio.cited.add(r);}
+	public void setCited(Collection<Reference> c){biblio.cited.addAll(c);}
+
 	
 	/**
 	 * Free attributes, stored under the form <key,value>
 	 *     // FIXME privatize
 	 */
-	public HashMap<String,String> attributes;
+	private HashMap<String,String> attributes = new HashMap<>();
+	public HashMap<String,String> getAttributes(){return(attributes);}
+	/**
+	 * Add an attribute to the Reference
+	 * @param key attr name
+	 * @param value attr value
+	 */
+	public void setAttribute(String key,String value){
+		if(attributes==null){attributes=new HashMap<String,String>();}
+		attributes.put(key, value);
+	}
+
+
+	/**
+	 * Get attribute (empty if attributes not set [!! unsecure] or attribute is not in the attribute table)
+	 * @param key attr name
+	 * @return value of attribute if exists, empty string otherwise
+	 */
+	public String getAttribute(String key){
+		if(attributes==null||!attributes.containsKey(key))return "";
+		return attributes.get(key);
+	}
+
+
 
 	// graph visiting var not needed
 	//private boolean visitedDepth = false;
 	//private boolean visitedHorizontalDepth = false;
 
-	private int timestamp;
-	public int getTimestamp(){return(timestamp);}
-	public void setTimestamp(int newts){timestamp=newts;}
+	private long timestamp=Log.currentTimestamp(); // ts set when the ref is initially created, then modified when citingFilled achieved for example
+	public long getTimestamp(){return(timestamp);}
+	public void setTimestamp(long newts){timestamp=newts;}
 
-	
+
+
 	/**
 	 * Constructor
 	 * 
@@ -257,22 +273,12 @@ public class Reference {
 	 * @param t title
 	 * @param r abstract
 	 */
-	public Reference(String id, String secid,Title t,Abstract r,String y){
-		id=id;
+	public Reference(String i, String secid,Title t,Abstract r,String y){
+		id=i;
 		secondaryId=secid;
 		title=t;
 		resume=r;
 		year=y;
-		//date="";
-		authors = new HashSet<String>();
-		keywords = new HashSet<String>();
-		citing=new HashSet<Reference>();
-		biblio=new Bibliography();
-		attributes = new HashMap<String,String>();
-		citingFilled = false;
-		depth = -1;
-		horizontalDepth=new HashMap<String,Integer>();
-		origin="";
 	}
 	
 	/**
@@ -336,20 +342,24 @@ public class Reference {
 	 *  limited by java and the lack of functional programming - so merging strategies are not parametrized as arguments
 	 *
 	 *  -- also this manual hashconsing is heavy - should we go full scala asap ? -- java legacy is finally a pain -- see NetLogo nighmares
-	 * @param id
-	 * @param title
-	 * @param year
-	 * @param attributes
-	 * @return
+	 * @param id id of the ref
+	 * @param title String title
+	 * @param year year
+	 * @param attributes hashmap of attributes as strings
+	 * @return unique reference object with the given id
 	 */
 	public static Reference construct(String id,String title, String year,HashMap<String,String> attributes){
 		Reference res = construct(id,title,year);
+
 		// merge attributes
 		// first add default in attr map if not present - fuck to not have the getOrElse
 		if(!attributes.containsKey("depth")){attributes.put("depth",Integer.toString(Integer.MAX_VALUE));}
 		if(!attributes.containsKey("priority")){attributes.put("priority",Integer.toString(Integer.MAX_VALUE));}
 		if(!attributes.containsKey("horizontalDepth")){attributes.put("horizontalDepth","");}
 		if(!attributes.containsKey("citingFilled")){attributes.put("citingFilled","false");}
+
+
+		// FIXME depth is not a raw attribute !
 		if(res.getAttribute("depth").length()>0){res.attributes.put("depth",Integer.toString(Math.min(Integer.parseInt(res.getAttribute("depth")),Integer.parseInt(attributes.get("depth")))));} else {res.attributes.put("depth",attributes.get("depth"));}
 		if(res.getAttribute("priority").length()>0){res.attributes.put("priority",Integer.toString(Math.min(Integer.parseInt(res.getAttribute("priority")),Integer.parseInt(attributes.get("priority")))));} else {res.attributes.put("priority",attributes.get("priority"));}
 		// merging horizdepths : reparse and merge hashmaps - ultra dirty - should have a generic trait Mergeable and different implementations
@@ -359,7 +369,15 @@ public class Reference {
 		}else{
 			res.attributes.put("horizontalDepth",attributes.get("horizontalDepth"));
 		}
+		// FIXME citingFilled is not a raw attribute
 		if(res.getAttribute("citingFilled").length()>0){res.setAttribute("citingFilled",Boolean.toString(Boolean.parseBoolean(res.getAttribute("citingFilled"))||Boolean.parseBoolean(attributes.get("citingFilled"))));}else{res.setAttribute("citingFilled",attributes.get("citingFilled"));}
+
+		// timestamp : depending on if citingFilled is true or not should choose ? anyway take the latest
+		// FIXME timestamp also not an attribute ? simpler to export as csv
+		if(res.getAttribute("timestamp").length()>0){
+			res.setAttribute("timestamp",Integer.toString(Math.max(Integer.parseInt(res.getAttribute("timestamp")),Integer.parseInt(attributes.get("timestamp")))));
+		}else{res.setAttribute("attribute",attributes.get("timestamp"));}
+
 		return(res);
 	}
 
@@ -373,31 +391,28 @@ public class Reference {
 	 * Construst from ghost.
 	 */
 	public static Reference construct(GhostReference ghost,String schID){
-		// null ghost is catch by nullPointerException -- ¡¡ DIRTY !!
-		Reference materializedRef = null;
-		try{
-			materializedRef = construct(ghost.getId(),ghost.getTitle(),ghost.getResume(),ghost.getYear());
-			// copy keywords and authors
-			materializedRef.setKeywords(ghost.getKeywords());
-			materializedRef.setAuthors(ghost.getAuthors());
-		}catch(Exception e){}
+		if (ghost==null){return(null);}
+		Reference materializedRef = construct(schID,ghost.getTitle(),ghost.getResume(),ghost.getYear());
+		// copy keywords and authors
+		materializedRef.setKeywords(ghost.getKeywords());
+		materializedRef.setAuthors(ghost.getAuthors());
 		return materializedRef;
 	}
 	
-	/**
-	 * Materialize a ghost ref.
-	 * 
-	 * @param ghost
-	 * @return
-	 */
-	public static Reference materialize(GhostReference ghost){
-		return construct(ghost,"");
-	}
+	//
+	//Materialize a ghost ref.
+	 //
+	 // @param ghost
+	 // @return
+	 ///
+	//public static Reference materialize(GhostReference ghost){
+	//	return construct(ghost,"");
+	//}
 
 	/**
 	 * Materialize a ghost ref with the given id
-	 * @param ghost
-	 * @param schID
+	 * @param ghost ghost ref to materialize
+	 * @param schID id
 	 * @return
 	 */
 	public static Reference materialize(GhostReference ghost,String schID){
@@ -405,25 +420,6 @@ public class Reference {
 	}
 
 
-	/**
-	 * Add an attribute to the Reference
-	 * @param key
-	 * @param value
-	 */
-	public void setAttribute(String key,String value){
-		if(attributes==null){attributes=new HashMap<String,String>();}
-		attributes.put(key, value);
-	}
-
-	/**
-	 * Get attribute (empty if attributes not set [!! unsecure] or attribute is not in the attribute table)
-	 * @param key
-	 * @return
-	 */
-	public String getAttribute(String key){
-		if(attributes==null||!attributes.containsKey(key))return "";
-		return attributes.get(key);
-	}
 
 
 	private static String mergeHorizDepths(String hd1,String hd2){
@@ -484,14 +480,15 @@ public class Reference {
 	 * @param newDepth
 	 */
 	public void setDepth0(int newDepth){
-		setDepthRec(newDepth,new HashSet<Reference>());
+		Log.stdout("Set depth : "+id);
+		setDepthRec(newDepth,new HashSet<>());
 	}
 
 	/**
 	 * set and propagates horizontal depth into the citation network
 	 *   - was not secure to reciprocal citations => indeed happens : add provenance ? could be loops - needs a visited
-	 * @param origin
-	 * @param depth
+	 * @param origin provenance of the ref
+	 * @param depth level in the query
 	 */
 	public void setHorizontalDepthRec(String origin,int depth,HashSet<Reference> chain){
 
@@ -515,6 +512,7 @@ public class Reference {
 
 
 	public void setHorizontalDepth0(String origin, int depth){
+		Log.stdout("Set hdepth : "+id);
 		setHorizontalDepthRec(origin,depth,new HashSet<>());
 	}
 

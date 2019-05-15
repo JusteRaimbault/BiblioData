@@ -61,7 +61,7 @@ public class RISWriter {
 				writer.write("ID  - "+r.getId()+"\n");
 				
 				//customized tag : references
-				for(Reference t:r.biblio.cited){
+				for(Reference t:r.getCited()){
 					writer.write("BI  - "+BIBWriter.minimalBibTeXString(t)+"\n");
 				}
 				

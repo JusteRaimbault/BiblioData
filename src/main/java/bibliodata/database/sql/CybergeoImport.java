@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.util.HashSet;
 import java.util.LinkedList;
 
+import bibliodata.utils.Log;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -87,7 +88,7 @@ public class CybergeoImport {
 			   r.setAttribute("keywords_fr", keywords_fr);
 			   
 			   
-			   r.biblio = new CybergeoBiblioParser().parse(biblio);
+			   r.setBiblio(new CybergeoBiblioParser().parse(biblio));
 			   
 			   //if(r.authors.size()>0){res.add(r);}
 			   //else{System.out.println(r.toString());}
@@ -322,11 +323,11 @@ public class CybergeoImport {
 		for(int i=0;i<stats.length;i++){
 			Reference r = Reference.construct("", new Title(stats[i][1]), new Abstract(), "");
 			r.setAttribute("UID", stats[i][0]);
-			System.out.println(r);
+			Log.stdout(r.toString());
 		}
 		count=0;
-		for(Reference r:res){if(r.attributes.containsKey("UID")){count++;}}
-		System.out.println("WITH UID : "+count);
+		for(Reference r:res){if(r.getAttributes().containsKey("UID")){count++;}}
+		Log.stdout("WITH UID : " + count);
 		
 		
 		// export to csv
@@ -352,7 +353,7 @@ public class CybergeoImport {
 		LinkedList<String[]> data = new LinkedList<String[]>();
 		for(Reference r:cybnetwork){
 			if(r.getAttribute("primary").length()>0){
-				String[] row={r.getId(),new Integer(r.getCiting().size()).toString(),new Integer(r.biblio.cited.size()).toString()};
+				String[] row={r.getId(),new Integer(r.getCiting().size()).toString(),new Integer(r.getBiblio().cited.size()).toString()};
 				data.add(row);
 			}
 		}
@@ -463,7 +464,7 @@ public class CybergeoImport {
 	    String[] res = new String[13];
 	    res[0]=r.getSecondaryId();res[1]=r.getAttribute("UID");res[2]=r.getId();res[3]=r.getTitle().title;
 	    res[4]=r.getTitle().en_title;res[5]=r.getKeywordString();res[6]=r.getAttribute("keywords_fr");res[7]=r.getAuthorString();res[8]=r.getDate();
-	    res[9]=r.getAttribute("langue");res[10]=r.getAttribute("translated");res[11]=new Integer(r.getCiting().size()).toString();res[12]=new Integer(r.biblio.cited.size()).toString();
+	    res[9]=r.getAttribute("langue");res[10]=r.getAttribute("translated");res[11]=new Integer(r.getCiting().size()).toString();res[12]=new Integer(r.getBiblio().cited.size()).toString();
 	    
 	    return res;
 	}

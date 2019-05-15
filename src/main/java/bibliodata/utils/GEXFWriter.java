@@ -67,7 +67,7 @@ public class GEXFWriter{
 		HashSet<String> addAttrNames = new HashSet<String>();
 		int id = 7;
 		for(Reference ref:refs){
-			for(String att:ref.attributes.keySet()){
+			for(String att:ref.getAttributes().keySet()){
 				if(!addAttrNames.contains(att)){//new attribute
 					addAttrNames.add(att);
 					Attribute nextAttr = attrList.createAttribute(new Integer(id).toString(), AttributeType.STRING, att);
@@ -99,8 +99,8 @@ public class GEXFWriter{
 			  ;
 			
 			for(String addAttName:additionalAttributes.keySet()){
-				if(ref.attributes.containsKey(addAttName)){
-					node.getAttributeValues().addValue(additionalAttributes.get(addAttName),ref.attributes.get(addAttName));
+				if(ref.getAttributes().containsKey(addAttName)){
+					node.getAttributeValues().addValue(additionalAttributes.get(addAttName),ref.getAttributes().get(addAttName));
 				}else{//NULL default value
 					node.getAttributeValues().addValue(additionalAttributes.get(addAttName),"NULL");
 				}

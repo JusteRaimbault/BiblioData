@@ -95,8 +95,8 @@ public class MongoDocument {
                 links.add(link);
             }
         }
-        if(reference.biblio.cited.size()>0){
-            for(Reference cited: reference.biblio.cited){
+        if(reference.getCited().size()>0){
+            for(Reference cited: reference.getCited()){
                 Document link = new Document("to",cited.getId());
                 link.append("from",reference.getId());
                 links.add(link);
