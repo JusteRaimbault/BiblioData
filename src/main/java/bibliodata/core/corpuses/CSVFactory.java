@@ -19,23 +19,30 @@ public class CSVFactory implements CorpusFactory {
 
 	private String bibfile;
 	
-	private int numRefs;
+	private int numRefs = -1;
 	
-	private String citedFolder;
+	private String citedFolder = "";
 
 	private int idcolumn = 1; // 2nd column by default
 	public void setIdcolumn(int i){idcolumn=i;}
 
+	private boolean withHeader = false;
+	public void setWithHeader(boolean b){withHeader = b;}
+
 	public CSVFactory(String file){
-		bibfile=file;numRefs=-1;citedFolder="";
+		bibfile=file;
 	}
 	
 	public CSVFactory(String file,int refs){
-		bibfile=file;numRefs=refs;citedFolder="";
+		bibfile=file;numRefs=refs;
 	}
 	
 	public CSVFactory(String file,int refs,String cited){
 		bibfile=file;numRefs=refs;citedFolder=cited;
+	}
+
+	public CSVFactory(String file,boolean wh){
+		bibfile=file;withHeader=wh;
 	}
 	
 	/* (non-Javadoc)
@@ -59,7 +66,8 @@ public class CSVFactory implements CorpusFactory {
 		Log.stdout("CSV data has "+refs.length+" rows");
 		if(refs[0].length>1){
 			if(numRefs==-1){numRefs=refs.length;}
-			for(int i = 0;i<numRefs;i++){
+			int start = 0;if (withHeader){start=1;}
+			for(int i = start;i<numRefs;i++){
 				String id = refs[i][idcolumn];
 				if(id!="NA"){
 					String year = "";

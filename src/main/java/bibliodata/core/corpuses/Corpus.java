@@ -196,7 +196,7 @@ public abstract class Corpus implements Iterable<Reference> {
 	}
 
 	public static OrderedCorpus fromCSV(String file){
-		return(new CSVFactory(file).getCorpus());
+		return(new CSVFactory(file,true).getCorpus());
 	}
 
 	public static Corpus fromCSV(String file,
@@ -219,6 +219,7 @@ public abstract class Corpus implements Iterable<Reference> {
 		if(citationFile.length()>0) {
 			Log.stdout("Adding citations");
 			String[][] rawlinks = CSVReader.read(citationFile, ";", "\"");
+			Log.stdout("Citation links to import : "+rawlinks.length);
 			for (String[] link : rawlinks) {
 				String from = link[0];
 				String to = link[1];

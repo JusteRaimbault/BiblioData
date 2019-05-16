@@ -384,6 +384,11 @@ public class MongoConnection {
         mongoCollection.updateMany(gt("depth",-1),inc("depth",1));
     }
 
+    public static void addTimeStamp(long ts,String collection){
+        MongoCollection<Document> mongoCollection = mongoDatabase.getCollection(collection);
+        mongoCollection.updateMany(gt("depth",-1),set("timestamp",ts));
+    }
+
     /**
      * set processing to false
      * @param collection
@@ -602,7 +607,7 @@ public class MongoConnection {
      * links as to,from
      * @return
      */
-    private static HashMap<String,String> getALlRawLinks(boolean from){
+    private static HashMap<String,String> getAllRawLinks(boolean from){
         MongoCollection<Document> origlinks = mongoDatabase.getCollection(Context.getCitationsCollection());
         HashMap<String,String> links = new HashMap<String,String>();
         for(Document l:origlinks.find()){

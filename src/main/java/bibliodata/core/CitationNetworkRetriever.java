@@ -27,19 +27,26 @@ public class CitationNetworkRetriever {
 
 			String action = args[0];
 
-			/**
-			 * Usage : $DATABASENAME $NREFS [$MAXPRIORITY]
-			 */
 			if(action.equals("--mongo")){
-				Log.stdout("Citation network from mongo");
-				String mongodb = args[1];
-				//String collection = args[2];
-				String refcollection = Context.getReferencesCollection();
-				String linkcollection = Context.getCitationsCollection();
-				int numrefs = Integer.parseInt(args[2]);
-				int maxPriority = Context.getMaxHorizontalDepth();
-				if(args.length==4){maxPriority=Integer.parseInt(args[3]);}
-				CitationNetwork.fillCitationsMongo(mongodb,refcollection,linkcollection,numrefs,maxPriority);
+			    if (args.length == 1){
+			        System.out.println("Constructing citation network from mongo. Usage : --citation --mongo \n"+
+                            "  $DATABASE : name of the database \n"+
+                            "  $NUMREFS : number of references for which to collect citations \n"+
+                            "  [$MAXPRIORITY] (optional) : maximal priority at which references are queried"
+                            );
+                }else {
+                    Log.stdout("Citation network from mongo");
+                    String mongodb = args[1];
+                    //String collection = args[2];
+                    String refcollection = Context.getReferencesCollection();
+                    String linkcollection = Context.getCitationsCollection();
+                    int numrefs = Integer.parseInt(args[2]);
+                    int maxPriority = Context.getMaxHorizontalDepth();
+                    if (args.length == 4) {
+                        maxPriority = Integer.parseInt(args[3]);
+                    }
+                    CitationNetwork.fillCitationsMongo(mongodb, refcollection, linkcollection, numrefs, maxPriority);
+                }
 			}
 
 
@@ -48,9 +55,18 @@ public class CitationNetworkRetriever {
 			 */
 			if(action.equals("--csv")) {
 
-				String refFile = "", outFile = "";
-				int depth = 0;
-				String citedFolder = "";
+			    if (args.length==1){
+			        System.out.println("Constructing citation network from csv. Usage : --citation --csv \n"+
+                            "  $CSVFILE : initial corpus file \n"+
+                            "  $OUTPUT_PREFIX : prefix for output file \n"+
+                            "  $DEPTH : up to which depth go \n"+
+                            "  [$CITEDFOLDER] (optional) : folder containing references bibliographies"
+                            );
+                }else {
+
+                    String refFile = "", outFile = "";
+                    int depth = 0;
+                    String citedFolder = "";
 
 				/*
 				if(args.length==5){
@@ -60,22 +76,23 @@ public class CitationNetworkRetriever {
 				}
 				*/
 
-				if (args.length == 3) {
-					refFile = args[0];
-					outFile = args[1];
-					depth = Integer.parseInt(args[2]);
-				} else {
-					if (args.length == 4) {
-						refFile = args[0];
-						outFile = args[1];
-						depth = Integer.parseInt(args[2]);
-						citedFolder = args[3];
-					}
-					// print usage
-					System.out.println("usage : java -jar citationNetwork.jar reffile outfile depth [cited] TEST");
-				}
+                    if (args.length == 3) {
+                        refFile = args[0];
+                        outFile = args[1];
+                        depth = Integer.parseInt(args[2]);
+                    } else {
+                        if (args.length == 4) {
+                            refFile = args[0];
+                            outFile = args[1];
+                            depth = Integer.parseInt(args[2]);
+                            citedFolder = args[3];
+                        }
+                        // print usage
+                        //System.out.println("usage : java -jar citationNetwork.jar reffile outfile depth [cited] TEST");
+                    }
 
-				CitationNetwork.buildCitationNetworkFromRefFile(refFile, outFile, depth, citedFolder);
+                    CitationNetwork.buildCitationNetworkFromRefFile(refFile, outFile, depth, citedFolder);
+                }
 			}
 
 		}

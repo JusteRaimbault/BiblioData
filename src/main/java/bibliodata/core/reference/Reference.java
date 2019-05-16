@@ -198,7 +198,7 @@ public class Reference {
 	 *   - ~order in citing : map citing ID -> depth~
 	 */
 	private HashMap<String,Integer> horizontalDepth = new HashMap<>();
-	public int getHorizontalDepth(String key){if(horizontalDepth.containsKey(key)){return(horizontalDepth.get(key));}else{return(-1);}}
+	public int getHorizontalDepth(String key){if(horizontalDepth.containsKey(key)){return(horizontalDepth.get(key).intValue());}else{return(-1);}}
     public HashMap<String,Integer> getHorizontalDepthMap(){return(horizontalDepth);}
 	public void setHorizontalDepth(String key,int value){
 		if(horizontalDepth!=null){
@@ -249,19 +249,22 @@ public class Reference {
 	 * @return value of attribute if exists, empty string otherwise
 	 */
 	public String getAttribute(String key){
-		if(attributes==null||!attributes.containsKey(key))return "";
-		return attributes.get(key);
+		if(!attributes.containsKey(key)){return("");}
+		return(attributes.get(key));
 	}
 
-
-
-	// graph visiting var not needed
-	//private boolean visitedDepth = false;
-	//private boolean visitedHorizontalDepth = false;
 
 	private long timestamp=Log.currentTimestamp(); // ts set when the ref is initially created, then modified when citingFilled achieved for example
 	public long getTimestamp(){return(timestamp);}
 	public void setTimestamp(long newts){timestamp=newts;}
+
+
+	// graph visiting variables -> not performant if has to reset at each call ? ok if origin is small ; otherwise in O(N2) - in that case use a map for linear time
+	private boolean visited = false;
+	public void setVisited(boolean b){visited = b;}
+	public boolean isVisited(){return(visited);}
+
+
 
 
 
@@ -347,19 +350,23 @@ public class Reference {
 	 * @param year year
 	 * @param attributes hashmap of attributes as strings
 	 * @return unique reference object with the given id
+	 *
+	 * TODO this function is key in the merging of refs during consolidation for example -> updating of citing should be accounted for (e.g. merging older refs with newer should add the newly collected citing)
+	 *
+	 *
 	 */
 	public static Reference construct(String id,String title, String year,HashMap<String,String> attributes){
 		Reference res = construct(id,title,year);
 
 		// merge attributes
 		// first add default in attr map if not present - fuck to not have the getOrElse
-		if(!attributes.containsKey("depth")){attributes.put("depth",Integer.toString(Integer.MAX_VALUE));}
-		if(!attributes.containsKey("priority")){attributes.put("priority",Integer.toString(Integer.MAX_VALUE));}
+		if(!attributes.containsKey("depth")||attributes.get("depth").length()==0){attributes.put("depth",Integer.toString(Integer.MAX_VALUE));}
+		if(!attributes.containsKey("priority")||attributes.get("priority").length()==0){attributes.put("priority",Integer.toString(Integer.MAX_VALUE));}
 		if(!attributes.containsKey("horizontalDepth")){attributes.put("horizontalDepth","");}
 		if(!attributes.containsKey("citingFilled")){attributes.put("citingFilled","false");}
 
 
-		// FIXME depth is not a raw attribute !
+		// FIXME depth is not a raw attribute ! -> but better for csv export ?
 		if(res.getAttribute("depth").length()>0){res.attributes.put("depth",Integer.toString(Math.min(Integer.parseInt(res.getAttribute("depth")),Integer.parseInt(attributes.get("depth")))));} else {res.attributes.put("depth",attributes.get("depth"));}
 		if(res.getAttribute("priority").length()>0){res.attributes.put("priority",Integer.toString(Math.min(Integer.parseInt(res.getAttribute("priority")),Integer.parseInt(attributes.get("priority")))));} else {res.attributes.put("priority",attributes.get("priority"));}
 		// merging horizdepths : reparse and merge hashmaps - ultra dirty - should have a generic trait Mergeable and different implementations
@@ -374,9 +381,13 @@ public class Reference {
 
 		// timestamp : depending on if citingFilled is true or not should choose ? anyway take the latest
 		// FIXME timestamp also not an attribute ? simpler to export as csv
-		if(res.getAttribute("timestamp").length()>0){
-			res.setAttribute("timestamp",Integer.toString(Math.max(Integer.parseInt(res.getAttribute("timestamp")),Integer.parseInt(attributes.get("timestamp")))));
-		}else{res.setAttribute("attribute",attributes.get("timestamp"));}
+		if (attributes.containsKey("timestamp")) {
+			if (res.getAttribute("timestamp").length() > 0) {
+				res.setAttribute("timestamp", Integer.toString(Math.max(Integer.parseInt(res.getAttribute("timestamp")), Integer.parseInt(attributes.get("timestamp")))));
+			} else {
+				res.setAttribute("attribute", attributes.get("timestamp"));
+			}
+		}
 
 		return(res);
 	}
@@ -454,9 +465,8 @@ public class Reference {
 
 	/**
 	 * propagates depth into the citation network
-	 * @param newDepth new depth to be set
-	 * @param origin the seq of refs from which the function has recursively been called - used to avoid loops
 	 */
+	/*
 	public void setDepthRec(int newDepth, HashSet<Reference> origin){
 
 		// FIXME "bug" (let say indesirable behavior) here as ref in the first layer for which depth has not been set will not be gone through if done sequentially
@@ -473,6 +483,14 @@ public class Reference {
 				c.setDepthRec(depth - 1, newOrigSeq);
 			}
 		}
+	}*/
+
+	public void setDepthRec(int newdepth){
+		if (!visited){
+			depth = Math.max(depth, newdepth);
+			visited = true;
+			for (Reference c : citing) {c.setDepthRec(newdepth - 1);}
+		}
 	}
 
 	/**
@@ -480,40 +498,61 @@ public class Reference {
 	 * @param newDepth
 	 */
 	public void setDepth0(int newDepth){
-		Log.stdout("Set depth : "+id);
-		setDepthRec(newDepth,new HashSet<>());
+		//Log.stdout("Set depth : "+id);
+		for(Reference r: Reference.getReferences()){r.setVisited(false);}
+		setDepthRec(newDepth);
 	}
 
 	/**
 	 * set and propagates horizontal depth into the citation network
 	 *   - was not secure to reciprocal citations => indeed happens : add provenance ? could be loops - needs a visited
-	 * @param origin provenance of the ref
-	 * @param depth level in the query
+	 *
 	 */
-	public void setHorizontalDepthRec(String origin,int depth,HashSet<Reference> chain){
+	// FIXME this function DOES NOT WORK - why is an other matter ... - looks like id are messing around and infinite loops are created
+	/*public void setHorizontalDepthRec(String origin,int depth,HashSet<String> chain){
 
+		Log.stdout("Set hdepth : "+getId()+" - d = "+depth+" - "+chain.size());
 
-		if (horizontalDepth.containsKey(origin)) {
-			horizontalDepth.put(origin, new Integer(Math.min(depth, horizontalDepth.get(origin).intValue())));
+		if (getHorizontalDepthMap().containsKey(origin)) {
+			setHorizontalDepth(origin, new Integer(Math.min(depth, getHorizontalDepth(origin))));
 		} else {
-			horizontalDepth.put(origin, new Integer(depth));
+			setHorizontalDepth(origin, new Integer(depth));
 		}
 
-		HashSet<Reference> newOrigSeq = new HashSet<>(chain);
-		newOrigSeq.add(this);
+		HashSet<String> newOrigSeq = new HashSet<>(chain);
+		newOrigSeq.add(getId());
 
-		for (Reference c : citing) {
-			if(!chain.contains(c)) {
+		Log.stdout("  rec calls : "+getCiting().size());
+		for (Reference c : getCiting()) {
+			if(!chain.contains(c.getId())) {
+				Log.stdout(" --- from "+getId());
+				StringBuilder sb = new StringBuilder();for(String s:chain){sb.append(s+" ; ");}
+				Log.stdout(" --- chain is "+sb.toString());
 				c.setHorizontalDepthRec(origin, depth,newOrigSeq);
 			}
 		}
 
+	}*/
+
+	public void setHorizontalDepthRec(String origin, int newdepth) {
+		if (!visited){
+			if (getHorizontalDepthMap().containsKey(origin)) {
+				setHorizontalDepth(origin, new Integer(Math.min(newdepth, getHorizontalDepth(origin))));
+			} else {
+				setHorizontalDepth(origin, new Integer(newdepth));
+			}
+			visited = true;
+			for (Reference c : getCiting()) {
+				setHorizontalDepthRec(origin,newdepth);
+			}
+		}
 	}
 
 
-	public void setHorizontalDepth0(String origin, int depth){
-		Log.stdout("Set hdepth : "+id);
-		setHorizontalDepthRec(origin,depth,new HashSet<>());
+	public void setHorizontalDepth0(String origin, int newdepth){
+		//Log.stdout(" ----- Set hdepth : "+id+" ------");
+		for(Reference r :Reference.getReferences()){r.setVisited(false);}
+		setHorizontalDepthRec(origin,newdepth);
 	}
 
 	
