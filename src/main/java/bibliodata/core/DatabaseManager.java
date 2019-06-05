@@ -25,7 +25,8 @@ public class DatabaseManager {
                 "| --priority $DATABASE $MAXDEPTH\n"+
                 "| --timestamp $DATABASE $TIMESTAMP\n"+
                 "| --export $DATABASE $FILE [$MAXPRIORITY] [$MAXDEPTH] [$WITHABSTRACTS]\n"+
-                "| --exportconso $FILE $MAXPRIORITY $MAXDEPTH $D1 $D2 ..."
+                "| --exportconso $FILE $MAXPRIORITY $MAXDEPTH $D1 $D2 ... \n"+
+                "| --consolidate $DB1 ... $DBN"
         );}else {
 
             String action = args[0];
@@ -195,6 +196,20 @@ public class DatabaseManager {
                     }
                 }
 
+            }
+
+            if (action.equals("--consolidate")){
+                if (args.length==1){
+                    System.out.println("Consolidate databases into a single database (by default 'consolidation'). Usage : --database --consolidate \n"+
+                            "   $DB1 ... $DBN : database to consolidate"
+                            );
+                }else {
+                    LinkedList<String> dbs = new LinkedList<>();
+                    for (int i = 1; i < args.length; i++) {
+                        dbs.add(args[i]);
+                    }
+                    MongoConnection.consolidate(dbs);
+                }
             }
 
 

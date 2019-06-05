@@ -195,8 +195,15 @@ public abstract class Corpus implements Iterable<Reference> {
 		return(initial);
 	}
 
+	/**
+	 * Get an ordered corpus from csv
+	 * @param file
+	 * @return
+	 */
 	public static OrderedCorpus fromCSV(String file){
-		return(new CSVFactory(file,true).getCorpus());
+		// FIXME with header or not is a mess
+		//return(new CSVFactory(file,true).getCorpus());
+		return(new CSVFactory(file,false).getCorpus());
 	}
 
 	public static Corpus fromCSV(String file,
@@ -243,6 +250,7 @@ public abstract class Corpus implements Iterable<Reference> {
 
 			Log.stdout("horizontalDepth ok");
 
+			// note : set depth only with an order ref file ? yes as assumed as initial layer
 			for(int i = 0 ; i<order.orderedRefs.size();i++) {
 				Log.stdout("depth ordered ref "+Integer.toString(i));
 				order.orderedRefs.get(i).setDepth0(initDepth);

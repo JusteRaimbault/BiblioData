@@ -49,6 +49,9 @@ public class Context {
     public static void setMongoPort(int port){Context.mongoPort=port;}
     public static int getMongoPort(){return(Context.mongoPort);}
 
+    private static String centralDatabase = "consolidated";
+    public static void setCentralDatabase(String db){centralDatabase = db;}
+    public static String getCentralDatabase(){return(centralDatabase);}
 
     /**
      * scholar api

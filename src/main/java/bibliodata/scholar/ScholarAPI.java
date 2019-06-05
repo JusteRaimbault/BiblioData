@@ -271,7 +271,7 @@ public class ScholarAPI {
 	 *
 	 * @param corpus
 	 */
-	public static void fillIdAndCitingRefs(Corpus corpus){
+	public static void fillIdAndCitingRefs(Corpus corpus,String consolidationDatabase){
 		try{
 			int totalRefs = corpus.references.size();int p=0;
 			for(Reference r:corpus.references){
@@ -294,7 +294,8 @@ public class ScholarAPI {
 						 *
 						 */
 
-						Reference rr;
+						//Reference rr;
+						Reference rr = MongoConnection.
 
 						// FIXME require ref details only if no ID -> should be an option to get other available fields
 						// FIXME also we should not have null pointers

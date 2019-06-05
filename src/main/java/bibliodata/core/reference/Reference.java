@@ -44,6 +44,11 @@ public class Reference {
 	 */
 	public static void removeReference(Reference r){references.remove(r);}
 
+	/**
+	 * Empty ref - the way equals is written imposes the weird id
+	 */
+	public static final Reference empty = new Reference("","-----------EMPTY-----------");
+	public boolean isEmpty = this.equals(empty);
 
 	/**
 	 * Secondary id

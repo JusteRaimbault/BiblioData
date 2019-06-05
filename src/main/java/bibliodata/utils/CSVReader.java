@@ -23,8 +23,10 @@ public class CSVReader {
 		   LinkedList<String[]> listRes = new LinkedList<String[]>();
 		   String currentLine = reader.readLine().replace(quote, ""); // juste remove the quotes
 		   while(currentLine!= null){
-			   listRes.addLast(currentLine.split(delimiter));
-			   currentLine = reader.readLine();
+			   if(!currentLine.startsWith("#")) {
+				   listRes.addLast(currentLine.split(delimiter));
+			   }
+		   	   currentLine = reader.readLine();
 			   if(currentLine != null){currentLine = currentLine.replace(quote, "");}
 		   }
 		   reader.close();

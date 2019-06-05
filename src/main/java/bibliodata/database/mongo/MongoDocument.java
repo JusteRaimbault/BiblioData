@@ -47,43 +47,58 @@ public class MongoDocument {
      * @return
      */
     public static Reference fromDocument(Document document){
-        String id = document.getString("id");
-        String title = document.getString("title");// every doc should have title
-        String year = document.getString("year");
-        if(year==null){year="NA";}
+        if(document.keySet().size()==0){return(Reference.empty);}//better avoid returning null
+        else {
+            String id = document.getString("id");
 
-        // add additional attributes by hand
-        // FIXME data structure is messy and not secure - either systematize setters/getters, or go to scala ?
-        // -> case class : immutable references / Links ? easy to combine with mongo cursors ?
+            String title = document.getString("title");// every doc should have title
+            String year = document.getString("year");
+            if (year == null) {
+                year = "NA";
+            }
 
-        String horizDepth = "";
-        if(document.containsKey("horizontalDepth")){
-            for(String k :((Document) document.get("horizontalDepth")).keySet()){horizDepth=horizDepth+","+k+":"+((Document) document.get("horizontalDepth")).getInteger(k).toString();}
-            //r.addAttribute("horizontalDepth",v.substring(1));
-            if(horizDepth.length()>0){horizDepth = horizDepth.substring(1);}// remove first comma
+            // add additional attributes by hand
+            // FIXME data structure is messy and not secure - either systematize setters/getters, or go to scala ?
+            // -> case class : immutable references / Links ? easy to combine with mongo cursors ?
+
+            String horizDepth = "";
+            if (document.containsKey("horizontalDepth")) {
+                for (String k : ((Document) document.get("horizontalDepth")).keySet()) {
+                    horizDepth = horizDepth + "," + k + ":" + ((Document) document.get("horizontalDepth")).getInteger(k).toString();
+                }
+                //r.addAttribute("horizontalDepth",v.substring(1));
+                if (horizDepth.length() > 0) {
+                    horizDepth = horizDepth.substring(1);
+                }// remove first comma
+            }
+
+            String depth = "";
+            if (document.containsKey("depth")) {
+                depth = Integer.toString(document.getInteger("depth"));
+                //r.addAttribute("depth",Integer.toString(document.getInteger("depth")));
+            }
+
+            String priority = "";
+            if (document.containsKey("priority") && document.get("priority").toString().length() > 0) {
+                priority = Integer.toString(document.getInteger("priority"));
+                //r.addAttribute("priority",Integer.toString(document.getInteger("priority")));
+            }
+
+            // construct attributes
+            HashMap<String, String> attrs = new HashMap<>();
+            attrs.put("horizontalDepth", horizDepth);
+            attrs.put("depth", depth);
+            attrs.put("priority", priority);
+
+            Reference r = Reference.construct(id, title, year, attrs);
+
+            // check if citingFilled and add if exists (case for consolidated refs)
+            if (document.containsKey("citingFilled")) {
+                r.setCitingFilled(document.getBoolean("citingFilled"));
+            }
+
+            return (r);
         }
-
-        String depth = "";
-        if(document.containsKey("depth")){
-            depth = Integer.toString(document.getInteger("depth"));
-            //r.addAttribute("depth",Integer.toString(document.getInteger("depth")));
-        }
-
-        String priority = "";
-        if(document.containsKey("priority")&&document.get("priority").toString().length()>0){
-            priority = Integer.toString(document.getInteger("priority"));
-            //r.addAttribute("priority",Integer.toString(document.getInteger("priority")));
-        }
-
-        // construct attributes
-        HashMap<String,String> attrs = new HashMap<>();
-        attrs.put("horizontalDepth",horizDepth);
-        attrs.put("depth",depth);
-        attrs.put("priority",priority);
-
-        Reference r = Reference.construct(id,title,year,attrs);
-
-        return(r);
     }
 
     public static LinkedList<Document> citationLinksFromReference(Reference reference) {
