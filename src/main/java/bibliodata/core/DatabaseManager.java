@@ -3,6 +3,7 @@ package bibliodata.core;
 
 
 import bibliodata.Context;
+import bibliodata.database.mongo.MongoCommand;
 import bibliodata.database.mongo.MongoConnection;
 import bibliodata.database.mongo.MongoImport;
 import bibliodata.database.mongo.MongoExport;
@@ -97,7 +98,7 @@ public class DatabaseManager {
                             );
                 }else {
                     MongoConnection.initMongo(args[1]);
-                    MongoConnection.incrAllDepths(Context.getReferencesCollection());
+                    MongoCommand.incrAllDepths(Context.getReferencesCollection());
                     MongoConnection.closeMongo();
                 }
             }
@@ -110,7 +111,7 @@ public class DatabaseManager {
                             );
                 }else {
                     MongoConnection.initMongo(args[1]);
-                    MongoConnection.notProcessing(Context.getReferencesCollection());
+                    MongoCommand.notProcessing(Context.getReferencesCollection());
                     MongoConnection.closeMongo();
                 }
             }
@@ -123,7 +124,7 @@ public class DatabaseManager {
                             );
                 }else {
                     MongoConnection.initMongo(args[1]);
-                    MongoConnection.computePriorities(Integer.parseInt(args[2]));
+                    MongoCommand.computePriorities(Integer.parseInt(args[2]));
                     MongoConnection.closeMongo();
                 }
             }
@@ -138,7 +139,7 @@ public class DatabaseManager {
                     long ts = 0;
                     if (args[2].equals("now")){ts = Log.currentTimestamp();}else {ts = Long.parseLong(args[2]);}
                     MongoConnection.initMongo(args[1]);
-                    MongoConnection.addTimeStamp(ts,Context.getReferencesCollection());
+                    MongoCommand.addTimeStamp(ts,Context.getReferencesCollection());
                     MongoConnection.closeMongo();
                 }
             }
@@ -208,7 +209,7 @@ public class DatabaseManager {
                     for (int i = 1; i < args.length; i++) {
                         dbs.add(args[i]);
                     }
-                    MongoConnection.consolidate(dbs);
+                    MongoCommand.consolidate(dbs);
                 }
             }
 

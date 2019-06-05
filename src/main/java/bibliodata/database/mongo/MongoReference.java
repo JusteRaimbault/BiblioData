@@ -91,7 +91,9 @@ public class MongoReference {
         if(existing.isEmpty||(!existing.isCitingFilled())){return(existing);}
         else{
             // need to fill citing refs
-            LinkedList<Reference> citing = getCiting(existing.getId());
+            LinkedList<Reference> citing = MongoCitation.getCiting(existing.getId());
+            existing.setCiting(citing);
+            return(existing);
         }
     }
 
@@ -100,7 +102,7 @@ public class MongoReference {
      * @param id
      * @return
      */
-    private static Reference getRawReference(String id){
+    public static Reference getRawReference(String id){
         return(MongoDocument.fromDocument(MongoRequest.findOne(Context.getReferencesCollection(),"id",id)));
     }
 
@@ -124,6 +126,12 @@ public class MongoReference {
         return(origrefs);
     }
 
+    /**
+     * Get refs as documents, given a maximal priority
+     * @param maxPriority
+     * @param maxDepth
+     * @return
+     */
     public static HashMap<String,Document>  getRefsPriorityAsDocuments(int maxPriority,int maxDepth){
         MongoCollection<Document> mongoCollection = MongoConnection.getCollection(Context.getReferencesCollection());
         HashMap<String,Document> res = new HashMap<String,Document>();

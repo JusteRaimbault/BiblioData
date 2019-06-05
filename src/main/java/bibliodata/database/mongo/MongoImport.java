@@ -71,7 +71,7 @@ public class MongoImport {
             links.add(new Document("from",from).append("to",to));
         }
 
-        MongoConnection.mongoInsert(citcollection,links);
+        MongoRequest.insert(citcollection,links);
     }
 
     /**
@@ -94,7 +94,7 @@ public class MongoImport {
         }
 
         // better updating to avoid duplicates also in initial import
-        MongoConnection.updateCorpus(corpus,refcollection,citcollection);
+        MongoCorpus.updateCorpus(corpus,refcollection,citcollection);
 
         MongoConnection.closeMongo();
     }

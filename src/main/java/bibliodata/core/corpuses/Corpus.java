@@ -40,12 +40,12 @@ public abstract class Corpus implements Iterable<Reference> {
 	
 	
 	/**
-	 * Get citing refs.
+	 * Get citing refs (no consolidation)
 	 * 
 	 * @return this corpus
 	 */
 	public Corpus fillCitingRefs(){
-		ScholarAPI.fillIdAndCitingRefs(this);
+		ScholarAPI.fillIdAndCitingRefs(this,"");
 		return this;
 	}
 	

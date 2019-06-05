@@ -53,8 +53,8 @@ public class MongoCommand {
      *  - for each max depth ref, get citing, compute min while constructing the graph
      */
     public static void computePriorities(int maxVerticalDepth){
-        HashMap<String,Document> allrefs = getAllRefs(maxVerticalDepth);
-        HashMap<String,LinkedList<String>> links = getAllLinks();
+        HashMap<String,Document> allrefs = MongoReference.getAllRefsAsDocuments(maxVerticalDepth);
+        HashMap<String,LinkedList<String>> links = MongoCitation.getAllLinksMap();
 
         LinkedList<Document> currentDepth = new LinkedList<Document>();
         for(Document d:allrefs.values()){if(d.getInteger("depth")==maxVerticalDepth){currentDepth.add(d);}}
@@ -70,7 +70,7 @@ public class MongoCommand {
             LinkedList<Document> nextdepth = new LinkedList<Document>();
 
             for(Document d: currentDepth){
-                LinkedList<Document> citing = getCitingAsDocuments(d,allrefs,links);
+                LinkedList<Document> citing = MongoCitation.getCitingAsDocuments(d,allrefs,links);
                 int currentPriority = Context.getMaxHorizontalDepth();
                 if(d.containsKey("horizontalDepth")){
                     Document h = (Document) d.get("horizontalDepth");
@@ -102,7 +102,7 @@ public class MongoCommand {
         // update in database
         Log.stdout("Priorities : updating "+priorities.size()+" references");
         for(String toupdate:priorities.keySet()){
-            mongoUpdate("references","id",toupdate, "priority", priorities.get(toupdate).intValue());
+            MongoRequest.update("references","id",toupdate, "priority", priorities.get(toupdate).intValue());
         }
     }
 
@@ -112,13 +112,13 @@ public class MongoCommand {
      * @param databases
      */
     public static void consolidate(LinkedList<String> databases){
-        Corpus all = getConsolidatedCorpus(databases,-1,-1);
+        Corpus all = MongoCorpus.getConsolidatedCorpus(databases,-1,-1);
 
         // TODO should take into account citation updates here
 
-        initMongo(Context.getCentralDatabase());
-        updateCorpus(all, Context.getReferencesCollection(),Context.getCitationsCollection());
-        closeMongo();
+        MongoConnection.initMongo(Context.getCentralDatabase());
+        MongoCorpus.updateCorpus(all, Context.getReferencesCollection(),Context.getCitationsCollection());
+        MongoConnection.closeMongo();
     }
 
 
@@ -129,13 +129,13 @@ public class MongoCommand {
      * @param targetDB
      * @param maxHorizDepth
      */
-    // FIXME method not finished
+    // FIXME method not finished - anyway not used
     public static void filterDatabase(String originDB,String targetDB,int maxHorizDepth,int maxVerticalDepth) {
-        initMongo(originDB);
+        MongoConnection.initMongo(originDB);
 
         LinkedList<Document> newrefs = new LinkedList<Document>();
 
-        HashMap<String,Document> origrefs = getAllRefs(maxVerticalDepth);
+        HashMap<String,Document> origrefs = MongoReference.getAllRefsAsDocuments(maxVerticalDepth);
 
         for(Document d:origrefs.values()){
             // filter by hand : first level = max depth, maxHorizDepth
@@ -174,13 +174,13 @@ public class MongoCommand {
      * @param success
      */
     public static void logIP(String ip,boolean success,int collectedRefs) {
-        MongoCollection<Document> mongoCollection = mongoDatabase.getCollection(Context.getNetstatCollection());
+        MongoCollection<Document> mongoCollection = MongoConnection.getCollection(Context.getNetstatCollection());
         String timestamp = new Long((new Date()).getTime()).toString();
 
         Document toinsert = new Document("ip",ip).append("success",success).append("ts",timestamp);
         mongoCollection.insertOne(toinsert);
 
-        Document existingcount = mongoFindOne(Context.getNetstatCollection(),"ipcount",ip);
+        Document existingcount = MongoRequest.findOne(Context.getNetstatCollection(),"ipcount",ip);
         if(existingcount.keySet().size()>0){
             mongoCollection.updateOne(eq("ipcount",ip),inc("docs",collectedRefs));
         }else{

@@ -70,6 +70,12 @@ public class Reference {
 		// but allow it - in the case of ghost references with no id, when title only is used for hashcode and equals
 		id=newid;
 	}
+	public boolean hasId() {
+		if(id==null){return(false);} // FIXME id should NEVER be null
+		if(id.length()==0){return(false);}
+		// else any non empty string could be considered as an id - could include here regex specification
+		return(true);
+	}
 
 	/**
 	 * Title
@@ -184,6 +190,7 @@ public class Reference {
 	public HashSet<Reference> getCiting(){return(citing);}
 	public void setCiting(Reference r){citing.add(r);}
 	public void setCiting(HashSet<Reference> refs){for(Reference r:refs){setCiting(r);}}
+	public void setCiting(Collection<Reference> refs){setCiting(new HashSet(refs));}
 
 
 	private boolean citingFilled = false;

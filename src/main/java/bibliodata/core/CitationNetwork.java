@@ -13,7 +13,9 @@ import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.corpuses.DefaultCorpus;
 import bibliodata.core.reference.Reference;
 import bibliodata.database.mongo.MongoConnection;
+import bibliodata.database.mongo.MongoCorpus;
 import bibliodata.database.mongo.MongoDocument;
+import bibliodata.database.mongo.MongoReference;
 import bibliodata.scholar.ScholarAPI;
 import bibliodata.database.sql.CybergeoImport;
 import bibliodata.database.sql.SQLConnection;
@@ -40,6 +42,7 @@ public class CitationNetwork {
 	 * @param refcollection
 	 * @param linkcollection
 	 * @param numrefs
+	 * TODO add consolidation database option
 	 */
 	public static void fillCitationsMongo(String database,String refcollection,String linkcollection,int numrefs,int maxPriority){
 
@@ -52,11 +55,11 @@ public class CitationNetwork {
 		MongoConnection.initMongo(database);
 
 		for(int i = 0;i<numrefs;i++){
-			Reference r = MongoConnection.getUnfilled(refcollection,maxPriority);
+			Reference r = MongoReference.getUnfilled(refcollection,maxPriority);
 			if(r==null){break;}
 			Log.stdout("Unfilled ref : "+r.toString());
-			ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r));
-			MongoConnection.updateCorpus(new DefaultCorpus(r,r.getCiting()),refcollection,linkcollection);
+			ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r),"");
+			MongoCorpus.updateCorpus(new DefaultCorpus(r,r.getCiting()),refcollection,linkcollection);
 		}
 
 		// corpus need to be updated at each loop to iterate on depth !
@@ -75,7 +78,7 @@ public class CitationNetwork {
 		
 		for(Reference r:base){
 			if(!existing.references.contains(r)){
-			  ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r));
+			  ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r),"");
 			  // export
 			  new DefaultCorpus(Reference.getReferences()).csvExport(outFile,false);
 			}
@@ -95,11 +98,11 @@ public class CitationNetwork {
 		try{TorPoolManager.setupTorPoolConnexion(true);}catch(Exception e){e.printStackTrace();}
 		ScholarAPI.init();
 		
-		System.out.println("Reconstructing References from file "+refFile);
+		Log.stdout("Reconstructing References from file "+refFile);
 		
 		Corpus initial = Corpus.fromNodeFile(refFile,citedFolder);
 
-		System.out.println("Number of References : "+Reference.getNumberOfReferences());
+		Log.stdout("Number of References : "+Reference.getNumberOfReferences());
 
 		//load out file to get refs already retrieved in a previous run
 		Corpus existing = new DefaultCorpus();
@@ -107,12 +110,12 @@ public class CitationNetwork {
 			existing = new CSVFactory(outFile).getCorpus();
 		}
 
-		System.out.println("Already got : "+existing.references.size());
+		Log.stdout("Already got : "+existing.references.size());
 
 		//System.out.println("Initial Refs : ");for(Reference r:Reference.references.keySet()){System.out.println(r.toString());}
 		
 		for(int d=1;d<=depth;d++){
-		  System.out.println("Getting Citation Network, depth "+d);
+		  Log.stdout("Getting Citation Network, depth "+d);
 		  buildCitationNetwork(outFile,existing);
 		}
 
@@ -145,10 +148,10 @@ public class CitationNetwork {
 		ScholarAPI.init();
 		
 		//import database
-		System.out.println("Setting up from sql...");
+		Log.stdout("Setting up from sql...");
 		SQLConnection.setupSQL("Cybergeo");
 		Set<Reference> initialRefs = CybergeoImport.importBase("WHERE  `datepubli` >=  '2003-01-01' AND  `resume` !=  '' AND  `titre` != ''");
-		System.out.println("References :  : "+Reference.getNumberOfReferences());
+		Log.stdout("References :  : "+Reference.getNumberOfReferences());
 		
 		
 		// construct network
@@ -162,13 +165,14 @@ public class CitationNetwork {
 	
 	
 	
-	
+
+	// FIXME externalize tests for reproducibility
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 
-		buildCitationNetworkFromRefFile("../../../Reflexivity/data/test.bib","../../../Reflexivity/data/testout",1,"");
+		//buildCitationNetworkFromRefFile("../../../Reflexivity/data/test.bib","../../../Reflexivity/data/testout",1,"");
 		
 		//TorPool.forceStopPID(1971, 2020);
 		
@@ -178,18 +182,18 @@ public class CitationNetwork {
 		
 		//buildCitationNetworkFromRefFile("/Users/Juste/Documents/ComplexSystems/Cybergeo/Data/processed/2003_frenchTitles_fullbase.ris","res/citation/cybergeo.gexf");
 		
-		/*
+
 		//String[] keywords = {"land+use+transport+interaction","city+system+network","network+urban+modeling","population+density+transport","transportation+network+urban+growth","urban+morphogenesis+network"};
 		
-		String[] keywords = {"land+use+transport+interaction"};
+		//String[] keywords = {"land+use+transport+interaction"};
 		
-		buildGeneralizedNetwork(
-				"/Users/Juste/Documents/ComplexSystems/CityNetwork/Models/Biblio/AlgoSR/cit/refs_",
-				keywords,
-				"res/citation/citations",
-				20);
+		//buildGeneralizedNetwork(
+	//			"/Users/Juste/Documents/ComplexSystems/CityNetwork/Models/Biblio/AlgoSR/cit/refs_",
+	//			keywords,
+	//			"res/citation/citations",
+	//			20);
 				
-		*/
-	}
+
+	}*/
 
 }

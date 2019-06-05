@@ -6,6 +6,7 @@ import com.mongodb.client.model.UpdateOptions;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +59,7 @@ public class MongoRequest {
      * @param value
      * @return
      */
-    public static List<Document> find(String collection,String key,Object value){
+    public static LinkedList<Document> find(String collection, String key, Object value){
         MongoCollection<Document> mongoCollection = MongoConnection.getCollection(collection);
         FindIterable res = mongoCollection.find(eq(key,value));
         LinkedList<Document> found = new LinkedList<>();

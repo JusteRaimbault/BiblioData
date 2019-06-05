@@ -60,7 +60,7 @@ public class MongoCitation {
      * @param alllinks
      * @return
      */
-    private static LinkedList<Document> getCitingAsDocuments(Document cited,HashMap<String,Document> alldocs,HashMap<String,LinkedList<String>> alllinks){
+    public static LinkedList<Document> getCitingAsDocuments(Document cited,HashMap<String,Document> alldocs,HashMap<String,LinkedList<String>> alllinks){
         LinkedList<Document> docs = new LinkedList<Document>();
         docs.add(cited);
         return(getCitingAsDocuments(docs,alldocs,alllinks));
@@ -69,15 +69,19 @@ public class MongoCitation {
 
 
     /**
-     * get citing given cited id
+     * get citing References given cited id
      * @param citedId
      * @return
      */
-    /*private static LinkedList<Reference> getCiting(String citedId){
-        LinkedList<Reference> res = new LinkedList<Document>();
-        LinkedList<Document> links = mongoFind()
-                // FIXME
-    }*/
+    public static LinkedList<Reference> getCiting(String citedId){
+        LinkedList<Reference> res = new LinkedList<>();
+        LinkedList<Document> links = MongoRequest.find(Context.getCitationsCollection(),"to",citedId);
+        for(Document link:links){
+            // \!/ DANGER - getReference / getRawReference is not optimal, risk of self recursive infinite call
+            res.add(MongoReference.getRawReference(link.getString("from")));//link has necessarily 'from' record
+        }
+        return(res);
+    }
 
 
     /**
@@ -102,7 +106,7 @@ public class MongoCitation {
      * links as to,from
      * @return
      */
-    private static HashMap<String,String> getAllLinksRaw(boolean from){
+    public static HashMap<String,String> getAllLinksRawMap(boolean from){
         MongoCollection<Document> origlinks = MongoConnection.getCollection(Context.getCitationsCollection());
         HashMap<String,String> links = new HashMap<String,String>();
         for(Document l:origlinks.find()){

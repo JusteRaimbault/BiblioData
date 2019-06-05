@@ -10,6 +10,7 @@ import bibliodata.Context;
 import bibliodata.core.AlgorithmicSystematicReview;
 
 import bibliodata.database.mongo.MongoConnection;
+import bibliodata.database.mongo.MongoReference;
 import bibliodata.mendeley.MendeleyAPI;
 import bibliodata.scholar.ScholarAPI;
 import bibliodata.utils.Log;
@@ -96,12 +97,12 @@ public class AbstractSetRetriever {
 				MongoConnection.initMongo(database);
 
 				for(int i = 0;i<numrefs;i++){
-					Reference r = MongoConnection.getUnfilled(refcollection, Context.getMaxHorizontalDepth());
+					Reference r = MongoReference.getUnfilled(refcollection, Context.getMaxHorizontalDepth());
 					if(r==null){break;}
 					Log.stdout("Unfilled ref : "+r.toString());
 					Reference detailed = MendeleyAPI.getReference(r.getTitle().title,r.getYear(),r.getId());
 					if(detailed!=null){
-						MongoConnection.updateReference(r,refcollection);
+						MongoReference.updateReference(r,refcollection);
 					}
 				}
 

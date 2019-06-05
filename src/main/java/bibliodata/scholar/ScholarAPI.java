@@ -15,7 +15,9 @@ import bibliodata.core.reference.Abstract;
 import bibliodata.core.reference.Reference;
 import bibliodata.core.reference.Title;
 
+import bibliodata.database.mongo.MongoCommand;
 import bibliodata.database.mongo.MongoConnection;
+import bibliodata.database.mongo.MongoReference;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.CookieStore;
@@ -278,6 +280,7 @@ public class ScholarAPI {
 				Log.stdout("Getting cit for ref "+r.toString());
 
 				// FIXME first condition is not correct, could refill refs at a more recent date
+				// FIXME why 1 and not 0 ?
 				if(r.getCiting().size()>1||r.isCitingFilled()){
 					Log.stdout("Citing refs already filled : "+r.getCiting().size()+" refs");
 				}
@@ -294,24 +297,36 @@ public class ScholarAPI {
 						 *
 						 */
 
-						//Reference rr;
-						Reference rr = MongoConnection.
+						// Either : no id => must collect ; or id but not in mongo - or in mongo but not citing filled
+						//
+						/*if (r.hasId()){
+
+						}else {
+							// if no id cannot consolidate anyway ? yes - after having collected (! mode where always id ?)
+
+						}*/
+
+						Reference rr;// = Reference.empty;
+						if (consolidationDatabase.length()>0){if (r.hasId()) r = MongoReference.getReference(r.getId());}
+
 
 						// FIXME require ref details only if no ID -> should be an option to get other available fields
 						// FIXME also we should not have null pointers
-						if(r.getId()==null||r.getId()==""){rr = getScholarRef(r);}else{rr=r;}
+						if(!r.hasId()){rr = getScholarRef(r);}else{rr=r;}
 
+						// FIXME do not collect if retrieven from mongo
 						if(rr!=null){
 							Log.stdout("ID : "+rr.getId());
 							//r.scholarID=rr.scholarID;//no need as rr and r should be same pointer ?
 							// FIXME with unique ids, this never happens
-							//if(!rr.equals(r)){Reference.references.remove(r);} //contradiction with hashconsing ?
+							//if(!rr.equals(r)){Reference.references.remove(r);} //contradiction with hashconsing ? - DIRTY
 							if(!rr.equals(r)){Reference.removeReference(r);}
 							r=rr;
 
 							//  limit of max cit number -> global parameter - shouldnt be larger than 1000 (failure in collection then)
 							List<Reference> citing = scholarRequest(r.getId(),Context.getScholarMaxRequests(),"cites");
-							for(Reference c:citing){r.setCiting(c);}
+							//for(Reference c:citing){r.setCiting(c);}
+							r.setCiting(citing);
 						}
 
 						r.setCitingFilled(true);
@@ -327,8 +342,8 @@ public class ScholarAPI {
 					}catch(Exception e){e.printStackTrace();}
 				}
 
-				// FIXME does not make sense in Mongo mode (ref by ref)
-				Log.purpose("progress","Corpus "+corpus.name+" : citing refs : "+(100.0 * (1.0*p) / (1.0*totalRefs))+ " % ; ref "+r.toString());p++;
+				// does not make sense in Mongo mode (ref by ref) -> removed
+				//Log.purpose("progress","Corpus "+corpus.name+" : citing refs : "+(100.0 * (1.0*p) / (1.0*totalRefs))+ " % ; ref "+r.toString());p++;
 
 			}
 		}catch(Exception e){e.printStackTrace();}
@@ -361,7 +376,7 @@ public class ScholarAPI {
 
 				    // store for systematic stats of blocked adress (may have patterns in blocking policy)
 					//  how to get ref retrieved by this ip only ? : store last increase
-					if(Context.getLogips()) MongoConnection.logIP(TorPoolManager.currentIP,false,0);
+					if(Context.getLogips()) MongoCommand.logIP(TorPoolManager.currentIP,false,0);
 
 					// FIXME port exclusivity as a global parameter ?
 				    TorPoolManager.switchPort(true);
@@ -377,7 +392,7 @@ public class ScholarAPI {
 			// at this stage the ip is accepted
 			// tricky to get exact number of refs ? -> put counter with ip in base
 			// a supplementary dom corresponds roughly to 10 more (potential) references
-			if(Context.getLogips()) MongoConnection.logIP(TorPoolManager.currentIP,true,10);
+			if(Context.getLogips()) MongoCommand.logIP(TorPoolManager.currentIP,true,10);
 
 		}catch(Exception e){e.printStackTrace();}
 		return dom;
