@@ -267,6 +267,9 @@ public abstract class Corpus implements Iterable<Reference> {
 			// citingFilled can be set to true for all upper levels
 			int deepest = Reference.getMinimalDepth();
 			for(Reference r:Reference.getReferences()){if (r.getDepth()>deepest){r.setCitingFilled(true);}}
+		}else {
+			// if no order file is provided, set depth of all refs to initDepth
+			for(Reference r:Reference.getReferences()){r.setDepth(initDepth);}
 		}
 
 		return(initial);
