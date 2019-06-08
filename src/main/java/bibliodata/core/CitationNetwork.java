@@ -59,6 +59,8 @@ public class CitationNetwork {
 			if(r==null){break;}
 			Log.stdout("Unfilled ref : "+r.toString());
 			ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r),consolidationDatabase);
+			// db may have been switched by consolidation
+			MongoConnection.switchMongo(database);
 			MongoCorpus.updateCorpus(new DefaultCorpus(r,r.getCiting()),refcollection,linkcollection);
 		}
 

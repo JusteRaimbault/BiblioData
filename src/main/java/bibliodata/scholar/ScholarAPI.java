@@ -298,10 +298,13 @@ public class ScholarAPI {
 						 */
 
 						Reference rr = Reference.empty;
-						if (consolidationDatabase.length()>0){
-							if (r.hasId()) rr = MongoReference.getReference(r.getId());
+						if (consolidationDatabase.length()>0&r.hasId()){
+							MongoConnection.switchMongo(consolidationDatabase);
+							rr = MongoReference.getReference(r.getId());
 							Log.stdout("Ref "+rr.getId()+" got from mongo");
-						} else {
+						}
+
+						if(rr.isEmpty()) {
 							// FIXME require ref details only if no ID -> should be an option to get other available fields
 							// FIXME also we should not have null pointers
 							if(!r.hasId()){

@@ -69,7 +69,7 @@ public class MongoConnection {
             // set logip option only in the case of mongo
             Context.setLogips(true);
         } catch(Exception e){
-            System.out.println("No mongo connection possible : ");
+            Log.stdout("No mongo connection possible : ");
             e.printStackTrace();
         }
     }

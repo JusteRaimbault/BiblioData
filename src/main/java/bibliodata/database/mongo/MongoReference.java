@@ -3,6 +3,7 @@ package bibliodata.database.mongo;
 
 import bibliodata.Context;
 import bibliodata.core.reference.Reference;
+import bibliodata.utils.Log;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 
@@ -88,6 +89,7 @@ public class MongoReference {
      */
     public static Reference getReference(String id){
         Reference existing = getRawReference(id);
+        Log.stdout("from mongo : "+existing.getId());
         if(existing.isEmpty())
                 //||(!existing.isCitingFilled())) // in some case may not be well set
           {return(existing);}
