@@ -96,7 +96,13 @@ public class MongoReference {
         else{
             // need to fill citing refs
             LinkedList<Reference> citing = MongoCitation.getCiting(existing.getId());
-            if (citing.size()>0){ existing.setCiting(citing); existing.setCitingFilled(true);}
+            if (citing.size()>0){
+                // need to update depths
+                for(Reference citingRef:citing){citingRef.setDepth(Math.max(existing.getDepth()-1,citingRef.getDepth()));citingRef.setCitingFilled(false);}
+                existing.setCiting(citing);
+                existing.setCitingFilled(true);
+
+            }
             return(existing);
         }
     }

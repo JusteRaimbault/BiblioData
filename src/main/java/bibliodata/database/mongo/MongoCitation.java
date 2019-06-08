@@ -78,7 +78,8 @@ public class MongoCitation {
         LinkedList<Document> links = MongoRequest.find(Context.getCitationsCollection(),"to",citedId);
         for(Document link:links){
             // \!/ DANGER - getReference / getRawReference is not optimal, risk of self recursive infinite call
-            res.add(MongoReference.getRawReference(link.getString("from")));//link has necessarily 'from' record
+            Reference citing = MongoReference.getRawReference(link.getString("from"));//link has necessarily 'from' record
+            res.add(citing);
         }
         return(res);
     }
