@@ -88,7 +88,7 @@ public class MongoReference {
      */
     public static Reference getReference(String id){
         Reference existing = getRawReference(id);
-        if(existing.isEmpty||(!existing.isCitingFilled())){return(existing);}
+        if(existing.isEmpty()||(!existing.isCitingFilled())){return(existing);}
         else{
             // need to fill citing refs
             LinkedList<Reference> citing = MongoCitation.getCiting(existing.getId());

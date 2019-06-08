@@ -48,7 +48,7 @@ public class Reference {
 	 * Empty ref - the way equals is written imposes the weird id
 	 */
 	public static final Reference empty = new Reference("","-----------EMPTY-----------");
-	public boolean isEmpty = this.equals(empty);
+	public boolean isEmpty(){return(this.equals(empty));}
 
 	/**
 	 * Secondary id

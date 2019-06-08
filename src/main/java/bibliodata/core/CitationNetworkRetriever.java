@@ -21,7 +21,7 @@ public class CitationNetworkRetriever {
 
 			if(args.length==0){
 				System.out.println("Usage : --citation\n"+
-					"| --mongo $DATABASE $NUMREFS [$MAXPRIORITY]\n"+
+					"| --mongo $DATABASE $NUMREFS [$MAXPRIORITY] [$CONSOLIDATIONDATABASE]\n"+
 					"| --csv $CSVFILE $OUTPUT_PREFIX $DEPTH [$CITEDFOLDER]"
 			);}
 
@@ -42,10 +42,15 @@ public class CitationNetworkRetriever {
                     String linkcollection = Context.getCitationsCollection();
                     int numrefs = Integer.parseInt(args[2]);
                     int maxPriority = Context.getMaxHorizontalDepth();
-                    if (args.length == 4) {
+                    String consolidationDatabase = "";
+                    if (args.length >= 4) {
                         maxPriority = Integer.parseInt(args[3]);
                     }
-                    CitationNetwork.fillCitationsMongo(mongodb, refcollection, linkcollection, numrefs, maxPriority);
+                    if (args.length == 5) {
+                        if (args[4].equals("true")){consolidationDatabase = Context.getCentralDatabase();}
+                        else {consolidationDatabase = args[4];}
+                    }
+                    CitationNetwork.fillCitationsMongo(mongodb, refcollection, linkcollection, numrefs, maxPriority,consolidationDatabase);
                 }
 			}
 

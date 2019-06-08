@@ -42,9 +42,9 @@ public class CitationNetwork {
 	 * @param refcollection
 	 * @param linkcollection
 	 * @param numrefs
-	 * TODO add consolidation database option
+	 * @param consolidationDatabase
 	 */
-	public static void fillCitationsMongo(String database,String refcollection,String linkcollection,int numrefs,int maxPriority){
+	public static void fillCitationsMongo(String database,String refcollection,String linkcollection,int numrefs,int maxPriority, String consolidationDatabase){
 
 		TorPoolManager.setupTorPoolConnexion(true,true);
 		ScholarAPI.init();
@@ -58,7 +58,7 @@ public class CitationNetwork {
 			Reference r = MongoReference.getUnfilled(refcollection,maxPriority);
 			if(r==null){break;}
 			Log.stdout("Unfilled ref : "+r.toString());
-			ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r),"");
+			ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r),consolidationDatabase);
 			MongoCorpus.updateCorpus(new DefaultCorpus(r,r.getCiting()),refcollection,linkcollection);
 		}
 

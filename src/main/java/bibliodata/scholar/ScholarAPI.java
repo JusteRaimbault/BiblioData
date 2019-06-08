@@ -297,25 +297,20 @@ public class ScholarAPI {
 						 *
 						 */
 
-						// Either : no id => must collect ; or id but not in mongo - or in mongo but not citing filled
-						//
-						/*if (r.hasId()){
+						Reference rr = Reference.empty;
+						if (consolidationDatabase.length()>0){
+							if (r.hasId()) rr = MongoReference.getReference(r.getId());
+						} else {
+							// FIXME require ref details only if no ID -> should be an option to get other available fields
+							// FIXME also we should not have null pointers
+							if(!r.hasId()){
+								rr = getScholarRef(r);
+							}else{rr=r;}
+						}
 
-						}else {
-							// if no id cannot consolidate anyway ? yes - after having collected (! mode where always id ?)
 
-						}*/
-
-						Reference rr;// = Reference.empty;
-						if (consolidationDatabase.length()>0){if (r.hasId()) r = MongoReference.getReference(r.getId());}
-
-
-						// FIXME require ref details only if no ID -> should be an option to get other available fields
-						// FIXME also we should not have null pointers
-						if(!r.hasId()){rr = getScholarRef(r);}else{rr=r;}
-
-						// FIXME do not collect if retrieven from mongo
-						if(rr!=null){
+						// collect citations if not empty and if not already citing filled
+						if(!rr.isEmpty()&!rr.isCitingFilled()){
 							Log.stdout("ID : "+rr.getId());
 							//r.scholarID=rr.scholarID;//no need as rr and r should be same pointer ?
 							// FIXME with unique ids, this never happens
@@ -327,13 +322,12 @@ public class ScholarAPI {
 							List<Reference> citing = scholarRequest(r.getId(),Context.getScholarMaxRequests(),"cites");
 							//for(Reference c:citing){r.setCiting(c);}
 							r.setCiting(citing);
+							r.setCitingFilled(true);
+							r.setTimestamp(Log.currentTimestamp());
+
+							// update depth of citing refs
+							for(Reference citingRef:r.getCiting()){citingRef.setDepth(Math.max(r.getDepth()-1,citingRef.getDepth()));}
 						}
-
-						r.setCitingFilled(true);
-						r.setTimestamp(Log.currentTimestamp());
-
-						// update depth of citing refs
-						for(Reference citing:r.getCiting()){citing.setDepth(Math.max(r.getDepth()-1,citing.getDepth()));}
 
 						// FIXME generic inheritance of parents properties here ? (cf horizontalDepth)
 
