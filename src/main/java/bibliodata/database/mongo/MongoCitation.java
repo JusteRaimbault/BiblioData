@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import bibliodata.utils.Log;
+
 /**
  * Methods retrieving citation links from mongo
  */
@@ -75,10 +77,12 @@ public class MongoCitation {
      */
     public static LinkedList<Reference> getCiting(String citedId){
         LinkedList<Reference> res = new LinkedList<>();
-        LinkedList<Document> links = MongoRequest.find(Context.getCitationsCollection(),"to",citedId);
+        Log.stdout("links for "+citedId);
+	LinkedList<Document> links = MongoRequest.find(Context.getCitationsCollection(),"to",citedId);
         for(Document link:links){
             // \!/ DANGER - getReference / getRawReference is not optimal, risk of self recursive infinite call
-            res.add(MongoReference.getRawReference(link.getString("from")));//link has necessarily 'from' record
+            Log.stdout("link from mongo : "+link.getString("from")+"-"+link.getString("to"));
+	    res.add(MongoReference.getRawReference(link.getString("from")));//link has necessarily 'from' record
         }
         return(res);
     }

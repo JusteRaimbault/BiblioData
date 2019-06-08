@@ -3,6 +3,7 @@ package bibliodata.database.mongo;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -46,10 +47,17 @@ public class MongoRequest {
         MongoCollection<Document> mongoCollection = MongoConnection.getCollection(collection);
         FindIterable resquery = mongoCollection.find();
         List<Document> res = new LinkedList<Document>();
-        while(resquery.iterator().hasNext()){
-            res.add((Document) resquery.iterator().next());
+        MongoCursor<Document> cursor = resquery.iterator();
+	try {
+           while(cursor.hasNext()){
+		   Document nextdoc = cursor.next();
+		   //System.out.println(nextdoc);
+            res.add(nextdoc);
+           }
+	}finally {
+           cursor.close();
         }
-        return(res);
+	return(res);
     }
 
     /**
@@ -63,8 +71,17 @@ public class MongoRequest {
         MongoCollection<Document> mongoCollection = MongoConnection.getCollection(collection);
         FindIterable res = mongoCollection.find(eq(key,value));
         LinkedList<Document> found = new LinkedList<>();
-        while(res.iterator().hasNext()){found.add((Document) res.iterator().next());}
-        return(found);
+        MongoCursor<Document> cursor = res.iterator();
+        try {
+           while(cursor.hasNext()){
+                   Document nextdoc = cursor.next();
+                   //System.out.println(nextdoc);
+            found.add(nextdoc);
+           }
+        }finally {
+           cursor.close();
+        }
+	return(found);
     }
 
     /**
