@@ -198,7 +198,7 @@ public abstract class Corpus implements Iterable<Reference> {
 	}
 
 	/**
-	 * Get an ordered corpus from csv
+	 * Get an ordered corpus from file
 	 * @param file
 	 * @return
 	 */
@@ -208,6 +208,9 @@ public abstract class Corpus implements Iterable<Reference> {
 		return(new CSVFactory(file,false).getCorpus());
 	}
 
+	/**
+	 * Note : order file MUST be csv -> conversion for when initial corpus is bib
+	 */
 	public static Corpus fromCSV(String file,
 								 String orderFile,
 								 String citationFile,

@@ -1,10 +1,8 @@
 package bibliodata;
 
-import bibliodata.core.CitationNetworkRetriever;
-import bibliodata.core.DatabaseManager;
-import bibliodata.core.KeywordsRequest;
+import bibliodata.core.*;
 //import bibliodata.mendeley.AbstractRetriever;
-import bibliodata.core.AbstractSetRetriever;
+
 
 public class Main {
 
@@ -37,6 +35,8 @@ public class Main {
                 AbstractSetRetriever.main(tail);break;
             case "--keywords" :
                 KeywordsRequest.main(tail);break;
+            case "--utils":
+                Utils.main(tail);break;
 
         }
 
