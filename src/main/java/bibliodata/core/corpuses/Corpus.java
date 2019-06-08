@@ -3,6 +3,7 @@
  */
 package bibliodata.core.corpuses;
 
+import java.lang.reflect.Array;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -10,6 +11,7 @@ import java.util.LinkedList;
 import bibliodata.scholar.ScholarAPI;
 import bibliodata.utils.*;
 import bibliodata.core.reference.Reference;
+import org.apache.commons.lang3.ArrayUtils;
 
 import static bibliodata.utils.ConversionUtils.toArray;
 
@@ -257,6 +259,11 @@ public abstract class Corpus implements Iterable<Reference> {
 			}
 
 			Log.stdout("depth ok");
+
+			// we assume that in the case if an order file is given, the corpus is full until last depth, so
+			// citingFilled can be set to true for all upper levels
+			int deepest = Reference.getMinimalDepth();
+			for(Reference r:Reference.getReferences()){if (r.getDepth()>deepest){r.setCitingFilled(true);}}
 		}
 
 		return(initial);

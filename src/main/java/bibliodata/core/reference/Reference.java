@@ -204,6 +204,12 @@ public class Reference {
 	public int getDepth(){return(depth);}
 	public void setDepth(int newdepth){depth=newdepth;}
 
+	public static int getMinimalDepth(){
+		int mindepth = Integer.MAX_VALUE;
+		for(Reference r:getReferences()){if (r.getDepth()<mindepth){mindepth = r.getDepth();}}
+		return(mindepth);
+	}
+
 	/**
 	 * Horizontal depth -> as a map since the reference can come from different contexts :
 	 *   - keyword request (from several simultaneously) map reqString -> depth
@@ -512,6 +518,7 @@ public class Reference {
 	public void setDepth0(int newDepth){
 		//Log.stdout("Set depth : "+id);
 		for(Reference r: Reference.getReferences()){r.setVisited(false);}
+		setDepth(newDepth);
 		setDepthRec(newDepth);
 	}
 
