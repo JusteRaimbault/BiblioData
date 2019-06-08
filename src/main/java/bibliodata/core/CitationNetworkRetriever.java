@@ -32,7 +32,8 @@ public class CitationNetworkRetriever {
 			        System.out.println("Constructing citation network from mongo. Usage : --citation --mongo \n"+
                             "  $DATABASE : name of the database \n"+
                             "  $NUMREFS : number of references for which to collect citations \n"+
-                            "  [$MAXPRIORITY] (optional) : maximal priority at which references are queried"
+                            "  [$MAXPRIORITY] (optional) : maximal priority at which references are queried\n"+
+                            "  [$CONSOLIDATION] (optional) : if true, default central db, otherwise name of consolidation database"
                             );
                 }else {
                     Log.stdout("Citation network from mongo");
@@ -41,7 +42,8 @@ public class CitationNetworkRetriever {
                     String refcollection = Context.getReferencesCollection();
                     String linkcollection = Context.getCitationsCollection();
                     int numrefs = Integer.parseInt(args[2]);
-                    int maxPriority = Context.getMaxHorizontalDepth();
+                    //int maxPriority = Context.getMaxHorizontalDepth(); // for corpuses where priority is not defined, better set to -1
+                    int maxPriority = -1;
                     String consolidationDatabase = "";
                     if (args.length >= 4) {
                         maxPriority = Integer.parseInt(args[3]);
