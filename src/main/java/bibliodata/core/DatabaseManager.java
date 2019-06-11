@@ -201,7 +201,7 @@ public class DatabaseManager {
 
             if (action.equals("--consolidate")){
                 if (args.length==1){
-                    System.out.println("Consolidate databases into a single database (by default 'consolidation'). Usage : --database --consolidate \n"+
+                    System.out.println("Consolidate databases into a single database (by default 'consolidated'). Usage : --database --consolidate \n"+
                             "   $DB1 ... $DBN : database to consolidate"
                             );
                 }else {
@@ -209,7 +209,7 @@ public class DatabaseManager {
                     for (int i = 1; i < args.length; i++) {
                         dbs.add(args[i]);
                     }
-                    MongoCommand.consolidate(dbs);
+                    MongoCommand.consolidate(dbs,-2);
                 }
             }
 

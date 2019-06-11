@@ -111,8 +111,8 @@ public class MongoCommand {
      * consolidation into a single database
      * @param databases
      */
-    public static void consolidate(LinkedList<String> databases){
-        Corpus all = MongoCorpus.getConsolidatedCorpus(databases,-1,-1);
+    public static void consolidate(LinkedList<String> databases,int maxDepth){
+        Corpus all = MongoCorpus.getConsolidatedCorpus(databases,-1,maxDepth);
 
         // TODO should take into account citation updates here
 
