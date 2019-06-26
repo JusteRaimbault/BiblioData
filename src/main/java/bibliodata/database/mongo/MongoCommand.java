@@ -106,6 +106,13 @@ public class MongoCommand {
         }
     }
 
+    /**
+     * in case when all vertical depth are defined, copy them to priority
+     */
+    //public static void depthToPriority(){
+    //
+    //}
+
 
     /**
      * consolidation into a single database

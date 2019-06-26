@@ -194,7 +194,7 @@ public class MongoRequest {
                     }
                     updates.add(set("horizontalDepth",merged));
                 }else{
-                    updates.add(set("horizontalDepth", document.getString("horizontalDepth")));
+                    updates.add(set("horizontalDepth", document.get("horizontalDepth")));
                 }
             }
 

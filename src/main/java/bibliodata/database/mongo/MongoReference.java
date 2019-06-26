@@ -51,11 +51,12 @@ public class MongoReference {
         try {
             Document queryres = new Document();
             if (maxPriority>0) {
+                // if priority is not set, maxPriority is taken as vertical depth
                 queryres = mongoCollection.findOneAndUpdate(
                         and(
                                 eq("citingFilled", false),
                                 gt("depth", 0),
-                                lt("priority", maxPriority),
+                                or(lt("priority", maxPriority),and(not(exists("priority")),gt("depth", maxPriority))),
                                 or(not(exists("processing")), not(eq("processing", true)))
                         ),
                         set("processing", true)
