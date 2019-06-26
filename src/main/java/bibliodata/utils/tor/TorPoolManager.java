@@ -81,21 +81,31 @@ public class TorPoolManager {
 	}
 
 	public static String getPortFromMongo(boolean exclusivity){
-		initMongo();
-		MongoCollection<Document> collection = mongoDatabase.getCollection(mongoCollection);
-		String res = "";
-		if(exclusivity){
-			Document d = collection.findOneAndDelete(exists("port"));
-			if(d.containsKey("port")){res = d.getString("port");}
-		}else{
-			FindIterable fi =collection.find();
-			if(fi.iterator().hasNext()){
-				Document d = (Document) fi.iterator().next();
-				if(d.containsKey("port")){res = d.getString("port");}
+		try {
+			initMongo();
+			MongoCollection<Document> collection = mongoDatabase.getCollection(mongoCollection);
+			String res = "";
+			if (exclusivity) {
+				Document d = collection.findOneAndDelete(exists("port"));
+				if (d.containsKey("port")) {
+					res = d.getString("port");
+				}
+			} else {
+				FindIterable fi = collection.find();
+				if (fi.iterator().hasNext()) {
+					Document d = (Document) fi.iterator().next();
+					if (d.containsKey("port")) {
+						res = d.getString("port");
+					}
+				}
 			}
+			closeMongo();
+			return (res);
+		}catch(Exception e){
+			closeMongo();
+			e.printStackTrace();
+			return("");
 		}
-		closeMongo();
-		return(res);
 	}
 
 
