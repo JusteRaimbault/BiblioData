@@ -50,7 +50,7 @@ public class MongoCorpus {
         MongoConnection.initMongo(databases.get(0));
         for(String database: databases){
             MongoConnection.switchMongo(database);
-            Corpus currentcorpus = getCorpus(maxPriority,maxDepth);
+            Corpus currentcorpus = getCorpus(maxPriority,maxDepth,-1); // always all refs for a consolidated corpus
             Log.stdout("For database "+database+" : "+currentcorpus.references.size()+" references ; total refs "+Reference.getNumberOfReferences());
         }
 
@@ -67,10 +67,12 @@ public class MongoCorpus {
      * @requires mongo db is initialized
      * @return
      */
-    public static Corpus getCorpus(int maxPriority, int maxDepth){
+    public static Corpus getCorpus(int maxPriority, int maxDepth,int numrefs){
         HashMap<String,Document> refs = new HashMap<String,Document>();
-        if(maxPriority==-1) {refs = MongoReference.getAllRefsAsDocuments(maxDepth);}else {
-            refs = MongoReference.getRefsPriorityAsDocuments(maxPriority,maxDepth);
+        if(maxPriority==-1) {
+            refs = MongoReference.getAllRefsAsDocuments(maxDepth,numrefs);}
+        else {
+            refs = MongoReference.getRefsPriorityAsDocuments(maxPriority,maxDepth,numrefs);
         }
 
         HashMap<String, Reference> corpus = new HashMap<String,Reference>();

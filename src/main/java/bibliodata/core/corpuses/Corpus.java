@@ -134,7 +134,9 @@ public abstract class Corpus implements Iterable<Reference> {
 			LinkedList<String> row = new LinkedList<>();
 			row.add(r.getId());row.add(r.getTitle().title);row.add(r.getYear());
 			if(withAbstract){row.add(r.getResume().resume);row.add(r.getAuthorString());}
-			for(String attr:attributes){row.add(r.getAttribute(attr));}
+			for(String attr:attributes){
+				row.add(r.getAttribute(attr)); // NA if attribute is not available
+			}
 			res.add(toArray(row));
 		}
 		return(res);

@@ -151,6 +151,8 @@ public class DatabaseManager {
                             "  $FILE : file prefix \n"+
                             "  [$MAXPRIORITY] (optional) : max priority to export \n"+
                             "  [$MAXDEPTH] (optional) : max vertical depth \n"+
+                            "  [$INITDEPTH] (optional) : init layer vertical depth \n"+
+                            "  [$NUMREFS] (optional) : number of references \n"+
                             "  [$WITHABSTRACTS] (optional) : export abstracts if exist"
                             );
                 }else {
@@ -163,12 +165,19 @@ public class DatabaseManager {
                     if (args.length >= 5) {
                         maxDepth = Integer.parseInt(args[4]);
                     }
-
+                    int initLayerDepth = 0;
+                    if (args.length >= 6) {
+                        initLayerDepth = Integer.parseInt(args[5]);
+                    }
+                    int numRefs = -1;
+                    if (args.length >= 7) {
+                        numRefs = Integer.parseInt(args[6]);
+                    }
                     boolean withAbstracts = false;
-                    if (args.length == 6) {
+                    if (args.length == 8) {
                         withAbstracts = true;
                     }
-                    MongoExport.export(maxPriority, maxDepth, withAbstracts, args[2]);
+                    MongoExport.export(maxPriority, maxDepth,initLayerDepth,numRefs, withAbstracts, args[2]);
                     MongoConnection.closeMongo();
                 }
             }

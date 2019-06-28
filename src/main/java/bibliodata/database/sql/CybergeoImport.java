@@ -352,7 +352,7 @@ public class CybergeoImport {
 		// compute res on primary refs
 		LinkedList<String[]> data = new LinkedList<String[]>();
 		for(Reference r:cybnetwork){
-			if(r.getAttribute("primary").length()>0){
+			if(r.hasAttribute("primary")){
 				String[] row={r.getId(),new Integer(r.getCiting().size()).toString(),new Integer(r.getBiblio().cited.size()).toString()};
 				data.add(row);
 			}

@@ -264,11 +264,15 @@ public class Reference {
 	/**
 	 * Get attribute (empty if attributes not set [!! unsecure] or attribute is not in the attribute table)
 	 * @param key attr name
-	 * @return value of attribute if exists, empty string otherwise
+	 * @return value of attribute if exists, NA otherwise
 	 */
 	public String getAttribute(String key){
-		if(!attributes.containsKey(key)){return("");}
+		if(!attributes.containsKey(key)){return("NA");}
 		return(attributes.get(key));
+	}
+
+	public boolean hasAttribute(String key){
+		return(attributes.containsKey(key));
 	}
 
 
@@ -385,22 +389,22 @@ public class Reference {
 
 
 		// FIXME depth is not a raw attribute ! -> but better for csv export ?
-		if(res.getAttribute("depth").length()>0){res.attributes.put("depth",Integer.toString(Math.min(Integer.parseInt(res.getAttribute("depth")),Integer.parseInt(attributes.get("depth")))));} else {res.attributes.put("depth",attributes.get("depth"));}
-		if(res.getAttribute("priority").length()>0){res.attributes.put("priority",Integer.toString(Math.min(Integer.parseInt(res.getAttribute("priority")),Integer.parseInt(attributes.get("priority")))));} else {res.attributes.put("priority",attributes.get("priority"));}
+		if(res.hasAttribute("depth")){res.attributes.put("depth",Integer.toString(Math.min(Integer.parseInt(res.getAttribute("depth")),Integer.parseInt(attributes.get("depth")))));} else {res.attributes.put("depth",attributes.get("depth"));}
+		if(res.hasAttribute("priority")){res.attributes.put("priority",Integer.toString(Math.min(Integer.parseInt(res.getAttribute("priority")),Integer.parseInt(attributes.get("priority")))));} else {res.attributes.put("priority",attributes.get("priority"));}
 		// merging horizdepths : reparse and merge hashmaps - ultra dirty - should have a generic trait Mergeable and different implementations
-		if(res.getAttribute("horizontalDepth").length()>0){
+		if(res.hasAttribute("horizontalDepth")){
 			res.attributes.put("horizontalDepth",
 					mergeHorizDepths(res.getAttribute("horizontalDepth"),attributes.get("horizontalDepth")));
 		}else{
 			res.attributes.put("horizontalDepth",attributes.get("horizontalDepth"));
 		}
 		// FIXME citingFilled is not a raw attribute
-		if(res.getAttribute("citingFilled").length()>0){res.setAttribute("citingFilled",Boolean.toString(Boolean.parseBoolean(res.getAttribute("citingFilled"))||Boolean.parseBoolean(attributes.get("citingFilled"))));}else{res.setAttribute("citingFilled",attributes.get("citingFilled"));}
+		if(res.hasAttribute("citingFilled")){res.setAttribute("citingFilled",Boolean.toString(Boolean.parseBoolean(res.getAttribute("citingFilled"))||Boolean.parseBoolean(attributes.get("citingFilled"))));}else{res.setAttribute("citingFilled",attributes.get("citingFilled"));}
 
 		// timestamp : depending on if citingFilled is true or not should choose ? anyway take the latest
 		// FIXME timestamp also not an attribute ? simpler to export as csv
 		if (attributes.containsKey("timestamp")) {
-			if (res.getAttribute("timestamp").length() > 0) {
+			if (res.hasAttribute("timestamp")) {
 				res.setAttribute("timestamp", Integer.toString(Math.max(Integer.parseInt(res.getAttribute("timestamp")), Integer.parseInt(attributes.get("timestamp")))));
 			} else {
 				res.setAttribute("attribute", attributes.get("timestamp"));

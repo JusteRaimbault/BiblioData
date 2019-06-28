@@ -53,7 +53,7 @@ public class MongoCommand {
      *  - for each max depth ref, get citing, compute min while constructing the graph
      */
     public static void computePriorities(int maxVerticalDepth){
-        HashMap<String,Document> allrefs = MongoReference.getAllRefsAsDocuments(maxVerticalDepth);
+        HashMap<String,Document> allrefs = MongoReference.getAllRefsAsDocuments(maxVerticalDepth,-1);
         HashMap<String,LinkedList<String>> links = MongoCitation.getAllLinksMap();
 
         LinkedList<Document> currentDepth = new LinkedList<Document>();
@@ -142,7 +142,7 @@ public class MongoCommand {
 
         LinkedList<Document> newrefs = new LinkedList<Document>();
 
-        HashMap<String,Document> origrefs = MongoReference.getAllRefsAsDocuments(maxVerticalDepth);
+        HashMap<String,Document> origrefs = MongoReference.getAllRefsAsDocuments(maxVerticalDepth,-1);
 
         for(Document d:origrefs.values()){
             // filter by hand : first level = max depth, maxHorizDepth

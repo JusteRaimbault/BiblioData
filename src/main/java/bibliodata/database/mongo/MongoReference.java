@@ -123,7 +123,7 @@ public class MongoReference {
      * @param maxDepth
      * @return HashMap is -> Document
      */
-    public static HashMap<String,Document> getAllRefsAsDocuments(int maxDepth){
+    public static HashMap<String,Document> getAllRefsAsDocuments(int maxDepth,int numrefs){
         MongoCollection<Document> origrefscol = MongoConnection.getCollection(Context.getReferencesCollection());
         HashMap<String,Document> origrefs = new HashMap<String,Document>();
         //  require that priority exists ? NO
@@ -132,7 +132,7 @@ public class MongoReference {
                 //and(gt("depth",maxDepth),exists("priority")))
         )
         ){
-            origrefs.put(d.getString("id"),d);
+            if(origrefs.size()<numrefs||numrefs<0){origrefs.put(d.getString("id"),d);}
         }
         return(origrefs);
     }
@@ -143,12 +143,16 @@ public class MongoReference {
      * @param maxDepth
      * @return
      */
-    public static HashMap<String,Document>  getRefsPriorityAsDocuments(int maxPriority,int maxDepth){
+    public static HashMap<String,Document>  getRefsPriorityAsDocuments(int maxPriority,int maxDepth, int numrefs){
         MongoCollection<Document> mongoCollection = MongoConnection.getCollection(Context.getReferencesCollection());
         HashMap<String,Document> res = new HashMap<String,Document>();
         // FIXME priority not always defined ?
-        for(Document queryres :mongoCollection.find(and(lt("priority",maxPriority),gt("depth",maxDepth)))){
-            res.put(queryres.getString("id"),queryres);
+        for(Document queryres :mongoCollection.find(
+                and(
+                        lt("priority",maxPriority), // do not use if no priority ?
+                        gt("depth",maxDepth))
+                )){
+            if(res.size()<numrefs||numrefs<0){res.put(queryres.getString("id"),queryres);}
         }
         return(res);
     }
