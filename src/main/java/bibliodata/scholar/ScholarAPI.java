@@ -273,7 +273,7 @@ public class ScholarAPI {
 	 *
 	 * @param corpus
 	 */
-	public static void fillIdAndCitingRefs(Corpus corpus,String consolidationDatabase){
+	public static void fillIdAndCitingRefs(Corpus corpus,String consolidationDatabase,boolean consolidationOnly){
 		try{
 			int totalRefs = corpus.references.size();int p=0;
 			for(Reference r:corpus.references){
@@ -304,35 +304,46 @@ public class ScholarAPI {
 							Log.stdout("Ref "+rr.getId()+" got from mongo");
 						}
 
-						if(rr.isEmpty()) {
-							// FIXME require ref details only if no ID -> should be an option to get other available fields
-							// FIXME also we should not have null pointers
-							if(!r.hasId()){
-								rr = getScholarRef(r);
-							}else{rr=r;}
+						// in the case of conso only (no scholar), do not run the rest - the ref has been constructed with
+						// citing if it had been collected before
+						if(!consolidationOnly) {
+
+							if (rr.isEmpty()) {
+								// FIXME require ref details only if no ID -> should be an option to get other available fields
+								// FIXME also we should not have null pointers
+								if (!r.hasId()) {
+									rr = getScholarRef(r);
+								} else {
+									rr = r;
+								}
+							}
+
+
+							// collect citations if not empty and if not already citing filled
+							if (!rr.isEmpty() & !rr.isCitingFilled()) {
+								Log.stdout("ID : " + rr.getId());
+								//r.scholarID=rr.scholarID;//no need as rr and r should be same pointer ?
+								// FIXME with unique ids, this never happens
+								//if(!rr.equals(r)){Reference.references.remove(r);} //contradiction with hashconsing ? - DIRTY
+								if (!rr.equals(r)) {
+									Reference.removeReference(r);
+								}
+								r = rr;
+
+								//  limit of max cit number -> global parameter - shouldnt be larger than 1000 (failure in collection then)
+								List<Reference> citing = scholarRequest(r.getId(), Context.getScholarMaxRequests(), "cites");
+								//for(Reference c:citing){r.setCiting(c);}
+								r.setCiting(citing);
+								r.setCitingFilled(true);
+								r.setTimestamp(Log.currentTimestamp());
+
+								// update depth of citing refs
+								for (Reference citingRef : r.getCiting()) {
+									citingRef.setDepth(Math.max(r.getDepth() - 1, citingRef.getDepth()));
+								}
+							}
+
 						}
-
-
-						// collect citations if not empty and if not already citing filled
-						if(!rr.isEmpty()&!rr.isCitingFilled()){
-							Log.stdout("ID : "+rr.getId());
-							//r.scholarID=rr.scholarID;//no need as rr and r should be same pointer ?
-							// FIXME with unique ids, this never happens
-							//if(!rr.equals(r)){Reference.references.remove(r);} //contradiction with hashconsing ? - DIRTY
-							if(!rr.equals(r)){Reference.removeReference(r);}
-							r=rr;
-
-							//  limit of max cit number -> global parameter - shouldnt be larger than 1000 (failure in collection then)
-							List<Reference> citing = scholarRequest(r.getId(),Context.getScholarMaxRequests(),"cites");
-							//for(Reference c:citing){r.setCiting(c);}
-							r.setCiting(citing);
-							r.setCitingFilled(true);
-							r.setTimestamp(Log.currentTimestamp());
-
-							// update depth of citing refs
-							for(Reference citingRef:r.getCiting()){citingRef.setDepth(Math.max(r.getDepth()-1,citingRef.getDepth()));}
-						}
-
 						// FIXME generic inheritance of parents properties here ? (cf horizontalDepth)
 
 						Log.stdout("Citing refs : "+r.getCiting().size());

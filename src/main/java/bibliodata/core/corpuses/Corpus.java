@@ -47,7 +47,7 @@ public abstract class Corpus implements Iterable<Reference> {
 	 * @return this corpus
 	 */
 	public Corpus fillCitingRefs(){
-		ScholarAPI.fillIdAndCitingRefs(this,"");
+		ScholarAPI.fillIdAndCitingRefs(this,"",false);
 		return this;
 	}
 	

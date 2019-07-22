@@ -96,6 +96,16 @@ public class MongoDocument {
             if (document.containsKey("citingFilled")) {
                 r.setCitingFilled(document.getBoolean("citingFilled"));
             }
+            // redundant properties with generic attributes // FIXME shitty architecture (again :/ )
+            if (document.containsKey("depth")) {
+                r.setDepth(Integer.parseInt(depth));
+            }
+            if (document.containsKey("horizontalDepth")) {
+                for (String k : ((Document) document.get("horizontalDepth")).keySet()) {
+                    r.setHorizontalDepth(k,((Document) document.get("horizontalDepth")).getInteger(k));
+                }
+            }
+
 
             return (r);
         }

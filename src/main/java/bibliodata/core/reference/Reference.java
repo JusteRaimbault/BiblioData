@@ -566,7 +566,7 @@ public class Reference {
 			}
 			visited = true;
 			for (Reference c : getCiting()) {
-				setHorizontalDepthRec(origin,newdepth);
+				c.setHorizontalDepthRec(origin,newdepth);
 			}
 		}
 	}

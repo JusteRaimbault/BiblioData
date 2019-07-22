@@ -44,7 +44,7 @@ public class CitationNetwork {
 	 * @param numrefs
 	 * @param consolidationDatabase
 	 */
-	public static void fillCitationsMongo(String database,String refcollection,String linkcollection,int numrefs,int maxPriority, String consolidationDatabase){
+	public static void fillCitationsMongo(String database,String refcollection,String linkcollection,int numrefs,int maxPriority, String consolidationDatabase,boolean consolidationOnly){
 
 		TorPoolManager.setupTorPoolConnexion(true,true);
 		ScholarAPI.init();
@@ -58,7 +58,7 @@ public class CitationNetwork {
 			Reference r = MongoReference.getUnfilled(refcollection,maxPriority);
 			if(r==null){break;}
 			Log.stdout("Unfilled ref : "+r.toString());
-			ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r),consolidationDatabase);
+			ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r),consolidationDatabase,consolidationOnly);
 			// db may have been switched by consolidation
 			MongoConnection.switchMongo(database);
 			MongoCorpus.updateCorpus(new DefaultCorpus(r,r.getCiting()),refcollection,linkcollection);
@@ -80,7 +80,7 @@ public class CitationNetwork {
 		
 		for(Reference r:base){
 			if(!existing.references.contains(r)){
-			  ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r),"");
+			  ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r),"",false);
 			  // export
 			  new DefaultCorpus(Reference.getReferences()).csvExport(outFile,false);
 			}

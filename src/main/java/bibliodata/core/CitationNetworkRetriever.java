@@ -33,7 +33,8 @@ public class CitationNetworkRetriever {
                             "  $DATABASE : name of the database \n"+
                             "  $NUMREFS : number of references for which to collect citations \n"+
                             "  [$MAXPRIORITY] (optional) : maximal priority at which references are queried\n"+
-                            "  [$CONSOLIDATION] (optional) : if true, default central db, otherwise name of consolidation database"
+                            "  [$CONSOLIDATION] (optional) : if true, default central db, otherwise name of consolidation database\n"+
+                            "  [$CONSOONLY] (optional) : if true, does not attempt scholar requests"
                             );
                 }else {
                     Log.stdout("Citation network from mongo");
@@ -45,6 +46,7 @@ public class CitationNetworkRetriever {
                     //int maxPriority = Context.getMaxHorizontalDepth(); // for corpuses where priority is not defined, better set to -1
                     int maxPriority = -1;
                     String consolidationDatabase = "";
+                    boolean consoonly = false;
                     if (args.length >= 4) {
                         maxPriority = Integer.parseInt(args[3]);
                     }
@@ -52,7 +54,10 @@ public class CitationNetworkRetriever {
                         if (args[4].equals("true")){consolidationDatabase = Context.getCentralDatabase();}
                         else {consolidationDatabase = args[4];}
                     }
-                    CitationNetwork.fillCitationsMongo(mongodb, refcollection, linkcollection, numrefs, maxPriority,consolidationDatabase);
+                    if (args.length == 6) {
+                        consoonly = Boolean.parseBoolean(args[5]);
+                    }
+                    CitationNetwork.fillCitationsMongo(mongodb, refcollection, linkcollection, numrefs, maxPriority,consolidationDatabase,consoonly);
                 }
 			}
 

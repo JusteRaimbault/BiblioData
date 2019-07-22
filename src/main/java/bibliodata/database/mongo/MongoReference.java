@@ -6,6 +6,7 @@ import bibliodata.core.reference.Reference;
 import bibliodata.utils.Log;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -127,8 +128,12 @@ public class MongoReference {
         MongoCollection<Document> origrefscol = MongoConnection.getCollection(Context.getReferencesCollection());
         HashMap<String,Document> origrefs = new HashMap<String,Document>();
         //  require that priority exists ? NO
+        Bson cond = gt("depth",maxDepth);
+        // FIXME not desirable behavior - depth can be negative indeed (why ?)
+        //if(maxDepth==-1) cond = or(not(exists("depth")),gt("depth",maxDepth));
         for(Document d: origrefscol.find(
-                gt("depth",maxDepth)
+                cond
+                //gt("depth",maxDepth) // depth may not be set for some ?
                 //and(gt("depth",maxDepth),exists("priority")))
         )
         ){
