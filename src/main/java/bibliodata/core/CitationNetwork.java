@@ -4,27 +4,20 @@
 package bibliodata.core;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Set;
 
 import bibliodata.core.corpuses.CSVFactory;
 import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.corpuses.DefaultCorpus;
 import bibliodata.core.reference.Reference;
-import bibliodata.database.mongo.MongoConnection;
-import bibliodata.database.mongo.MongoCorpus;
-import bibliodata.database.mongo.MongoDocument;
-import bibliodata.database.mongo.MongoReference;
+import bibliodata.database.mongo.*;
 import bibliodata.scholar.ScholarAPI;
 import bibliodata.database.sql.CybergeoImport;
 import bibliodata.database.sql.SQLConnection;
-import bibliodata.utils.CSVWriter;
 import bibliodata.utils.GEXFWriter;
 import bibliodata.utils.Log;
-import bibliodata.utils.RISReader;
-import bibliodata.utils.tor.TorPool;
-import bibliodata.utils.tor.TorPoolManager;
+import bibliodata.utils.proxy.TorPool;
+import bibliodata.utils.proxy.TorPoolManager;
 
 /**
  * 
@@ -46,8 +39,10 @@ public class CitationNetwork {
 	 */
 	public static void fillCitationsMongo(String database,String refcollection,String linkcollection,int numrefs,int maxPriority, String consolidationDatabase,boolean consolidationOnly){
 
-		TorPoolManager.setupTorPoolConnexion(true,true);
-		ScholarAPI.init();
+		if (!consolidationOnly) {
+			TorPoolManager.setupTorPoolConnexion(true, true);
+			ScholarAPI.init();
+		}
 
 		Log.stdout("Filling mongobase "+database+" ; collections "+refcollection+","+linkcollection+" ; "+numrefs+" refs");
 
@@ -61,11 +56,13 @@ public class CitationNetwork {
 			ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r),consolidationDatabase,consolidationOnly);
 			// db may have been switched by consolidation
 			MongoConnection.switchMongo(database);
-			MongoCorpus.updateCorpus(new DefaultCorpus(r,r.getCiting()),refcollection,linkcollection);
+			// in the case of a conso only, use processing state to not loop (dirty)
+			MongoCorpus.updateCorpus(new DefaultCorpus(r,r.getCiting()),refcollection,linkcollection,consolidationOnly);
 		}
 
 		// corpus need to be updated at each loop to iterate on depth !
 		//MongoConnection.updateCorpus(new DefaultCorpus(Reference.references.keySet()),refcollection,linkcollection);
+		//if (consolidationOnly){MongoCommand.notProcessing(Context.getReferencesCollection());} // FIXME issue with parallel runs
 
 		MongoConnection.closeMongo();
 	}

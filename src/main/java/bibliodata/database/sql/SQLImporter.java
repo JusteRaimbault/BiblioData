@@ -4,7 +4,7 @@ import java.sql.ResultSet;
 import java.util.HashSet;
 
 import bibliodata.utils.Log;
-import bibliodata.utils.tor.TorPoolManager;
+import bibliodata.utils.proxy.TorPoolManager;
 import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.corpuses.DefaultCorpus;
 import bibliodata.core.reference.Abstract;

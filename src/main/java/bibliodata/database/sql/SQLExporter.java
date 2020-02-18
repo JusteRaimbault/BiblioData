@@ -9,7 +9,7 @@ import java.util.LinkedList;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 
-import bibliodata.utils.tor.TorPoolManager;
+import bibliodata.utils.proxy.TorPoolManager;
 import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.reference.Reference;
 

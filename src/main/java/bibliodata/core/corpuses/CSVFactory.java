@@ -59,6 +59,9 @@ public class CSVFactory implements CorpusFactory {
 	 * @see main.corpuses.CorpusFactory#getCorpus()
 	 */
 	@Override
+	/**
+	 * TODO add bib parsing (one field)
+	 */
 	public OrderedCorpus getCorpus() {
 		// assumes a simple csv file : title,ID
 		OrderedCorpus res = new OrderedCorpus();
@@ -69,15 +72,19 @@ public class CSVFactory implements CorpusFactory {
 			int start = 0;if (withHeader){start=1;}
 			for(int i = start;i<numRefs;i++){
 				String id = refs[i][idcolumn];
-				if(id!="NA"){
-					String year = "";
-					if (refs[i].length >= 3){year = refs[i][2];} // year assumed as third col
-					Reference r = Reference.construct(id,new Title(refs[i][0]),new Abstract(), year);
-					res.addReference(r);
-					if(citedFolder!=""){//if must construct cited corpus
-						r.getBiblio().cited = (new CSVFactory(citedFolder+(new Integer(i+1)).toString(),-1)).getCorpus().references;
-					}
+				String title = refs[i][0];
+				String year = "";
+				if (refs[i].length >= 3){year = refs[i][2];} // year assumed as third col
+
+				// when id is not known, construct a "local id"
+				if(id.equals("NA")){id = "loc:"+(title+year).hashCode();}
+
+				Reference r = Reference.construct(id,new Title(title),new Abstract(), year);
+				res.addReference(r);
+				if(citedFolder!=""){//if must construct cited corpus
+					r.getBiblio().cited = (new CSVFactory(citedFolder+(new Integer(i+1)).toString(),-1)).getCorpus().references;
 				}
+
 			}
 		}
 		return res;

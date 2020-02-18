@@ -6,7 +6,6 @@ package bibliodata.cybergeo;
 import java.util.Date;
 import java.util.HashSet;
 
-import bibliodata.core.AlgorithmicSystematicReview;
 import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.corpuses.CybergeoCorpus;
 import bibliodata.core.corpuses.CybergeoFactory;
@@ -15,14 +14,12 @@ import bibliodata.core.corpuses.RISFactory;
 import bibliodata.core.reference.Reference;
 import bibliodata.mendeley.MendeleyAPI;
 import bibliodata.scholar.ScholarAPI;
-import bibliodata.database.sql.CybergeoImport;
 import bibliodata.database.sql.SQLConnection;
-import bibliodata.database.sql.SQLConverter;
 import bibliodata.database.sql.SQLExporter;
 import bibliodata.database.sql.SQLImporter;
 import bibliodata.utils.Log;
 import bibliodata.utils.RISWriter;
-import bibliodata.utils.tor.TorPoolManager;
+import bibliodata.utils.proxy.TorPoolManager;
 
 /**
  * Management of the Cybergeo corpus

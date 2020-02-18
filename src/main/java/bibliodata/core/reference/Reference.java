@@ -70,6 +70,11 @@ public class Reference {
 		// but allow it - in the case of ghost references with no id, when title only is used for hashcode and equals
 		id=newid;
 	}
+
+	/**
+	 * TODO tackle the case of local ids (corpus with no sch ids)
+	 * @return
+	 */
 	public boolean hasId() {
 		if(id==null){return(false);} // FIXME id should NEVER be null
 		if(id.length()==0){return(false);}
@@ -455,6 +460,9 @@ public class Reference {
 
 
 
+	/**
+	  Combine two string representations of an horizontal depth
+	 */
 	private static String mergeHorizDepths(String hd1,String hd2){
 		HashMap<String,Integer> hd = new HashMap<>();
 		// do not resole conflict ? yes otherwise just concatenation would be enough
@@ -476,7 +484,8 @@ public class Reference {
 		// hd.toSeq.map{_._1+":"+_._2}.mkString(",")
 		String res = "";
 		for (String k: hd.keySet()){res=res+","+k+":"+hd.get(k).toString();}
-		return(res.substring(1));
+		if (res.length()==0) {return(res);}
+		else {return(res.substring(1));}
 	}
 	
 	

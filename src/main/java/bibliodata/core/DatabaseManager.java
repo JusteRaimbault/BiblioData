@@ -38,13 +38,16 @@ public class DatabaseManager {
                     // print usage
                     System.out.println(
                        "Import corpus from csv to mongo. Usage : --database --import\n"+
-                       "  $FILE : path to csv file with corpus to import, required format at least 'title;id', optional year third column \n"+
+                       "  $FILE : path to csv file with corpus to import, required format at least 'title;id', optional year third column\n"+
+                       "        (id = \"NA\" will self generate ids)"+
                        "  $DATABASE : name of database where to import \n"+
                        "  [$DEPTH] (optional) : depth of higher layer \n"+
                        "  [$ORIGIN] (optional) : name of corpus origin \n"+
                        "  [$DROP_COLLECTIONS] (optional) : boolean, should collections in the database be dropped (default to false) \n"+
                        "  [$ORDERFILE] (optional) : path to csv file with ordered higher layer (used to compute horizontal depth) \n"+
-                       "  [$CITATIONFILE] (optional) : path to csv link file (format 'from;to') "
+                       "  [$CITATIONFILE] (optional) : path to csv link file (format 'from;to') "+
+                       "\n\n"+
+                       "To import corpus of the form oneref <- manyrefs in files: preprocess to create full corpus file with NAs ids and link file; use --import and --importcit"
                     );
                 }else {
 

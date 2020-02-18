@@ -3,21 +3,16 @@
  */
 package bibliodata.core;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.util.HashSet;
 import java.util.List;
 
-import bibliodata.core.corpuses.CSVFactory;
 import bibliodata.core.corpuses.Corpus;
-import bibliodata.core.corpuses.DefaultCorpus;
 import bibliodata.core.corpuses.OrderedCorpus;
 import bibliodata.core.reference.Reference;
 import bibliodata.database.mongo.MongoImport;
 import bibliodata.scholar.ScholarAPI;
 import bibliodata.utils.CSVReader;
 import bibliodata.utils.Log;
-import bibliodata.utils.tor.TorPoolManager;
+import bibliodata.utils.proxy.TorPoolManager;
 
 /**
  * @author Raimbault Juste <br/> <a href="mailto:juste.raimbault@polytechnique.edu">juste.raimbault@polytechnique.edu</a>
@@ -55,7 +50,7 @@ public class KeywordsRequest {
 						"  $KWFILE : file with keyword requests (format 'request;requestcode') \n"+
 						"  $OUTFILE : file to store resulting corpus \n"+
 						"  $NUMREF : number of references to collect for each kw \n"+
-						"  [$ADDTERM] (optional) : additional term to append to each request"
+						"  [$ADDTERM] (optional) : additional term to append to each request; request is wrapped with quotes"
 						);
 			}
 
@@ -66,7 +61,7 @@ public class KeywordsRequest {
 						"  $NUMREF : number of references to collect for each kw \n"+
 						"  [$INITDEPTH] (optional) : depth of the initial layer \n"+
 						"  [$DROPCOLLECTION] (optional) : should reference collection be dropped \n"+
-						"  [$ADDTERM] (optional) : additional term to append to each request"
+						"  [$ADDTERM] (optional) : additional term to append to each request; request is wrapped with quotes"
 						);
 			}
 
@@ -111,7 +106,7 @@ public class KeywordsRequest {
 						reqnames[i] = kwraw[i][0].replace(" ", "_");
 					}
 					if (addterm.length() > 0) {
-						currentreq = currentreq + "+" + addterm;
+						currentreq = "\""+currentreq+"\""+ "+" + addterm;
 					}
 					reqs[i] = currentreq;
 

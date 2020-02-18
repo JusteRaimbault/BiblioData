@@ -5,7 +5,6 @@ package bibliodata.core;
 
 import bibliodata.Context;
 import bibliodata.utils.Log;
-import bibliodata.utils.tor.TorPool;
 
 /**
  * @author Raimbault Juste <br/> <a href="mailto:juste.raimbault@polytechnique.edu">juste.raimbault@polytechnique.edu</a>
@@ -32,7 +31,7 @@ public class CitationNetworkRetriever {
 			        System.out.println("Constructing citation network from mongo. Usage : --citation --mongo \n"+
                             "  $DATABASE : name of the database \n"+
                             "  $NUMREFS : number of references for which to collect citations \n"+
-                            "  [$MAXPRIORITY] (optional) : maximal priority at which references are queried\n"+
+                            "  [$MAXPRIORITY] (optional) : maximal priority at which references are queried - the priority field must be filled (with database manager after kw req e.g.)\n"+
                             "  [$CONSOLIDATION] (optional) : if true, default central db, otherwise name of consolidation database\n"+
                             "  [$CONSOONLY] (optional) : if true, does not attempt scholar requests"
                             );
@@ -50,7 +49,7 @@ public class CitationNetworkRetriever {
                     if (args.length >= 4) {
                         maxPriority = Integer.parseInt(args[3]);
                     }
-                    if (args.length == 5) {
+                    if (args.length >= 5) {
                         if (args[4].equals("true")){consolidationDatabase = Context.getCentralDatabase();}
                         else {consolidationDatabase = args[4];}
                     }

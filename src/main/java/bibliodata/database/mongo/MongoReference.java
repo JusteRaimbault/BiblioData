@@ -25,7 +25,7 @@ public class MongoReference {
      * @param r
      * @param collection
      */
-    public static void updateReference(Reference r, String collection){
+    public static void updateReference(Reference r, String collection, boolean processing){
         // this must be done in the construction/update
         //r.citingFilled = citationsCollected;
         //Document prev = mongoFindOne(collection,"id",r.scholarID);
@@ -34,7 +34,7 @@ public class MongoReference {
 
         // FIXME should merge docs with a merge strategy - but functional programming in java is more than a pain
         // do not insert if already at a higher depth
-        MongoRequest.upsert(collection,"id",r.getId(),MongoDocument.fromReference(r).append("processing",false));
+        MongoRequest.upsert(collection,"id",r.getId(),MongoDocument.fromReference(r).append("processing",processing));
     }
 
 

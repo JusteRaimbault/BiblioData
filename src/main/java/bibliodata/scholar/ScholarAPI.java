@@ -39,8 +39,8 @@ import org.jsoup.select.Elements;
 import org.apache.commons.httpclient.util.URIUtil;
 
 import bibliodata.utils.Log;
-import bibliodata.utils.tor.TorPoolManager;
-import bibliodata.utils.tor.TorThread;
+import bibliodata.utils.proxy.TorPoolManager;
+import bibliodata.utils.proxy.TorThread;
 
 /**
  * @author Raimbault Juste <br/> <a href="mailto:juste.raimbault@polytechnique.edu">juste.raimbault@polytechnique.edu</a>

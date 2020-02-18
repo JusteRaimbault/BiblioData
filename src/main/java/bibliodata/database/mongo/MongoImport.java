@@ -94,7 +94,7 @@ public class MongoImport {
         }
 
         // better updating to avoid duplicates also in initial import
-        MongoCorpus.updateCorpus(corpus,refcollection,citcollection);
+        MongoCorpus.updateCorpus(corpus,refcollection,citcollection,false);
 
         MongoConnection.closeMongo();
     }

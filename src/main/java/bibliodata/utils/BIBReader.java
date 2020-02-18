@@ -17,6 +17,11 @@ import java.util.Map;
 
 public class BIBReader {
 
+    /**
+     * Read a bibtex file using jbibtex
+     * @param filePath
+     * @return
+     */
     public static HashSet<Reference> read(String filePath) {
         HashSet<Reference> refs = new HashSet<Reference>();
         try {
@@ -32,11 +37,15 @@ public class BIBReader {
                 try {
                     String t = latexPrinter.print(latexParser.parse((entry.getField(BibTeXEntry.KEY_TITLE)).toUserString()));
                     String y = latexPrinter.print(latexParser.parse((entry.getField(BibTeXEntry.KEY_YEAR)).toUserString()));
-                    refs.add(Reference.construct("", new Title(t), new Abstract(""), y));
-                }catch (Exception e) {}
+                    // FIXME other fields should be imported
+                    refs.add(Reference.construct("loc:"+(t+y).hashCode(), t, y));
+                }catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
 
         } catch (Exception e) {
+            System.out.println("Expection while importing bibtex file: ");
             e.printStackTrace();
             return refs;
         }

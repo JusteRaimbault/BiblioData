@@ -24,9 +24,9 @@ public class MongoCorpus {
      * Update a corpus of refs in the database
      * @param references
      */
-    public static void updateCorpus(Corpus references, String refcollection, String linkcollection){
+    public static void updateCorpus(Corpus references, String refcollection, String linkcollection,boolean processing){
         for(Reference r:references){
-            MongoReference.updateReference(r,refcollection);
+            MongoReference.updateReference(r,refcollection,processing);
             MongoCitation.updateCitations(r,linkcollection);
         }
     }

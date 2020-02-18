@@ -1,19 +1,16 @@
 package bibliodata.core;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
 import bibliodata.core.corpuses.DefaultCorpus;
 import bibliodata.core.reference.Reference;
 import bibliodata.mendeley.MendeleyAPI;
-import bibliodata.database.sql.SQLConnection;
 import bibliodata.scholar.ScholarAPI;
 import bibliodata.utils.*;
 import bibliodata.cortext.CortextAPI;
-import bibliodata.utils.tor.TorPool;
+import bibliodata.utils.proxy.TorPool;
 
 /**
  * @author Raimbault Juste <br/> <a href="mailto:juste.raimbault@polytechnique.edu">juste.raimbault@polytechnique.edu</a>

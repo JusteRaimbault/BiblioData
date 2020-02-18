@@ -102,7 +102,7 @@ public class AbstractSetRetriever {
 					Log.stdout("Unfilled ref : "+r.toString());
 					Reference detailed = MendeleyAPI.getReference(r.getTitle().title,r.getYear(),r.getId());
 					if(detailed!=null){
-						MongoReference.updateReference(r,refcollection);
+						MongoReference.updateReference(r,refcollection,false);
 					}
 				}
 
