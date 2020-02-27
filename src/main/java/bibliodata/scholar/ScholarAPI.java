@@ -505,6 +505,7 @@ public class ScholarAPI {
 
 			HttpGet httpGet = new HttpGet(encodedURL);
 			httpGet.setHeader("user-agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36");
+			// FIXME should ne able to set the timeout here
 			HttpResponse response = client.execute(httpGet);
 		    try {
 		    	//res= Jsoup.parse(response.getEntity().getContent(),"UTF-8","");

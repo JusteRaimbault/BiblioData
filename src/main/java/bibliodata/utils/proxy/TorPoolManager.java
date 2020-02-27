@@ -114,6 +114,8 @@ public class TorPoolManager {
 	/**
 	 * Checks if a pool is currently running, and setup initial port correspondingly.
 	 *
+	 * FIXME mongoMode is not used - always by default true
+	 *
 	 * @param portexclusivity should the used port be removed from the list of available ports (exclusivity)
 	 */
 	public static void setupTorPoolConnexion(boolean portexclusivity,boolean mongoMode) {

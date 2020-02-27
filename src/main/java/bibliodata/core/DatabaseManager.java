@@ -148,7 +148,7 @@ public class DatabaseManager {
             }
 
             if (action.equals("--export")) {
-                if(args.length==1) {
+                if(args.length<=2) {
                     System.out.println("Export database to csv. Usage : --database --export \n"+
                             "  $DATABASE : name of database \n"+
                             "  $FILE : file prefix \n"+
@@ -159,7 +159,9 @@ public class DatabaseManager {
                             "  [$WITHABSTRACTS] (optional) : export abstracts if exist"
                             );
                 }else {
-                    MongoConnection.initMongo(args[1]);
+                    String database = args[1];
+                    String fileprefix = args[2];
+                    MongoConnection.initMongo(database);
                     int maxPriority = -1;
                     if (args.length >= 4) {
                         maxPriority = Integer.parseInt(args[3]);
@@ -180,7 +182,7 @@ public class DatabaseManager {
                     if (args.length == 8) {
                         withAbstracts = true;
                     }
-                    MongoExport.export(maxPriority, maxDepth,initLayerDepth,numRefs, withAbstracts, args[2]);
+                    MongoExport.export(maxPriority, maxDepth,initLayerDepth,numRefs, withAbstracts, fileprefix);
                     MongoConnection.closeMongo();
                 }
             }

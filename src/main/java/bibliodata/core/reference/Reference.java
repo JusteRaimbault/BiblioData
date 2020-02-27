@@ -566,6 +566,11 @@ public class Reference {
 
 	}*/
 
+	/**
+	 * Recursive function to propagate horizontal depth
+	 * @param origin origin name
+	 * @param newdepth updated horizontal depth
+	 */
 	public void setHorizontalDepthRec(String origin, int newdepth) {
 		if (!visited){
 			if (getHorizontalDepthMap().containsKey(origin)) {
@@ -581,6 +586,11 @@ public class Reference {
 	}
 
 
+	/**
+	 * Root function for setting horizontal depth
+	 * @param origin origin name
+	 * @param newdepth updated horizontal depth
+	 */
 	public void setHorizontalDepth0(String origin, int newdepth){
 		//Log.stdout(" ----- Set hdepth : "+id+" ------");
 		for(Reference r :Reference.getReferences()){r.setVisited(false);}

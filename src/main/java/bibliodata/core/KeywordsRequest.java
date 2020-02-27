@@ -8,6 +8,7 @@ import java.util.List;
 import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.corpuses.OrderedCorpus;
 import bibliodata.core.reference.Reference;
+import bibliodata.database.mongo.MongoConnection;
 import bibliodata.database.mongo.MongoImport;
 import bibliodata.scholar.ScholarAPI;
 import bibliodata.utils.CSVReader;
@@ -87,7 +88,14 @@ public class KeywordsRequest {
 					addterm = args[6];
 				}
 
-				TorPoolManager.setupTorPoolConnexion(true);
+				if (mode.equals("--file")) {
+					TorPoolManager.setupTorPoolConnexion(true);
+				} else {
+					TorPoolManager.setupTorPoolConnexion(true, true);
+				}
+
+				// fix: as the scholar request uses mongo to log IPs, needs to be already initialized here
+				if (mode.equals("--mongo")) MongoConnection.initMongo(out);
 
 				ScholarAPI.init();
 
