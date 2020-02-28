@@ -7,8 +7,10 @@ import bibliodata.database.mongo.MongoCommand;
 import bibliodata.database.mongo.MongoConnection;
 import bibliodata.database.mongo.MongoImport;
 import bibliodata.database.mongo.MongoExport;
+import bibliodata.utils.CSVReader;
 import bibliodata.utils.Log;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 
 public class DatabaseManager {
@@ -152,11 +154,12 @@ public class DatabaseManager {
                     System.out.println("Export database to csv. Usage : --database --export \n"+
                             "  $DATABASE : name of database \n"+
                             "  $FILE : file prefix \n"+
-                            "  [$MAXPRIORITY] (optional) : max priority to export \n"+
-                            "  [$MAXDEPTH] (optional) : max vertical depth \n"+
-                            "  [$INITDEPTH] (optional) : init layer vertical depth \n"+
-                            "  [$NUMREFS] (optional) : number of references \n"+
-                            "  [$WITHABSTRACTS] (optional) : export abstracts if exist"
+                            "  [$MAXPRIORITY] (optional): max priority to export \n"+
+                            "  [$MAXDEPTH] (optional): max vertical depth \n"+
+                            "  [$INITDEPTH] (optional): init layer vertical depth \n"+
+                            "  [$FILTERFILE] (optional): csv file (first column id) to filter references \n"+
+                            "  [$NUMREFS] (optional): number of references \n"+
+                            "  [$WITHABSTRACTS] (optional): export abstracts if exist"
                             );
                 }else {
                     String database = args[1];
@@ -174,15 +177,21 @@ public class DatabaseManager {
                     if (args.length >= 6) {
                         initLayerDepth = Integer.parseInt(args[5]);
                     }
-                    int numRefs = -1;
+                    HashSet<String> filter = new HashSet<String>();
                     if (args.length >= 7) {
-                        numRefs = Integer.parseInt(args[6]);
+                        String filterFile = args[6];
+                        String[][] tofilter = CSVReader.read(filterFile, ";","");
+                        for(int i =0; i< tofilter.length; i++){filter.add(tofilter[i][0]);}
+                    }
+                    int numRefs = -1;
+                    if (args.length >= 8) {
+                        numRefs = Integer.parseInt(args[7]);
                     }
                     boolean withAbstracts = false;
-                    if (args.length == 8) {
+                    if (args.length == 9) {
                         withAbstracts = true;
                     }
-                    MongoExport.export(maxPriority, maxDepth,initLayerDepth,numRefs, withAbstracts, fileprefix);
+                    MongoExport.export(maxPriority, maxDepth,initLayerDepth,numRefs, withAbstracts, filter, fileprefix);
                     MongoConnection.closeMongo();
                 }
             }
