@@ -83,8 +83,8 @@ public class MongoImport {
      * @param citcollection
      * @param dropCollections
      */
-    public static void corpusToMongo(Corpus corpus,String db,String refcollection,String citcollection,boolean dropCollections){
-        MongoConnection.initMongo(db);
+    public static void corpusToMongo(Corpus corpus,String db,String refcollection,String citcollection,boolean dropCollections, boolean initDB){
+        if (initDB) MongoConnection.initMongo(db);
 
         Log.stdout("To import : "+corpus.references.size());
 
@@ -96,7 +96,11 @@ public class MongoImport {
         // better updating to avoid duplicates also in initial import
         MongoCorpus.updateCorpus(corpus,refcollection,citcollection,false);
 
-        MongoConnection.closeMongo();
+        if (initDB) MongoConnection.closeMongo();
+    }
+
+    public static void corpusToMongo(Corpus corpus,String db,String refcollection,String citcollection,boolean dropCollections){
+        corpusToMongo(corpus, db, refcollection, citcollection, dropCollections, true);
     }
 
 

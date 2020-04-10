@@ -157,13 +157,14 @@ public class KeywordsRequest {
 						//Log.stdout("to export : "+toexport.references.size());
 						//for(Reference r:toexport.references){Log.stdout(r.title.title);for(String h:r.horizontalDepth.keySet()){Log.stdout(h+" -> "+r.horizontalDepth.get(h));}}
 						// exporting kwreq by kwreq causes a redundancy with horizdepth when names are duplicated -> change merge strategy with latest only
-						MongoImport.corpusToMongo(toexport, out, "references", "links", drop);
+						MongoImport.corpusToMongo(toexport, out, "references", "links", drop, false); // ! do not init db so it is not closed (for ip logging in particular)
 					}
 
 					// write kws in achieved file
 					//try{(new FileWriter(new File(outFile+"_achieved.txt"),true)).write(req+"\n");}catch(Exception e){e.printStackTrace();}
 				}
 
+				if (mode.equals("--mongo")) MongoConnection.closeMongo();
 
 			}
 
