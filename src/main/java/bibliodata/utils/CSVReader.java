@@ -18,11 +18,13 @@ public class CSVReader {
 
 	private static String[] parseLine(String rawLine,String delimiter,String quote){
 		//rawLine.replace(quote, ""); can not use split - hand parse
+		if (quote.length()==0) return(rawLine.split(delimiter));
+
 		LinkedList<String> acc = new LinkedList<>();
 		boolean inside = false;
 		String currentField = "";
 		for(int i=0;i<rawLine.length();i++){
-			if (quote.length()>0) {
+			//if (quote.length()>0) {
 				if (rawLine.charAt(i) == delimiter.charAt(0) && !inside) {
 					acc.add(currentField);
 					currentField = "";
@@ -36,14 +38,14 @@ public class CSVReader {
 				if (rawLine.charAt(i) != quote.charAt(0) && rawLine.charAt(i) != delimiter.charAt(0)) {
 					currentField = currentField + rawLine.charAt(i);
 				}
-			} else { // with no quote strings should be properly formatted and contain no delimiter
-				if (rawLine.charAt(i) == delimiter.charAt(0)) {
-					acc.add(currentField);
-					currentField = "";
-				} else {
-					currentField = currentField + rawLine.charAt(i);
-				}
-			}
+			//} else { // with no quote strings should be properly formatted and contain no delimiter
+			//	if (rawLine.charAt(i) == delimiter.charAt(0)) {
+			//		acc.add(currentField);
+			//		currentField = "";
+			//	} else {
+			//		currentField = currentField + rawLine.charAt(i);
+			//	}
+			//}
 		}
 		String[] res = new String[acc.size()];
 		int i = 0;
