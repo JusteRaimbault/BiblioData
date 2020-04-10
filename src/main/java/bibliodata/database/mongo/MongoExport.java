@@ -58,6 +58,7 @@ public class MongoExport {
         // DEBUG : at this step ALL refs in the corpus should have some hdepth
 
         // filter using negative horizontal depths
+        // FIXME does not remove refs from citing HashSets !
         Corpus toexport = new DefaultCorpus();
         for(Reference r:fullCorpus) {
             boolean toremove = false;

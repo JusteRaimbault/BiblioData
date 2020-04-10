@@ -157,7 +157,7 @@ public class DatabaseManager {
                             "  [$MAXPRIORITY] (optional): max priority to export \n"+
                             "  [$MAXDEPTH] (optional): max vertical depth \n"+
                             "  [$INITDEPTH] (optional): init layer vertical depth \n"+
-                            "  [$FILTERFILE] (optional): csv file (first column id) to filter references \n"+
+                            "  [$FILTERFILE] (optional): csv file (first column id) to filter references [delim ;, quote \" \n"+
                             "  [$NUMREFS] (optional): number of references \n"+
                             "  [$WITHABSTRACTS] (optional): export abstracts if exist"
                             );
@@ -180,7 +180,7 @@ public class DatabaseManager {
                     HashSet<String> filter = new HashSet<String>();
                     if (args.length >= 7) {
                         String filterFile = args[6];
-                        String[][] tofilter = CSVReader.read(filterFile, ";","");
+                        String[][] tofilter = CSVReader.read(filterFile, ";","\"");
                         for(int i =0; i< tofilter.length; i++){filter.add(tofilter[i][0]);}
                     }
                     int numRefs = -1;

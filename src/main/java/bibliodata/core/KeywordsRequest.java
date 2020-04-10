@@ -48,7 +48,7 @@ public class KeywordsRequest {
 
 			if (mode.equals("--file")){
 				System.out.println("Usage : --keywords --file \n"+
-						"  $KWFILE : file with keyword requests (format 'request;requestcode') \n"+
+						"  $KWFILE : file with keyword requests (format 'requestcode;request') \n"+
 						"  $OUTFILE : file to store resulting corpus \n"+
 						"  $NUMREF : number of references to collect for each kw \n"+
 						"  [$ADDTERM] (optional) : additional term to append to each request; request is wrapped with quotes"
@@ -57,7 +57,7 @@ public class KeywordsRequest {
 
 			if (mode.equals("--mongo")){
 				System.out.println("Usage : --keywords --mongo \n"+
-						"  $KWFILE : file with keyword requests (format 'request;requestcode') \n"+
+						"  $KWFILE : file with keyword requests (format 'requestcode;request') \n"+
 						"  $DATABASE : name of database in which resulting corpus is stored \n"+
 						"  $NUMREF : number of references to collect for each kw \n"+
 						"  [$INITDEPTH] (optional) : depth of the initial layer \n"+
@@ -100,7 +100,9 @@ public class KeywordsRequest {
 				ScholarAPI.init();
 
 				// parse kws file
-				String[][] kwraw = CSVReader.read(kwFile, ";", "\"");
+				// JR 20200410 remove the quote in request file so that quoted expressions are manageable without escaping nightmare
+				//String[][] kwraw = CSVReader.read(kwFile, ";", "\"");
+				String[][] kwraw = CSVReader.read(kwFile, ";", "");
 				//System.out.println(kwraw.length);
 				String[] reqs = new String[kwraw.length];
 				String[] reqnames = new String[kwraw.length];

@@ -49,7 +49,10 @@ public class MongoDocument {
     public static Reference fromDocument(Document document){
         if(document.keySet().size()==0){return(Reference.empty);}//better avoid returning null
         else {
+            //  will fail if doc as no id
             String id = document.getString("id");
+            // TODO find how can empty refs be inserted into mongo (removed manually)
+            if(id==null){return(Reference.empty);}
 
             String title = document.getString("title");// every doc should have title
             String year = document.getString("year");

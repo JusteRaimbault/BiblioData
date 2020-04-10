@@ -15,17 +15,35 @@ import java.util.LinkedList;
  */
 public class CSVReader {
 
-	// TODO to be tested
+
 	private static String[] parseLine(String rawLine,String delimiter,String quote){
 		//rawLine.replace(quote, ""); can not use split - hand parse
-		LinkedList<String> acc = new LinkedList<String>();
+		LinkedList<String> acc = new LinkedList<>();
 		boolean inside = false;
 		String currentField = "";
 		for(int i=0;i<rawLine.length();i++){
-			if(rawLine.charAt(i)==delimiter.charAt(0)&&!inside){acc.add(currentField);currentField="";}
-			if(rawLine.charAt(i)==quote.charAt(0)&&!inside){inside=true;}//previous char should be delimiter
-			if(rawLine.charAt(i)==quote.charAt(0)&&inside){inside=false;}
-			if(rawLine.charAt(i)!=quote.charAt(0)&&rawLine.charAt(i)!=delimiter.charAt(0)){currentField=currentField+rawLine.charAt(i);}
+			if (quote.length()>0) {
+				if (rawLine.charAt(i) == delimiter.charAt(0) && !inside) {
+					acc.add(currentField);
+					currentField = "";
+				}
+				if (rawLine.charAt(i) == quote.charAt(0) && !inside) {
+					inside = true;
+				}//previous char should be delimiter
+				if (rawLine.charAt(i) == quote.charAt(0) && inside) {
+					inside = false;
+				}
+				if (rawLine.charAt(i) != quote.charAt(0) && rawLine.charAt(i) != delimiter.charAt(0)) {
+					currentField = currentField + rawLine.charAt(i);
+				}
+			} else { // with no quote strings should be properly formatted and contain no delimiter
+				if (rawLine.charAt(i) == delimiter.charAt(0)) {
+					acc.add(currentField);
+					currentField = "";
+				} else {
+					currentField = currentField + rawLine.charAt(i);
+				}
+			}
 		}
 		String[] res = new String[acc.size()];
 		int i = 0;
@@ -43,7 +61,7 @@ public class CSVReader {
 	public static String[][] read(String filePath,String delimiter,String quote){
 		try{
 		   BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)));
-		   LinkedList<String[]> listRes = new LinkedList<String[]>();
+		   LinkedList<String[]> listRes = new LinkedList<>();
 		   String currentLine = reader.readLine();
 		   while(currentLine!= null){
 			   if(!currentLine.startsWith("#")) {
