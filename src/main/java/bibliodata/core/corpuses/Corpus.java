@@ -119,7 +119,9 @@ public abstract class Corpus implements Iterable<Reference> {
 		LinkedList<String[]> dataedges = linksAsCSVRows();
 		Log.stdout("Exporting corpus with "+datanodes.size()+" refs, "+dataedges.size()+" links");
 		CSVWriter.write(prefix+".csv", datanodes, ";", "\"");
-		CSVWriter.write(prefix+"_links.csv", dataedges, ";", "\"");
+		if (dataedges.size()>0) {
+			CSVWriter.write(prefix + "_links.csv", dataedges, ";", "\"");
+		}
 	}
 
 	private LinkedList<String[]> refsAsCSVRows(boolean withAbstract,LinkedList<String> attributes){
@@ -173,7 +175,7 @@ public abstract class Corpus implements Iterable<Reference> {
 	 * @param citedFolder
 	 * @return
 	 */
-	public static Corpus fromNodeFile(String refFile, String citedFolder){
+	public static Corpus fromNodeFile(String refFile, String citedFolder, int idcolumn){
 		Corpus initial = new DefaultCorpus();
 
 		if(refFile.endsWith(".ris")){
@@ -184,7 +186,7 @@ public abstract class Corpus implements Iterable<Reference> {
 		}
 		if(refFile.endsWith(".csv")){
 			if(citedFolder.length()==0){
-				initial = new CSVFactory(refFile).getCorpus();
+				initial = new CSVFactory(refFile).setIdcolumn(idcolumn).getCorpus();
 			}else{
 				initial = new CSVFactory(refFile,-1,citedFolder).getCorpus();
 			}
@@ -198,6 +200,8 @@ public abstract class Corpus implements Iterable<Reference> {
 
 		return(initial);
 	}
+
+	public static Corpus fromNodeFile(String refFile, String citedFolder){return(fromNodeFile(refFile, citedFolder, 1));}
 
 	/**
 	 * Get an ordered corpus from file

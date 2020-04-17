@@ -24,10 +24,10 @@ public class CSVFactory implements CorpusFactory {
 	private String citedFolder = "";
 
 	private int idcolumn = 1; // 2nd column by default
-	public void setIdcolumn(int i){idcolumn=i;}
+	public CSVFactory setIdcolumn(int i){idcolumn=i; return(this);}
 
 	private boolean withHeader = false;
-	public void setWithHeader(boolean b){withHeader = b;}
+	public CSVFactory setWithHeader(boolean b){withHeader = b; return(this);}
 
 	public CSVFactory(String file){
 		bibfile=file;

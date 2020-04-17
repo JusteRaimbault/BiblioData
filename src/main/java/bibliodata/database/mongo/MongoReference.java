@@ -76,9 +76,18 @@ public class MongoReference {
             //Log.stdout(queryres.toJson());
 
             Reference res = Reference.construct(queryres.getString("id"), queryres.getString("title"));
+            // FIXME depth is restricted to Int - problematic when using mongo interactively in parallel (numeric double by default)
             res.setDepth(queryres.getInteger("depth"));
             return (res);
-        }catch(Exception e){return(null);}
+        }catch(Exception e){
+            e.printStackTrace();
+            return(null);
+        }
+    }
+
+    public static void setProcessing(String id, String collection){
+        MongoCollection<Document> mongoCollection = MongoConnection.getCollection(collection);
+        mongoCollection.findOneAndUpdate(eq("id",id),set("processing", true));
     }
 
 

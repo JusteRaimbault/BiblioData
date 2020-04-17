@@ -31,11 +31,11 @@ public class CitationNetwork {
 
 	/**
 	 * Construct the citation network for refs in a mongo database
-	 * @param database
-	 * @param refcollection
-	 * @param linkcollection
-	 * @param numrefs
-	 * @param consolidationDatabase
+	 * @param database database name
+	 * @param refcollection ref collection name
+	 * @param linkcollection link collection name
+	 * @param numrefs number of references to collect
+	 * @param consolidationDatabase consolidation database
 	 */
 	public static void fillCitationsMongo(String database,String refcollection,String linkcollection,int numrefs,int maxPriority, String consolidationDatabase,boolean consolidationOnly){
 
@@ -64,6 +64,21 @@ public class CitationNetwork {
 		//MongoConnection.updateCorpus(new DefaultCorpus(Reference.references.keySet()),refcollection,linkcollection);
 		//if (consolidationOnly){MongoCommand.notProcessing(Context.getReferencesCollection());} // FIXME issue with parallel runs
 
+		MongoConnection.closeMongo();
+	}
+
+	public static void fillCitationsMongoIds(String database, String refcollection,String linkcollection, String idsfile, String consolidationDatabase){
+		TorPoolManager.setupTorPoolConnexion(true, true);
+		ScholarAPI.init();
+		Corpus tocollect = Corpus.fromNodeFile(idsfile,"", 0);
+		MongoConnection.initMongo(database);
+		for(Reference r:tocollect){
+			MongoReference.setProcessing(r.getId(), refcollection);
+			Log.stdout("Unfilled ref : "+r.toString());
+			ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r),consolidationDatabase,false);
+			MongoConnection.switchMongo(database);
+			MongoCorpus.updateCorpus(new DefaultCorpus(r,r.getCiting()),refcollection,linkcollection,false);
+		}
 		MongoConnection.closeMongo();
 	}
 

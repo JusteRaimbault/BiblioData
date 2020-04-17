@@ -47,7 +47,7 @@ public class Log {
 	}
 
 	public static void stdout(String s,boolean newline){
-		if(newline==true){
+		if(newline){
 			System.out.println("["+new Date().toString()+"] "+s);
 		}else{
 			System.out.print(s);
