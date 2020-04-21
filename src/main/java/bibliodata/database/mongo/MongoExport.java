@@ -37,7 +37,10 @@ public class MongoExport {
         for(Reference r:fullCorpus){
             if (r.getDepth()==initLayerDepth) {
                 initlayer.add(r);
-                if (filter.contains(r.getId())) { // set negative hdepth for refs to be filtered and propagate it
+                boolean filtered = false;
+                for(String f : filter){filtered=filtered||r.getId().startsWith(f);}
+                if (filtered) { // set negative hdepth for refs to be filtered and propagate it
+                    Log.stdout("    Filtered: "+r.toString());
                     r.setHorizontalDepth("FILTERED",-1);
                 }
             }
@@ -58,14 +61,23 @@ public class MongoExport {
         // DEBUG : at this step ALL refs in the corpus should have some hdepth
 
         // filter using negative horizontal depths
-        // FIXME does not remove refs from citing HashSets !
         Corpus toexport = new DefaultCorpus();
+        Corpus toremove = new DefaultCorpus();
         for(Reference r:fullCorpus) {
-            boolean toremove = false;
+            boolean remove = false;
             for (String origin:r.getHorizontalDepthMap().keySet()){
-                toremove=toremove||(r.getHorizontalDepth(origin)<0);
+                remove=remove||(r.getHorizontalDepth(origin)<0);
             }
-            if (!toremove) toexport.references.add(r);
+            if (!remove) toexport.references.add(r);
+            else toremove.references.add(r);
+        }
+
+        // second pass to remove refs from citing HashSets in the exported corpus
+        for(Reference r:toexport) {
+            HashSet<Reference> citing = new HashSet<Reference>(r.getCiting());
+            for(Reference c:citing){
+                if (toremove.references.contains(c)) r.getCiting().remove(c);
+            }
         }
 
         Log.stdout(toexport.references.size()+" refs to export");
@@ -82,7 +94,11 @@ public class MongoExport {
         }
         Log.stdout("total hdepth count = "+hdepthcount);
 
-        LinkedList<String> attributes = new LinkedList<>();attributes.add("depth");attributes.add("priority");attributes.add("horizontalDepth");attributes.add("citingFilled");
+        LinkedList<String> attributes = new LinkedList<>();
+        attributes.add("depth");
+        //attributes.add("priority");
+        //attributes.add("horizontalDepth");
+        attributes.add("citingFilled");
 
         // add horizontal depths
         attributes.addAll(attrs);

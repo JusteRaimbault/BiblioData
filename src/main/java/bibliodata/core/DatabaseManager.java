@@ -157,7 +157,7 @@ public class DatabaseManager {
                             "  [$MAXPRIORITY] (optional): max priority to export \n"+
                             "  [$MAXDEPTH] (optional): max vertical depth \n"+
                             "  [$INITDEPTH] (optional): init layer vertical depth \n"+
-                            "  [$FILTERFILE] (optional): csv file (first column id) to filter references [delim ;, quote \" \n"+
+                            "  [$FILTERFILE] (optional): csv file (first column id or prefix of id) to filter references (delim ;, quote \")\n"+
                             "  [$NUMREFS] (optional): number of references \n"+
                             "  [$WITHABSTRACTS] (optional): export abstracts if exist"
                             );
@@ -181,7 +181,11 @@ public class DatabaseManager {
                     if (args.length >= 7) {
                         String filterFile = args[6];
                         String[][] tofilter = CSVReader.read(filterFile, ";","\"");
-                        for(int i =0; i< tofilter.length; i++){filter.add(tofilter[i][0]);}
+                        for(int i =0; i< tofilter.length; i++){
+                            String filteredid = tofilter[i][0]; //remove trailing 0s (issue formatting)
+                            while(filteredid.endsWith("0")){filteredid = filteredid.substring(0,filteredid.length()-1);}
+                            filter.add(filteredid);
+                        }
                     }
                     int numRefs = -1;
                     if (args.length >= 8) {
