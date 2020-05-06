@@ -26,9 +26,18 @@ public class MongoExport {
      * @param numRefs number of references (-1: all references)
      * @param withAbstracts export abstracts if available
      * @param filter set of ids not to export
+     * @param keptHorizontalDepths set of horizontal depth label to keep (request level filter)
      * @param file file prefix for export (CSV for refs and links)
      */
-    public static void export(int maxPriority, int maxDepth, int initLayerDepth, int numRefs, boolean withAbstracts, HashSet<String> filter,String file) {
+    public static void export(int maxPriority,
+                              int maxDepth,
+                              int initLayerDepth,
+                              int numRefs,
+                              boolean withAbstracts,
+                              HashSet<String> filter,
+                              HashSet<String> keptHorizontalDepths,
+                              String file
+    ) {
         Log.stdout("Export maxPriority="+maxPriority+" ; maxDepth="+maxDepth+" ; initLayerDepth="+initLayerDepth+" ; numRefs="+numRefs);
         Corpus fullCorpus = MongoCorpus.getCorpus(maxPriority,maxDepth,numRefs);
         Log.stdout(fullCorpus.references.size()+" considered");
@@ -48,11 +57,12 @@ public class MongoExport {
         Log.stdout("init layer size = "+initlayer.size());
         int n = initlayer.size();int i =0;
         for(Reference r0:initlayer){
-            Log.stdout("setting hdepth : "+i+" / "+n);
+            //Log.stdout("setting hdepth : "+i+" / "+n);
+            if(i%50==0){Log.stdout(" "+i+" / "+n+" ",false);}else{Log.stdout("=",false);}
             HashMap<String,Integer> origs = r0.getHorizontalDepthMap();
-            Log.stdout(" in-cit links = "+r0.getCiting().size());
+            //Log.stdout(" in-cit links = "+r0.getCiting().size());
             for(String origin:origs.keySet()){
-                Log.stdout(origin+":"+origs.get(origin));
+                //Log.stdout(origin+":"+origs.get(origin));
                 r0.setHorizontalDepth0(origin,origs.get(origin));
             }
             i++;
@@ -60,14 +70,18 @@ public class MongoExport {
 
         // DEBUG : at this step ALL refs in the corpus should have some hdepth
 
-        // filter using negative horizontal depths
+        // filter using negative and kept horizontal depths
         Corpus toexport = new DefaultCorpus();
         Corpus toremove = new DefaultCorpus();
+
         for(Reference r:fullCorpus) {
-            boolean remove = false;
+            boolean removeNeg = false;
+            boolean removeKept = true;
             for (String origin:r.getHorizontalDepthMap().keySet()){
-                remove=remove||(r.getHorizontalDepth(origin)<0);
+                removeNeg=removeNeg||(r.getHorizontalDepth(origin)<0);
+                removeKept = removeKept&&!keptHorizontalDepths.contains(origin);
             }
+            boolean remove = removeNeg&&removeKept;
             if (!remove) toexport.references.add(r);
             else toremove.references.add(r);
         }
@@ -80,6 +94,7 @@ public class MongoExport {
             }
         }
 
+        Log.stdout(toremove.references.size()+" refs to remove");
         Log.stdout(toexport.references.size()+" refs to export");
 
         // set hdepth as attributes

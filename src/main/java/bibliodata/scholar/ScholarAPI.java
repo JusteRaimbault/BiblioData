@@ -44,7 +44,7 @@ import bibliodata.utils.proxy.TorThread;
 
 /**
  * @author Raimbault Juste <br/> <a href="mailto:juste.raimbault@polytechnique.edu">juste.raimbault@polytechnique.edu</a>
- *
+ * TODO for refs with citing > 1000 use by year (see https://arxiv.org/abs/2004.14329)
  */
 public class ScholarAPI {
 

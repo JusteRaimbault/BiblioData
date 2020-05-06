@@ -38,6 +38,7 @@ public class MongoDocument {
             Document hdepth = new Document((Map) reference.getHorizontalDepthMap());
             res.append("horizontalDepth",hdepth);
         }
+        res.append("ts",reference.getTimestamp());
         return(res);
     }
 
@@ -109,6 +110,10 @@ public class MongoDocument {
                 }
             }
 
+            if (document.containsKey("ts")){
+                r.setTimestamp(document.getLong("ts"));
+            }
+
 
             return (r);
         }
@@ -120,6 +125,7 @@ public class MongoDocument {
             for(Reference citing:reference.getCiting()){
                 Document link = new Document("from",citing.getId());
                 link.append("to",reference.getId());
+                link.append("ts",reference.getTimestamp());
                 links.add(link);
             }
         }
@@ -127,6 +133,7 @@ public class MongoDocument {
             for(Reference cited: reference.getCited()){
                 Document link = new Document("to",cited.getId());
                 link.append("from",reference.getId());
+                link.append("ts",cited.getTimestamp());
                 links.add(link);
             }
         }
@@ -134,7 +141,7 @@ public class MongoDocument {
     }
 
     public static LinkedList<Document> fromCorpus(Corpus corpus){
-        LinkedList<Document> docs = new LinkedList();
+        LinkedList<Document> docs = new LinkedList<Document>();
         for(Reference r:corpus){
             docs.add(fromReference(r));
         }
@@ -142,7 +149,7 @@ public class MongoDocument {
     }
 
     public static LinkedList<Document> citationLinksFromCorpus(Corpus corpus){
-        LinkedList<Document> links = new LinkedList();
+        LinkedList<Document> links = new LinkedList<Document>();
         for(Reference r:corpus){
             links.addAll(citationLinksFromReference(r));
         }

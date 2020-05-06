@@ -10,6 +10,7 @@ import bibliodata.database.mongo.MongoExport;
 import bibliodata.utils.CSVReader;
 import bibliodata.utils.Log;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 
@@ -151,15 +152,17 @@ public class DatabaseManager {
 
             if (action.equals("--export")) {
                 if(args.length<=2) {
-                    System.out.println("Export database to csv. Usage : --database --export \n"+
+                    System.out.println(
+                            "Export database to csv. Usage : --database --export \n"+
                             "  $DATABASE : name of database \n"+
                             "  $FILE : file prefix \n"+
-                            "  [$MAXPRIORITY] (optional): max priority to export \n"+
-                            "  [$MAXDEPTH] (optional): max vertical depth \n"+
-                            "  [$INITDEPTH] (optional): init layer vertical depth \n"+
-                            "  [$FILTERFILE] (optional): csv file (first column id or prefix of id) to filter references (delim ;, quote \")\n"+
-                            "  [$NUMREFS] (optional): number of references \n"+
-                            "  [$WITHABSTRACTS] (optional): export abstracts if exist"
+                            "  [$MAXPRIORITY] (optional): max priority to export (-1 for all) \n"+
+                            "  [$MAXDEPTH] (optional): max vertical depth (-1 for all) \n"+
+                            "  [$INITDEPTH] (optional): init layer vertical depth (from which horizontal depth is propagated) \n"+
+                            "  [$FILTERFILE] (optional): csv file (first column id or prefix of id) to filter references (delim ;, quote \") - false for no filter\n"+
+                            "  [$KEPTHDEPTHS] (optional): string giving the horizontal depth labels to be kept ( ; separator) \n"+
+                            "  [$NUMREFS] (optional): number of references (-1 for all) \n"+
+                            "  [$WITHABSTRACTS] (optional): export abstracts if exist (false by default)"
                             );
                 }else {
                     String database = args[1];
@@ -180,22 +183,32 @@ public class DatabaseManager {
                     HashSet<String> filter = new HashSet<String>();
                     if (args.length >= 7) {
                         String filterFile = args[6];
-                        String[][] tofilter = CSVReader.read(filterFile, ";","\"");
-                        for(int i =0; i< tofilter.length; i++){
-                            String filteredid = tofilter[i][0]; //remove trailing 0s (issue formatting)
-                            while(filteredid.endsWith("0")){filteredid = filteredid.substring(0,filteredid.length()-1);}
-                            filter.add(filteredid);
+                        if (!filterFile.equals("false")) {
+                            String[][] tofilter = CSVReader.read(filterFile, ";", "\"");
+                            for (int i = 0; i < tofilter.length; i++) {
+                                String filteredid = tofilter[i][0]; //remove trailing 0s (issue formatting)
+                                while (filteredid.endsWith("0")) {
+                                    filteredid = filteredid.substring(0, filteredid.length() - 1);
+                                }
+                                filter.add(filteredid);
+                            }
                         }
                     }
-                    int numRefs = -1;
+                    HashSet<String> keptHorizontalDepths = new HashSet<>();
                     if (args.length >= 8) {
-                        numRefs = Integer.parseInt(args[7]);
+                        String[] kept = args[7].replace("\"","").split(";");
+                        for(String k: kept){System.out.println("kept hdepth : "+k);}
+                        keptHorizontalDepths.addAll(Arrays.asList(kept));
+                    }
+                    int numRefs = -1;
+                    if (args.length >= 9) {
+                        numRefs = Integer.parseInt(args[8]);
                     }
                     boolean withAbstracts = false;
-                    if (args.length == 9) {
-                        withAbstracts = true;
+                    if (args.length == 10) {
+                        withAbstracts = Boolean.parseBoolean(args[9]);
                     }
-                    MongoExport.export(maxPriority, maxDepth,initLayerDepth,numRefs, withAbstracts, filter, fileprefix);
+                    MongoExport.export(maxPriority, maxDepth,initLayerDepth,numRefs, withAbstracts, filter, keptHorizontalDepths, fileprefix);
                     MongoConnection.closeMongo();
                 }
             }

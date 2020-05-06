@@ -51,7 +51,7 @@ public class CitationNetwork {
 
 		for(int i = 0;i<numrefs;i++){
 			Reference r = MongoReference.getUnfilled(refcollection,maxPriority);
-			if(r==null){break;}
+			if(r.isEmpty()){break;}
 			Log.stdout("Unfilled ref : "+r.toString());
 			ScholarAPI.fillIdAndCitingRefs(new DefaultCorpus(r),consolidationDatabase,consolidationOnly);
 			// db may have been switched by consolidation

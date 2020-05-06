@@ -119,10 +119,10 @@ public class MongoRequest {
      *        )
      *        -> terrible, keep quickndirty approach for now
      *
-     * @param collection
-     * @param idkey
-     * @param idvalue
-     * @param document
+     * @param collection collection
+     * @param idkey key of id
+     * @param idvalue value of id
+     * @param document updated document
      */
     public static void upsert(String collection, String idkey,Object idvalue, Document document){
         MongoCollection<Document> mongoCollection = MongoConnection.getCollection(collection);
@@ -140,7 +140,8 @@ public class MongoRequest {
                         !k.equals("id")&
                         !k.equals("citingFilled")&
                         !k.equals("origin")&
-                        !k.equals("horizontalDepth")
+                        !k.equals("horizontalDepth")&
+                        !k.equals("ts")
                 ){
                     updates.add(set(k,document.get(k)));
                 }
@@ -198,6 +199,14 @@ public class MongoRequest {
                 }
             }
 
+            if(document.containsKey("ts")){
+                if(existing.containsKey("ts")){
+                    updates.add(set("ts", Math.max(document.getLong("ts"),existing.getLong("ts"))));
+                }else{
+                    updates.add(set("ts", document.get("ts")));
+                }
+            }
+
             // apply updates
             mongoCollection.updateOne(eq(idkey, idvalue), combine(updates),(new UpdateOptions()).upsert(true));
         }else{
@@ -209,15 +218,18 @@ public class MongoRequest {
 
     /**
      * insert documents if not exactly the same already
-     * @param collection
-     * @param documents
+     * @param collection collection
+     * @param documents doc to upsert
      */
-    public static void upsert(String collection,List<Document> documents){
+    public static void upsert(String collection, List<Document> documents, List<String> idkeys){
         MongoCollection<Document> mongoCollection = MongoConnection.getCollection(collection);
         for(Document document:documents){
             //mongoCollection.updateOne(document,document,(new UpdateOptions()).upsert(true));
             List<Bson> filter = new LinkedList<Bson>();
-            for(String k:document.keySet()){if(!k.equals("_id")){filter.add(eq(k,document.get(k)));}}
+            for(String k:idkeys){//document.keySet()){
+                if(!k.equals("_id")){filter.add(eq(k,document.get(k)));}
+            }
+            // FIXME is ts actually replaced?
             mongoCollection.replaceOne(and(filter),document,(new UpdateOptions()).upsert(true));
         }
     }
@@ -225,11 +237,11 @@ public class MongoRequest {
 
     /**
      * update one field with one id field
-     * @param collection
-     * @param idkey
-     * @param idvalue
-     * @param updatekey
-     * @param updatevalue
+     * @param collection collection
+     * @param idkey key for id
+     * @param idvalue value for id
+     * @param updatekey key update
+     * @param updatevalue value update
      */
     public static void update(String collection, String idkey, Object idvalue, String updatekey, Object updatevalue) {
         MongoCollection<Document> mongoCollection = MongoConnection.getCollection(collection);

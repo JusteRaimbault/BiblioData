@@ -98,7 +98,7 @@ public class AbstractSetRetriever {
 
 				for(int i = 0;i<numrefs;i++){
 					Reference r = MongoReference.getUnfilled(refcollection, Context.getMaxHorizontalDepth());
-					if(r==null){break;}
+					if(r.isEmpty()){break;}
 					Log.stdout("Unfilled ref : "+r.toString());
 					Reference detailed = MendeleyAPI.getReference(r.getTitle().title,r.getYear(),r.getId());
 					if(detailed!=null){

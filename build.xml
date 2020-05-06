@@ -9,10 +9,10 @@
   <!-- no need source, use lastly compiled classes-->
   <property name="build" location="bin"/>
   <property name="jar.dir" value="jar" />
-  <!--<property name="main" value = "bibliodata.Main"/>-->
+  <property name="main" value = "bibliodata.Main"/>
   <!--<property name="main" value = "main.CitationNetwork"/>-->
   <!--<property name="main" value="utils.tor.TestTorPoolManager"/>-->
-  <property name="main" value="bibliodata.utils.proxy.ProxyManager"/>
+  <!--<property name="main" value="bibliodata.utils.proxy.ProxyManager"/>-->
   <property name="bib" location="lib"/>
 
     <mkdir dir="bin"/>

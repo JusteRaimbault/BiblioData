@@ -21,14 +21,13 @@ public class MongoCitation {
 
     /**
      *
-     * @param r
-     * @param linkcol
+     * @param r reference
+     * @param linkcol link collection
      */
     public static void updateCitations(Reference r, String linkcol){
         List<Document> links = MongoDocument.citationLinksFromReference(r);
-        // insert only if not already
-        //mongoInsert(linkcol,links);
-        MongoRequest.upsert(linkcol,links);
+        LinkedList<String> linkids = new LinkedList<>();linkids.add("from");linkids.add("to");
+        MongoRequest.upsert(linkcol,links,linkids);
     }
 
 
@@ -57,9 +56,9 @@ public class MongoCitation {
 
     /**
      * get citing for a doc given all docs and all links
-     * @param cited
-     * @param alldocs
-     * @param alllinks
+     * @param cited cited doc
+     * @param alldocs all documents
+     * @param alllinks all links
      * @return
      */
     public static LinkedList<Document> getCitingAsDocuments(Document cited,HashMap<String,Document> alldocs,HashMap<String,LinkedList<String>> alllinks){
