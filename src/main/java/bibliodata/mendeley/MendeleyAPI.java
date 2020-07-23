@@ -144,6 +144,8 @@ public class MendeleyAPI{
 				// return access token
 				// Q : use refresh token ? not really necessary if renewed each hour.
 
+				Log.stdout("API Response: "+object.toString());
+
 				String token = object.getString("access_token");
 				Log.output("Token : "+token);
 				
@@ -186,28 +188,47 @@ public class MendeleyAPI{
 			
 			// check if result, if not renew the access token and redo the request
 			if(entries.size()==0){token = getAccessToken(true);entries = (JsonArray)rawRequest(query,numResponse,token);}
-			
+
+			//Log.stdout("API result: "+entries.toString());
+			Log.stdout("API result size: "+entries.size());
+
 			//iterate on the json object
-			
 			for(int i=0;i<entries.size();i++){
 				JsonObject entry = entries.getJsonObject(i);
 				
 				//System.out.println(i+" : "+entry);//DEBUG
 				//System.out.println(Integer.toString(entry.getInt("year")));
-				
+
+				String mendeleyId = "";
+				if(entry.containsKey("id")) {mendeleyId = entry.getString("id");}
+				String title = "";
+				if(entry.containsKey("title")) {title = entry.getString("title");}
+				String abs = "";
+				if(entry.containsKey("abstract")) {abs = entry.getString("abstract");}
+				String year = "";
+				if(entry.containsKey("year")) {year = Integer.toString(entry.getInt("year"));}
+
 				// add reference using construct -- no scholar ID
 				Reference newref = null;
 				if(ghostRefs){
 					// ghost ref with fields id, title, abstract, year
-					newref = new GhostReference(entry.getString("id"),entry.getString("title"),entry.getString("abstract"),Integer.toString(entry.getInt("year")));
+					newref = new GhostReference(mendeleyId,title,abs,year);
 				}else{
-					newref = Reference.construct("", new Title(entry.getString("title")), new Abstract(entry.getString("abstract")),Integer.toString(entry.getInt("year")));
-					newref.setSecondaryId(entry.getString("id"));
+					newref = Reference.construct("", new Title(title), new Abstract(abs),year);
+					newref.setSecondaryId(mendeleyId);
 				}
 				// in any case set authors and keywords
 				newref.setAuthors(getAuthors(entry));
 				newref.setKeywords(getKeywords(entry));
-				
+
+				if (entry.containsKey("identifiers")){
+					JsonObject ids = entry.getJsonObject("identifiers");
+					if (ids.containsKey("doi")){
+						newref.setAttribute("doi",ids.getString("doi"));
+					}
+				}
+
+
 				refs.add(newref);
 			}		
 			return refs;
@@ -225,9 +246,10 @@ public class MendeleyAPI{
 		if(authors!=null){
 			for(int i=0;i<authors.size();i++){
 				JsonObject author = authors.getJsonObject(i);
-				//System.out.println(author);
-				String firstname = "";try{firstname = author.getString("first_name");}catch(Exception e){}
-				String lastname = "";try{lastname = author.getString("last_name");}catch(Exception e){}
+				String firstname = "";try{firstname = author.getString("first_name");}catch(Exception e){
+					//Log.stdout("no author first name");
+				}
+				String lastname = "";try{lastname = author.getString("last_name");}catch(Exception e){Log.stdout("no author last name");}
 				res.add(firstname+" "+lastname);
 			}
 		}

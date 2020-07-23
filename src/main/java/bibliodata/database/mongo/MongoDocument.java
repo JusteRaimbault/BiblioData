@@ -30,6 +30,7 @@ public class MongoDocument {
         if(reference.getResume().en_resume.length()>0){res.append("abstract_en",reference.getResume().en_resume);}
         if(reference.getKeywords().size()>0){res.append("keywords",reference.getKeywordString());}
         if(reference.getYear().length()>0){res.append("year",reference.getYear());}
+        for(String attr: reference.getAttributes().keySet()){res.append(attr,reference.getAttribute(attr));}
         //if(reference.date.length()>0){res.append("date",reference.date);}
         res.append("citingFilled",reference.isCitingFilled());
         res.append("depth",reference.getDepth());

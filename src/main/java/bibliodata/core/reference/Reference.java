@@ -119,11 +119,12 @@ public class Reference {
 	public String getAuthorString(){
 		try{
 			StringBuilder sb = new StringBuilder();
-			for(String a:authors){sb.append(","+a);}
+			for(String a:authors){
+				if (sb.length()>0) sb.append(",");
+				sb.append(a);
+			}
 			String res = sb.toString();
-			if(res.length()>0){res = res.substring(0, res.length()-1);}
 			return res;
-			// FIXME why could there be an exception here ? uninitialized authors ?
 		}catch(Exception e){return "";}
 	}
 
@@ -165,10 +166,11 @@ public class Reference {
 	public String getKeywordString(){
 		try{
 			StringBuilder sb = new StringBuilder();
-			for(String a:keywords){sb.append(";"+a);}
-			String res = sb.toString();
-			if(res.length()>0){res = res.substring(0, res.length()-1);}
-			return res;
+			for(String a:keywords){
+				if (sb.length()>0) sb.append(";");
+				sb.append(a);
+			}
+			return sb.toString();
 		}catch(Exception e){return "";}
 	}
 
@@ -251,7 +253,6 @@ public class Reference {
 	
 	/**
 	 * Free attributes, stored under the form <key,value>
-	 *     // FIXME privatize
 	 */
 	private HashMap<String,String> attributes = new HashMap<>();
 	public HashMap<String,String> getAttributes(){return(attributes);}
@@ -263,6 +264,10 @@ public class Reference {
 	public void setAttribute(String key,String value){
 		if(attributes==null){attributes=new HashMap<String,String>();}
 		attributes.put(key, value);
+	}
+	public void setAttributes(HashMap<String,String> attrs){
+		if(attributes==null){attributes=new HashMap<String,String>();}
+		attributes.putAll(attrs);
 	}
 
 
@@ -434,6 +439,7 @@ public class Reference {
 		// copy keywords and authors
 		materializedRef.setKeywords(ghost.getKeywords());
 		materializedRef.setAuthors(ghost.getAuthors());
+		materializedRef.setAttributes(ghost.getAttributes());
 		return materializedRef;
 	}
 	

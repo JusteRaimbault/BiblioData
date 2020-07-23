@@ -19,7 +19,11 @@ import bibliodata.core.corpuses.CSVFactory;
 import bibliodata.core.corpuses.Corpus;
 import bibliodata.core.corpuses.DefaultCorpus;
 import bibliodata.core.reference.Reference;
+import com.mongodb.client.FindIterable;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
+
+import static com.mongodb.client.model.Filters.*;
 
 /**
  * @author Raimbault Juste <br/> <a href="mailto:juste.raimbault@polytechnique.edu">juste.raimbault@polytechnique.edu</a>
@@ -97,12 +101,19 @@ public class AbstractSetRetriever {
 				MongoConnection.initMongo(database);
 
 				for(int i = 0;i<numrefs;i++){
-					Reference r = MongoReference.getUnfilled(refcollection, Context.getMaxHorizontalDepth());
-					if(r.isEmpty()){break;}
-					Log.stdout("Unfilled ref : "+r.toString());
-					Reference detailed = MendeleyAPI.getReference(r.getTitle().title,r.getYear(),r.getId());
-					if(detailed!=null){
-						MongoReference.updateReference(r,refcollection,false);
+					//Reference r = MongoReference.getUnfilled(refcollection, Context.getMaxHorizontalDepth());
+					FindIterable res = MongoConnection.getCollection(refcollection).find(or(not(exists("mendeleyChecked")),eq("mendeleyChecked","false")));
+					if(!res.iterator().hasNext()){break;}
+					else {
+						Document d = (Document) res.iterator().next();
+						Reference r = Reference.construct(d.getString("id"), d.getString("title"));
+						Log.stdout("Unfilled ref for mendeley data: " + r.toString());
+						Reference detailed = MendeleyAPI.getReference(r.getTitle().title, r.getYear(), r.getId());
+						if (detailed != null) {
+							Log.stdout("Obtained: "+detailed.toString());
+							detailed.setAttribute("mendeleyChecked","true");
+							MongoReference.updateReference(detailed, refcollection, false);
+						}
 					}
 				}
 

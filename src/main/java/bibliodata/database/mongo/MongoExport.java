@@ -83,7 +83,10 @@ public class MongoExport {
             }
             boolean remove = removeNeg&&removeKept;
             if (!remove) toexport.references.add(r);
-            else toremove.references.add(r);
+            else {
+                Log.stdout("Removing: "+r.getId());
+                toremove.references.add(r);
+            }
         }
 
         // second pass to remove refs from citing HashSets in the exported corpus
