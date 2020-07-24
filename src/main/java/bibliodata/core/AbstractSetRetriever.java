@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 
 import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Updates.set;
 
 /**
  * @author Raimbault Juste <br/> <a href="mailto:juste.raimbault@polytechnique.edu">juste.raimbault@polytechnique.edu</a>
@@ -78,7 +79,7 @@ public class AbstractSetRetriever {
 
 					Log.stdout(r.toString());
 					if(!existing.references.contains(r)){
-						Reference detailed = MendeleyAPI.getReference(r.getTitle().title,r.getYear(),r.getId());
+						Reference detailed = MendeleyAPI.getReference(r.getTitle().title,r.getId());
 						if(detailed!=null){
 							finalCorpus.references.add(detailed);
 							// export the current corpus
@@ -102,17 +103,23 @@ public class AbstractSetRetriever {
 
 				for(int i = 0;i<numrefs;i++){
 					//Reference r = MongoReference.getUnfilled(refcollection, Context.getMaxHorizontalDepth());
-					FindIterable res = MongoConnection.getCollection(refcollection).find(or(not(exists("mendeleyChecked")),eq("mendeleyChecked","false")));
-					if(!res.iterator().hasNext()){break;}
+					Document d = MongoConnection.getCollection(refcollection).findOneAndUpdate(
+							or(not(exists("mendeleyChecked")),eq("mendeleyChecked","false")),
+							set("processing", true)
+					);
+					if(d==null){break;}
 					else {
-						Document d = (Document) res.iterator().next();
 						Reference r = Reference.construct(d.getString("id"), d.getString("title"));
 						Log.stdout("Unfilled ref for mendeley data: " + r.toString());
-						Reference detailed = MendeleyAPI.getReference(r.getTitle().title, r.getYear(), r.getId());
+						Reference detailed = MendeleyAPI.getReference(r.getTitle().title, r.getId());
 						if (detailed != null) {
 							Log.stdout("Obtained: "+detailed.toString());
 							detailed.setAttribute("mendeleyChecked","true");
 							MongoReference.updateReference(detailed, refcollection, false);
+						}else{
+							Log.stdout("No result");
+							r.setAttribute("mendeleyChecked","failed");
+							MongoReference.updateReference(r, refcollection, false);
 						}
 					}
 				}
@@ -133,7 +140,7 @@ public class AbstractSetRetriever {
 
 
 
-	/**
+	/*
 	 * single ref abstract
 	 * @param args
 	 *

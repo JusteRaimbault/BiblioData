@@ -221,6 +221,7 @@ public class MendeleyAPI{
 				newref.setAuthors(getAuthors(entry));
 				newref.setKeywords(getKeywords(entry));
 
+				// doi
 				if (entry.containsKey("identifiers")){
 					JsonObject ids = entry.getJsonObject("identifiers");
 					if (ids.containsKey("doi")){
@@ -228,6 +229,15 @@ public class MendeleyAPI{
 					}
 				}
 
+				// source
+				if (entry.containsKey("source")){
+					newref.setAttribute("source",entry.getString("source"));
+				}
+
+				// type
+				if (entry.containsKey("type")){
+					newref.setAttribute("type",entry.getString("type"));
+				}
 
 				refs.add(newref);
 			}		
@@ -275,17 +285,17 @@ public class MendeleyAPI{
 	/**
 	 * Wraps a raw api request, given an access token.
 	 * 
-	 * @param query
-	 * @param numResponse
-	 * @param token
-	 * @return
+	 * @param query query string
+	 * @param numResponse number of responses
+	 * @param token api token
+	 * @return json result
 	 */
 	private static JsonStructure rawRequest(String query,int numResponse,String token){
 		HttpResponse res=null;
 		try{
 			//simple get request
 			String url = "https://api.mendeley.com/search/catalog?query="+query+"&limit="+(Integer.toString(numResponse));
-			HashMap<String,String> header = new HashMap<String,String>();
+			HashMap<String,String> header = new HashMap<>();
 			header.put("Accept", "application/vnd.mendeley-document.1+json");	
 			header.put("Authorization", "Bearer "+token);
 			res = Connexion.get(url,header,client,context);
@@ -321,17 +331,18 @@ public class MendeleyAPI{
 	 * Get reference from title, same way than scholar api.
 	 *   scholarID is requested here for performance, as hashcode for Reference without scholarID is in O(Nrefs)
 	 * 
-	 * @param title
-	 * @return
+	 * @param title title
+	 * @return matched ref (by title) or null if no result
 	 */
-	public static Reference getReference(String title,String year,String scholarID){
+	public static Reference getReference(String title,String scholarID){
 		// get potential references as ghost references
 		//HashSet<Reference> potentialRefs = MendeleyAPI.catalogRequest(title.replaceAll(" ","+").replaceAll("\\{", "").replaceAll("\\}", ""),10,true);
-		HashSet<Reference> potentialRefs = MendeleyAPI.catalogRequest(title.replaceAll(" ","+").replaceAll("[^\\p{L}\\p{Nd}\\+]+", ""),20,true);
+		String reqstring = title.replaceAll(" ","+").replaceAll("[^\\p{L}\\p{Nd}\\+]+","");
+		HashSet<Reference> potentialRefs = MendeleyAPI.catalogRequest(reqstring,100,true);
 		
 		
-		// match it -- author not used
-		Reference res = matchRef(title,"",year,potentialRefs);
+		// match it
+		Reference res = matchRef(title,potentialRefs);
 		
 		if(res!=null){
 			// unghost it -> construct static method with GhostReference single argument.
@@ -343,17 +354,15 @@ public class MendeleyAPI{
 	
 	/**
 	 * Same criteria than for scholar ref to match a ref.
-	 * 
-	 * @param title
-	 * @param author : -- NOT USED --
-	 * @param year
-	 * @param refs
-	 * @return
+	 *  - do not use author and year, match on title only (too much jitter on year? - could add small threshold?)
+	 * @param title original title
+	 * @param refs refs to match
+	 * @return best matching res (arbitrary threshold of 3 for Levenstein distance)
 	 */
-	public static Reference matchRef(String title,String author,String year,HashSet<Reference> refs){
+	 private static Reference matchRef(String title,HashSet<Reference> refs){
 		Reference res = null;
 		for(Reference nr:refs){
-			Log.stdout(nr.getYear()+"  --  "+year);
+			//Log.stdout(nr.getYear()+"  --  "+year);
 			String t1 = StringUtils.lowerCase(nr.getTitle().title).replaceAll("[^\\p{L}\\p{Nd}]+", "");
 			String t2 = StringUtils.lowerCase(title).replaceAll("[^\\p{L}\\p{Nd}]+", "");
 			//Log.stdout(nr.toString());
@@ -362,18 +371,20 @@ public class MendeleyAPI{
 			if(StringUtils.getLevenshteinDistance(t1,t2)<3){//&&year.compareTo(nr.year)==0){
 			   res=nr;
 			}
-		};
+		}
+		Log.stdout("Matched: "+res);
 		return res;
 	}
 	
 	
 	
-	/**
+	/*
 	 * Get abstracts for the given set of References
+	 *  -> done in AbstractSetRetriever
 	 */
-	public static void getAbstracts(HashSet<Reference> corpus){
+	/*public static void getAbstracts(HashSet<Reference> corpus){
 		
-	}
+	}*/
 	
 	
 	
@@ -394,10 +405,10 @@ public class MendeleyAPI{
 		// test catalog request rate
 		// HASHCODE SHITS OVER  -> OK pb in testing null or empty schID
 		for(int k=0;k<100;k++){
-			System.out.println("");
+			System.out.println();
 			System.out.println("-- "+k+" --");
 			//HashSet<Reference> c = catalogRequest("transfer+theorem",3,false);
-			Reference r = getReference("Modéliser les pratiques pastorales d’altitude dans la longue durée","2012","7976888532897584518");
+			Reference r = getReference("Modéliser les pratiques pastorales d’altitude dans la longue durée","7976888532897584518");
 			//for(Reference r:c){System.out.println(r);}
 			System.out.println(r);
 			

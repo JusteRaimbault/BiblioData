@@ -269,7 +269,7 @@ public class Cybergeo {
 		for(Reference r:cybergeo){
 			Log.stdout(r.toString());
 			if(!existing.contains(r.getId())){
-				Reference detailed = MendeleyAPI.getReference(r.getTitle().title,r.getYear(),r.getId());
+				Reference detailed = MendeleyAPI.getReference(r.getTitle().title,r.getId());
 				if(detailed!=null){
 					//export the ref
 					SQLExporter.exportRefDetails(detailed,database,"refdesc");
@@ -283,7 +283,7 @@ public class Cybergeo {
 		for(Reference r:corpus){
 			Log.stdout(r.toString());
 			if(!existing.contains(r.getId())){
-				Reference detailed = MendeleyAPI.getReference(r.getTitle().title,r.getYear(),r.getId());
+				Reference detailed = MendeleyAPI.getReference(r.getTitle().title,r.getId());
 				if(detailed!=null){
 					//export the ref
 					SQLExporter.exportRefDetails(detailed,database,"refdesc");
