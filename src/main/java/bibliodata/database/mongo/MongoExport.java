@@ -26,6 +26,7 @@ public class MongoExport {
      * @param numRefs number of references (-1: all references)
      * @param withAbstracts export abstracts if available
      * @param filter set of ids not to export
+     * @param filterExclusive how to propagate filtered ids to lower layers: if filterExclusive, remove ref if contains filter, else remove ref if only contains filtered
      * @param keptHorizontalDepths set of horizontal depth label to keep (request level filter)
      * @param file file prefix for export (CSV for refs and links)
      */
@@ -35,6 +36,7 @@ public class MongoExport {
                               int numRefs,
                               boolean withAbstracts,
                               HashSet<String> filter,
+                              boolean filterExclusive,
                               HashSet<String> keptHorizontalDepths,
                               String file
     ) {
@@ -75,10 +77,10 @@ public class MongoExport {
         Corpus toremove = new DefaultCorpus();
 
         for(Reference r:fullCorpus) {
-            boolean removeNeg = false;
+            boolean removeNeg =  !filterExclusive;
             boolean removeKept = true;
             for (String origin:r.getHorizontalDepthMap().keySet()){
-                removeNeg=removeNeg||(r.getHorizontalDepth(origin)<0);
+                if(filterExclusive) removeNeg=removeNeg||(r.getHorizontalDepth(origin)<0); else removeNeg=removeNeg&&(r.getHorizontalDepth(origin)<0);
                 removeKept = removeKept&&!keptHorizontalDepths.contains(origin);
             }
             boolean remove = removeNeg&&removeKept;
@@ -91,7 +93,7 @@ public class MongoExport {
 
         // second pass to remove refs from citing HashSets in the exported corpus
         for(Reference r:toexport) {
-            HashSet<Reference> citing = new HashSet<Reference>(r.getCiting());
+            HashSet<Reference> citing = new HashSet<>(r.getCiting());
             for(Reference c:citing){
                 if (toremove.references.contains(c)) r.getCiting().remove(c);
             }
@@ -101,7 +103,7 @@ public class MongoExport {
         Log.stdout(toexport.references.size()+" refs to export");
 
         // set hdepth as attributes
-        HashSet<String> attrs = new HashSet<String>();
+        HashSet<String> attrs = new HashSet<>();
         int hdepthcount = 0;
         for(Reference r:toexport){
             if(r.getHorizontalDepthMap().keySet().size()>0){hdepthcount++;}

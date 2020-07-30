@@ -142,7 +142,7 @@ public class DatabaseManager {
                             "  $TIMESTAMP : long ts or 'now'"
                             );
                 } else {
-                    long ts = 0;
+                    long ts;
                     if (args[2].equals("now")){ts = Log.currentTimestamp();}else {ts = Long.parseLong(args[2]);}
                     MongoConnection.initMongo(args[1]);
                     MongoCommand.addTimeStamp(ts,Context.getReferencesCollection());
@@ -160,6 +160,7 @@ public class DatabaseManager {
                             "  [$MAXDEPTH] (optional): max vertical depth (-1 for all) \n"+
                             "  [$INITDEPTH] (optional): init layer vertical depth (from which horizontal depth is propagated) \n"+
                             "  [$FILTERFILE] (optional): csv file (first column id or prefix of id) to filter references (delim ;, quote \") - false for no filter\n"+
+                            "  [$FILTEREXCLUSIVE] (optional): boolean to have an exclusive filtering (true) or not - false by default \n"+
                             "  [$KEPTHDEPTHS] (optional): string giving the horizontal depth labels to be kept ( ; separator) \n"+
                             "  [$NUMREFS] (optional): number of references (-1 for all) \n"+
                             "  [$WITHABSTRACTS] (optional): export abstracts if exist (false by default)"
@@ -180,35 +181,42 @@ public class DatabaseManager {
                     if (args.length >= 6) {
                         initLayerDepth = Integer.parseInt(args[5]);
                     }
-                    HashSet<String> filter = new HashSet<String>();
+                    HashSet<String> filter = new HashSet<>();
                     if (args.length >= 7) {
                         String filterFile = args[6];
                         if (!filterFile.equals("false")) {
                             String[][] tofilter = CSVReader.read(filterFile, ";", "\"");
-                            for (int i = 0; i < tofilter.length; i++) {
-                                String filteredid = tofilter[i][0]; //remove trailing 0s (issue formatting)
-                                while (filteredid.endsWith("0")) {
-                                    filteredid = filteredid.substring(0, filteredid.length() - 1);
+                            if (tofilter!=null) {
+                                for (String[] row : tofilter) {
+                                    String filteredid = row[0];
+                                    //add-hoc removal of trailing 0s (issue formatting)
+                                    while (filteredid.endsWith("0")) {
+                                        filteredid = filteredid.substring(0, filteredid.length() - 1);
+                                    }
+                                    filter.add(filteredid);
                                 }
-                                filter.add(filteredid);
                             }
                         }
                     }
-                    HashSet<String> keptHorizontalDepths = new HashSet<>();
+                    boolean filterExclusive = false;
                     if (args.length >= 8) {
-                        String[] kept = args[7].replace("\"","").split(";");
+                        filterExclusive =  Boolean.parseBoolean(args[7]);
+                    }
+                    HashSet<String> keptHorizontalDepths = new HashSet<>();
+                    if (args.length >= 9) {
+                        String[] kept = args[8].replace("\"","").split(";");
                         for(String k: kept){System.out.println("kept hdepth : "+k);}
                         keptHorizontalDepths.addAll(Arrays.asList(kept));
                     }
                     int numRefs = -1;
-                    if (args.length >= 9) {
-                        numRefs = Integer.parseInt(args[8]);
+                    if (args.length >= 10) {
+                        numRefs = Integer.parseInt(args[9]);
                     }
                     boolean withAbstracts = false;
-                    if (args.length == 10) {
-                        withAbstracts = Boolean.parseBoolean(args[9]);
+                    if (args.length == 11) {
+                        withAbstracts = Boolean.parseBoolean(args[10]);
                     }
-                    MongoExport.export(maxPriority, maxDepth,initLayerDepth,numRefs, withAbstracts, filter, keptHorizontalDepths, fileprefix);
+                    MongoExport.export(maxPriority, maxDepth,initLayerDepth,numRefs, withAbstracts, filter, filterExclusive, keptHorizontalDepths, fileprefix);
                     MongoConnection.closeMongo();
                 }
             }
