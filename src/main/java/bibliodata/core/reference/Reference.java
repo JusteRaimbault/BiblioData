@@ -223,13 +223,14 @@ public class Reference {
 	 *   - ~order in citing : map citing ID -> depth~
 	 */
 	private HashMap<String,Integer> horizontalDepth = new HashMap<>();
-	public int getHorizontalDepth(String key){if(horizontalDepth.containsKey(key)){return(horizontalDepth.get(key).intValue());}else{return(-1);}}
+	public int getHorizontalDepth(String key){return(horizontalDepth.getOrDefault(key,-1));}
     public HashMap<String,Integer> getHorizontalDepthMap(){return(horizontalDepth);}
 	public void setHorizontalDepth(String key,int value){
 		if(horizontalDepth!=null){
 			horizontalDepth.put(key,value);
 		}
 	}
+	public void resetHorizontalDepth(){horizontalDepth = new HashMap<>();}
 
 
 	/**
