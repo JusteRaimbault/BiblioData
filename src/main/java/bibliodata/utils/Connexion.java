@@ -1,6 +1,3 @@
-/**
- * 
- */
 package bibliodata.utils;
 
 import java.io.File;
@@ -9,29 +6,21 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.http.Header;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.FormBodyPart;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.ContentBody;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.BasicHttpParams;
 import org.apache.http.protocol.HttpContext;
 
 /**
  * @author Raimbault Juste <br/> <a href="mailto:juste.raimbault@polytechnique.edu">juste.raimbault@polytechnique.edu</a>
  *
- * Basic method to handle connections
+ * Basic methods to handle http connections
  */
 public class Connexion {
 	
@@ -51,10 +40,11 @@ public static HttpResponse get(String url,HashMap<String,String> headers,Default
 	 * 
 	 * Simple Post Request
 	 * 
-	 * @param url
-	 * @param data
+	 * @param url url
+	 * @param headers headers
+	 * @param data data
 	 * @param context : context externally provided to store cookies e.g.
-	 * @return
+	 * @return response
 	 */
 	public static HttpResponse post(String url,HashMap<String,String> headers,HashMap<String,String> data,DefaultHttpClient client,HttpContext context){
 				
@@ -62,7 +52,7 @@ public static HttpResponse get(String url,HashMap<String,String> headers,Default
 			HttpPost httpPost = new HttpPost(url);
 			for(String k:headers.keySet()){httpPost.setHeader(k, headers.get(k));}
 			//httpPost.setParams((new BasicHttpParams()).setParameter("http.protocol.handle-redirects",false));
-			List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+			List <NameValuePair> nvps = new ArrayList <>();
 			for(String k:data.keySet()){nvps.add(new BasicNameValuePair(k, data.get(k)));}
 			httpPost.setEntity(new UrlEncodedFormEntity(nvps));
 			
@@ -78,14 +68,12 @@ public static HttpResponse get(String url,HashMap<String,String> headers,Default
 	 * 
 	 * NO HEADERS AS MULTIPART SUBMISSION SHOULD CREATE ITSELF.
 	 * 
-	 * @param url
-	 * @param headers
-	 * @param data
-	 * @param filePath
-	 * @param client
-	 * @param context
-	 * 
-	 * @return
+	 * @param url url
+	 * @param data data
+	 * @param filePath file path
+	 * @param client client
+	 * @param context context
+	 * @return response
 	 */
 	public static HttpResponse postUpload(String url,HashMap<String,String> data,String filePath,DefaultHttpClient client,HttpContext context){
 
@@ -97,14 +85,11 @@ public static HttpResponse get(String url,HashMap<String,String> headers,Default
 		    	builder.addTextBody(k,data.get(k));
 			}
 		    builder.addBinaryBody("files[]", new File(filePath), ContentType.create("application/zip"), filePath).build();
-		    
-		    //builder.build().writeTo(System.out);
-		    //System.out.println(builder.build().getContentLength());
+
 		    httpPost.setEntity(builder.build());
 		    
 		    //httpPost.setHeader("Content-Length",Long.toString(builder.build().getContentLength()));
-		    
-		    //System.out.println(httpPost.getHeaders("Content-Length")[0].toString());
+
 		    for(Header h:httpPost.getAllHeaders()){System.out.println(h);}
 		    
 			return client.execute(httpPost,context);

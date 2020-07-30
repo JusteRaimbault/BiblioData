@@ -42,12 +42,12 @@ public class MendeleyAPI{
 	/**
 	 * Mendeley api
 	 */
-	public static String mendeleyAppId;
+	private static String mendeleyAppId;
 
 	/**
 	 * Mendeley secret
 	 */
-	public static String mendeleyAppSecret;
+	private static String mendeleyAppSecret;
 
 	/**
 	 * Http client
@@ -62,17 +62,17 @@ public class MendeleyAPI{
 	/**
 	 * Current access token to the api.
 	 */
-	public static String accessToken;
+	private static String accessToken;
 	
 	/**
 	 * When (in system ms) the current access token was created.
 	 */
-	public static long accessTokenBirth;
-	
+	private static long accessTokenBirth;
+
 	/**
 	 * If api setup has been performed.
 	 */
-	public static boolean isSetup = false;
+	private static boolean isSetup = false;
 	
 	
 	/**
@@ -82,26 +82,22 @@ public class MendeleyAPI{
 	public static void setupAPI(String mendeleyconf){
 		try{
 		    Log.stdout("Setting up Mendeley API...");
-
 			HashMap<String,String> confsMap = CSVReader.readMap(mendeleyconf, ":","");
-
-			// mendeley
 			if(confsMap.containsKey("appID")){mendeleyAppId = confsMap.get("appID");}
 			if(confsMap.containsKey("appSecret")){mendeleyAppSecret=confsMap.get("appSecret");}
-
-
-			client = new DefaultHttpClient();
-			client.getCredentialsProvider().setCredentials(AuthScope.ANY,new UsernamePasswordCredentials(mendeleyAppId,mendeleyAppSecret));
-
-			//context
-			context = new BasicHttpContext();
-		
+			resetClient();
 			// empty access token
 			accessToken = "";
-		
 			isSetup=true;
-		
 		}catch(Exception e){e.printStackTrace();}
+	}
+
+	private static void resetClient(){
+		client = new DefaultHttpClient();
+		client.getCredentialsProvider().setCredentials(AuthScope.ANY,new UsernamePasswordCredentials(mendeleyAppId,mendeleyAppSecret));
+
+		//context
+		context = new BasicHttpContext();
 	}
 	
 	
@@ -110,24 +106,23 @@ public class MendeleyAPI{
 	 *   Token is renewed only when needed.
 	 * 
 	 * @param renewToken force token renewal.
-	 * 
-	 * @return
+	 * @return access token or empty string if unavailable
 	 */
-	public static String getAccessToken(boolean renewToken){
+	private static String getAccessToken(boolean renewToken){
 		try{
 			// auth query if renewal is forced
-			if(renewToken||(System.currentTimeMillis()-accessTokenBirth)>3000000||accessToken==""){
+			if(renewToken||(System.currentTimeMillis()-accessTokenBirth)>3000000||accessToken.length()==0){
 				Log.output("Getting access token to Mendeley api -- previous token age : "+(System.currentTimeMillis()-accessTokenBirth));
 				
 				//auth is a basic post request
-				HashMap<String,String> header = new HashMap<String,String>();
+				HashMap<String,String> header = new HashMap<>();
 				header.put("Content-Type", "application/x-www-form-urlencoded");
 
 				// url
 				String url = "https://api.mendeley.com/oauth/token";
 
 				//post data
-				HashMap<String,String> data = new HashMap<String,String>();
+				HashMap<String,String> data = new HashMap<>();
 				data.put("grant_type", "client_credentials");
 				data.put("scope", "all");
 
@@ -136,30 +131,38 @@ public class MendeleyAPI{
 				//String resp = (new BufferedReader(new InputStreamReader(res.getEntity().getContent())).readLine());
 				// do not need to convert to string, as json reader can directly read string
 
-				//parse json string
-				JsonReader jsonReader = Json.createReader(res.getEntity().getContent());
-				JsonObject object = jsonReader.readObject();
-				jsonReader.close();
+				if (res != null) {
+					//parse json string
+					JsonReader jsonReader = Json.createReader(res.getEntity().getContent());
+					JsonObject object = jsonReader.readObject();
+					jsonReader.close();
 
-				// return access token
-				// Q : use refresh token ? not really necessary if renewed each hour.
+					// return access token
+					// Q : use refresh token ? not really necessary if renewed each hour.
 
-				Log.stdout("API Response: "+object.toString());
+					Log.stdout("API Response: " + object.toString());
 
-				String token = object.getString("access_token");
-				Log.output("Token : "+token);
-				
-				// set current access token and birth date
-				accessToken = token;
+					String token = object.getString("access_token");
+					Log.output("Token : " + token);
+
+					// set current access token and birth date
+					accessToken = token;
+				}
+
 				accessTokenBirth = System.currentTimeMillis();
-						
-				return token;
+
+				return accessToken;
 			}else{
 				// return current access token
 				return accessToken;
 			}
 		}
-		catch (Exception e) {e.printStackTrace();return "";}
+		catch (Exception e) {
+			e.printStackTrace();
+			Log.stdout("Exception in get access token: resetting client");
+			resetClient();
+			return "";
+		}
 	}
 	
 	
@@ -167,16 +170,16 @@ public class MendeleyAPI{
 	/**
 	 * Mendeley catalog request
 	 * 
-	 * @param query
-	 * @param numResponse
-	 * @param ghostRefs
-	 * @return
+	 * @param query formatted query
+	 * @param numResponse number of responses
+	 * @param ghostRefs should result be true refs of ghost refs
+	 * @return hashset of matched refs
 	 */
 	public static HashSet<Reference> catalogRequest(String query,int numResponse,boolean ghostRefs){
 		
 		Log.stdout("Mendeley query : "+query);
 		
-		HashSet<Reference> refs = new HashSet<Reference>();
+		HashSet<Reference> refs = new HashSet<>();
 		
 		try{
 			
@@ -284,6 +287,7 @@ public class MendeleyAPI{
 	
 	/**
 	 * Wraps a raw api request, given an access token.
+	 *   rq : catalog request limited to 100 responses => check headers to see if next page available ?
 	 * 
 	 * @param query query string
 	 * @param numResponse number of responses
@@ -300,26 +304,23 @@ public class MendeleyAPI{
 			header.put("Authorization", "Bearer "+token);
 			res = Connexion.get(url,header,client,context);
 
-			//rq : catalog request limited to 100 responses
-			// Check headers to see if next page available ?
-			//for(Header h:res.getAllHeaders()){System.out.println(h.toString());}
+			if (res != null) {
+				JsonReader jsonReader = Json.createReader(res.getEntity().getContent());
 
-			JsonReader jsonReader = Json.createReader(res.getEntity().getContent());			
-			
-			JsonArray entries = jsonReader.readArray();
-			jsonReader.close();
+				JsonArray entries = jsonReader.readArray();
+				jsonReader.close();
 
-			EntityUtils.consumeQuietly(res.getEntity());
-			
-			return entries;
-			
-		}catch(JsonException je){
-			// if json exception, object was read instead of array, returns empty array.
-			EntityUtils.consumeQuietly(res.getEntity());
-			return Json.createArrayBuilder().build();
+				EntityUtils.consumeQuietly(res.getEntity());
+
+				return entries;
+			}else{
+				return Json.createArrayBuilder().build();
+			}
 		}catch(Exception e){
 			e.printStackTrace();
-			EntityUtils.consumeQuietly(res.getEntity());
+			if (res != null) EntityUtils.consumeQuietly(res.getEntity());
+			Log.stdout("Exception in raw request: resetting client");
+			resetClient();
 			// return an empty array
 			return Json.createArrayBuilder().build();
 		}
