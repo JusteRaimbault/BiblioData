@@ -73,11 +73,13 @@ public class Reference {
 
 	/**
 	 * TODO tackle the case of local ids (corpus with no sch ids)
-	 * @return
+	 *  -> more generally, ids should be multiple [clarify with secondary ids] - for now [20240430] quick fix: no id if starts with loc, overriden after
+	 * @return true if has an id
 	 */
 	public boolean hasId() {
 		if(id==null){return(false);} // FIXME id should NEVER be null
 		if(id.length()==0){return(false);}
+		if (id.startsWith("loc")) {return(false);}
 		// else any non empty string could be considered as an id - could include here regex specification
 		return(true);
 	}
@@ -223,13 +225,14 @@ public class Reference {
 	 *   - ~order in citing : map citing ID -> depth~
 	 */
 	private HashMap<String,Integer> horizontalDepth = new HashMap<>();
-	public int getHorizontalDepth(String key){if(horizontalDepth.containsKey(key)){return(horizontalDepth.get(key).intValue());}else{return(-1);}}
+	public int getHorizontalDepth(String key){return(horizontalDepth.getOrDefault(key,-1));}
     public HashMap<String,Integer> getHorizontalDepthMap(){return(horizontalDepth);}
 	public void setHorizontalDepth(String key,int value){
 		if(horizontalDepth!=null){
 			horizontalDepth.put(key,value);
 		}
 	}
+	public void resetHorizontalDepth(){horizontalDepth = new HashMap<>();}
 
 
 	/**
