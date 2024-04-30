@@ -44,18 +44,25 @@ public class MongoExport {
         Corpus fullCorpus = MongoCorpus.getCorpus(maxPriority,maxDepth,numRefs);
         Log.stdout(fullCorpus.references.size()+" considered");
         // get hdepth names and propagate
-        LinkedList<Reference> initlayer = new LinkedList<Reference>();
+        LinkedList<Reference> initlayer = new LinkedList<>();
         for(Reference r:fullCorpus){
             if (r.getDepth()==initLayerDepth) {
                 initlayer.add(r);
                 boolean filtered = false;
                 for(String f : filter){filtered=filtered||r.getId().startsWith(f);}
-                if (filtered) { // set negative hdepth for refs to be filtered and propagate it
+                if (filtered) {
+                    // set negative hdepth for refs to be filtered and propagate it
                     Log.stdout("    Filtered: "+r.toString());
+                    // to ensure removing manually filtered at first layer in any case, remove all other hdepths than filtered
+                    r.resetHorizontalDepth();
                     r.setHorizontalDepth("FILTERED",-1);
                 }
             }
         }
+
+        if (filter.size()>0)
+        //for(Reference r:fullCorpus) {}
+
         Log.stdout("init layer size = "+initlayer.size());
         int n = initlayer.size();int i =0;
         for(Reference r0:initlayer){
