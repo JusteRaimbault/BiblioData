@@ -68,13 +68,13 @@ public class CSVFactory implements CorpusFactory {
 		String[][] refs = CSVReader.read(bibfile, ";","\"");
 		assert refs != null;
 		Log.stdout("CSV data has "+refs.length+" rows");
-		System.out.println(refs[0][0]);
+		//System.out.println(refs[0][0]);
 		if(refs[0].length>1){
 			if(numRefs==-1){numRefs=refs.length;}
 			int start = 0;if (withHeader){start=1;}
 			for(int i = start;i<numRefs;i++){
 				//System.out.println(refs[i][0]+" - "+refs[i][idcolumn]+" - "+refs[i][2]);
-				//System.out.println(refs[i][0]+" - "+refs[i][idcolumn]);
+				System.out.println(refs[i][0]+" - "+refs[i][idcolumn]);
 				String id = refs[i][idcolumn];
 				String title = refs[i][0];
 				String year = "";
@@ -84,7 +84,9 @@ public class CSVFactory implements CorpusFactory {
 				if(id.equals("NA")){id = "loc:"+(title+year).hashCode();}
 
 				Reference r = Reference.construct(id,new Title(title),new Abstract(), year);
+				System.out.println(r.toString());
 				res.addReference(r);
+				System.out.println(res.references.size());
 				if(citedFolder.length()>0){//if must construct cited corpus
 					r.getBiblio().cited = (new CSVFactory(citedFolder+(new Integer(i+1)).toString(),-1)).getCorpus().references;
 				}
