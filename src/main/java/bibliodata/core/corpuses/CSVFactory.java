@@ -68,13 +68,13 @@ public class CSVFactory implements CorpusFactory {
 		String[][] refs = CSVReader.read(bibfile, ";","\"");
 		assert refs != null;
 		Log.stdout("CSV data has "+refs.length+" rows");
-		System.out.println(refs[0][0]);
-		for (String[] ref : refs) {
-			System.out.println(ref[0]);
-			for (String s : ref) {
-				System.out.println(s);
-			}
-		}
+		//System.out.println(refs[0][0]);
+		//for (String[] ref : refs) {
+		//	System.out.println(ref[0]);
+		//	for (String s : ref) {
+		//		System.out.println(s);
+		//	}
+		//}
 		if(refs[0].length>1){
 			if(numRefs==-1){numRefs=refs.length;}
 			int start = 0;if (withHeader){start=1;}
@@ -100,6 +100,19 @@ public class CSVFactory implements CorpusFactory {
 			}
 		}
 		return res;
+	}
+
+	public static void test(){
+		//String[][] f = read("data/testIterative/refs_0_keywords.csv","\t","");
+		Corpus test = (new CSVFactory("data/test2.csv")).getCorpus();
+		System.out.println(test.references.size());
+		for(Reference r:test){
+			System.out.println(r);
+		}
+	}
+
+	public static void main(String[] args) {
+		test();
 	}
 
 }

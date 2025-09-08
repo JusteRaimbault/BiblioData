@@ -22,21 +22,21 @@ public class CSVReader {
 
 		LinkedList<String> acc = new LinkedList<>();
 		boolean inside = false;
-		String currentField = "";
+		StringBuilder currentField = new StringBuilder();
 		for(int i=0;i<rawLine.length();i++){
+			//System.out.println(rawLine.charAt(i)+" - "+inside+" - "+currentField+ " - "+acc.toArray().length);
+			//System.out.println(rawLine.charAt(i) == delimiter.charAt(0));
+			//System.out.println(rawLine.charAt(i) == quote.charAt(0));
 			//if (quote.length()>0) {
-				if (rawLine.charAt(i) == delimiter.charAt(0) && !inside) {
-					acc.add(currentField);
-					currentField = "";
+				if (rawLine.charAt(i) == delimiter.charAt(0) && (!inside)) {
+					acc.add(currentField.toString());
+					currentField = new StringBuilder();
 				}
-				if (rawLine.charAt(i) == quote.charAt(0) && !inside) {
-					inside = true;
-				}//previous char should be delimiter
-				if (rawLine.charAt(i) == quote.charAt(0) && inside) {
-					inside = false;
+				if ((rawLine.charAt(i) == quote.charAt(0))) {
+					inside = !inside;
 				}
 				if (rawLine.charAt(i) != quote.charAt(0) && rawLine.charAt(i) != delimiter.charAt(0)) {
-					currentField = currentField + rawLine.charAt(i);
+					currentField.append(rawLine.charAt(i));
 				}
 			//} else { // with no quote strings should be properly formatted and contain no delimiter
 			//	if (rawLine.charAt(i) == delimiter.charAt(0)) {
@@ -47,6 +47,10 @@ public class CSVReader {
 			//	}
 			//}
 		}
+		// do not forget the last field (do not check that outside? ! pb with newlines)
+		// TODO fix for newline handling (do not use split but this function also to parse the total file : ~)
+		acc.add(currentField.toString());
+
 		String[] res = new String[acc.size()];
 		int i = 0;
 		for(String s:acc){res[i]=s;i++;}
@@ -58,6 +62,9 @@ public class CSVReader {
 	 * @param filePath
 	 * @param delimiter
 	 * @param quote
+	 *
+	 * TODO quotes are accurately handled with delimiter but not newline -> will fail if \n in a field
+	 *
 	 * @return
 	 */
 	public static String[][] read(String filePath,String delimiter,String quote){
@@ -92,12 +99,17 @@ public class CSVReader {
 	
 	
 	public static void test(){
-		String[][] f = read("data/testIterative/refs_0_keywords.csv","\t","");
+		//String[][] f = read("data/testIterative/refs_0_keywords.csv","\t","");
+		String[][] f = read("data/test2.csv",";","\"");
 		for(int i=0;i<f.length;i++){
 			for(int j=0;j<f[i].length;j++){
 				System.out.println(f[i][j]);
 			}
 		}
+	}
+
+	public static void main(String[] args) {
+		test();
 	}
 	
 	
