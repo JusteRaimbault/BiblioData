@@ -28,6 +28,9 @@ public class KeywordsRequest {
 	 *    - csv with delimiter ";"
 	 *    - if one column, terms separated by space are merge with "+" (equivalent to a "AND" in the request)
 	 *    - if two columns, idem, but first column is the corpus identifier
+	 *
+	 *    TODO initial depth not working? debug
+	 *
 	*/
 	public static void main(String[] args) {
 
