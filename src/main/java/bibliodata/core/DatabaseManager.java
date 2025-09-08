@@ -43,6 +43,7 @@ public class DatabaseManager {
                        "Import corpus from csv to mongo. Usage : --database --import\n"+
                        "  $FILE : path to csv file with corpus to import, required format at least 'title;id', optional year third column\n"+
                        "        (id = \"NA\" will self generate ids)"+
+                       "      Delimiter : \";\", quoted file : \"\\\"\"\n"+
                        "  $DATABASE : name of database where to import \n"+
                        "  [$DEPTH] (optional) : depth of higher layer \n"+
                        "  [$ORIGIN] (optional) : name of corpus origin \n"+

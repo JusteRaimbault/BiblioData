@@ -71,6 +71,7 @@ public class CSVFactory implements CorpusFactory {
 			if(numRefs==-1){numRefs=refs.length;}
 			int start = 0;if (withHeader){start=1;}
 			for(int i = start;i<numRefs;i++){
+				//System.out.println(refs[i][0]+" - "+refs[i][idcolumn]+" - "+refs[i][2]);
 				String id = refs[i][idcolumn];
 				String title = refs[i][0];
 				String year = "";

@@ -41,6 +41,7 @@ public class MongoImport {
                                    boolean dropCollections){
         Log.stdout("Importing file "+file+" to db "+db);
         Corpus initial = Corpus.fromCSV(file,orderFile,citationFile,citedFolder,initDepth,origin);
+        //Log.stdout("DEBUG : ref year = "+initial.references.iterator().next().getYear());
 
         // FIXME priorities are not computed -> can be done directly from horizontalDepth
 
