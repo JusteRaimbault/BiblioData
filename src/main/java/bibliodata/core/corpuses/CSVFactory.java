@@ -68,8 +68,9 @@ public class CSVFactory implements CorpusFactory {
 		String[][] refs = CSVReader.read(bibfile, ";","\"");
 		assert refs != null;
 		Log.stdout("CSV data has "+refs.length+" rows");
-		//System.out.println(refs[0][0]);
+		System.out.println(refs[0][0]);
 		for (String[] ref : refs) {
+			System.out.println(ref[0]);
 			for (String s : ref) {
 				System.out.println(s);
 			}
