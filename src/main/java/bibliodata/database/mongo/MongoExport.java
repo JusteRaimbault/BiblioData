@@ -60,75 +60,91 @@ public class MongoExport {
             }
         }
 
-        if (filter.size()>0)
-        //for(Reference r:fullCorpus) {}
-
-        Log.stdout("init layer size = "+initlayer.size());
-        int n = initlayer.size();int i =0;
-        for(Reference r0:initlayer){
-            //Log.stdout("setting hdepth : "+i+" / "+n);
-            if(i%50==0){Log.stdout(" "+i+" / "+n+" ",false);}else{Log.stdout("=",false);}
-            HashMap<String,Integer> origs = r0.getHorizontalDepthMap();
-            //Log.stdout(" in-cit links = "+r0.getCiting().size());
-            for(String origin:origs.keySet()){
-                //Log.stdout(origin+":"+origs.get(origin));
-                r0.setHorizontalDepth0(origin,origs.get(origin));
-            }
-            i++;
-        }
-
-        // DEBUG : at this step ALL refs in the corpus should have some hdepth
-
-        // filter using negative and kept horizontal depths
         Corpus toexport = new DefaultCorpus();
-        Corpus toremove = new DefaultCorpus();
-
-        for(Reference r:fullCorpus) {
-            boolean removeNeg =  !filterExclusive;
-            boolean removeKept = true;
-            for (String origin:r.getHorizontalDepthMap().keySet()){
-                if(filterExclusive) removeNeg=removeNeg||(r.getHorizontalDepth(origin)<0); else removeNeg=removeNeg&&(r.getHorizontalDepth(origin)<0);
-                removeKept = removeKept&&!keptHorizontalDepths.contains(origin);
-            }
-            boolean remove = removeNeg&&removeKept;
-            if (!remove) toexport.references.add(r);
-            else {
-                Log.stdout("Removing: "+r.getId());
-                toremove.references.add(r);
-            }
-        }
-
-        // second pass to remove refs from citing HashSets in the exported corpus
-        for(Reference r:toexport) {
-            HashSet<Reference> citing = new HashSet<>(r.getCiting());
-            for(Reference c:citing){
-                if (toremove.references.contains(c)) r.getCiting().remove(c);
-            }
-        }
-
-        Log.stdout(toremove.references.size()+" refs to remove");
-        Log.stdout(toexport.references.size()+" refs to export");
-
-        // set hdepth as attributes
-        HashSet<String> attrs = new HashSet<>();
-        int hdepthcount = 0;
-        for(Reference r:toexport){
-            if(r.getHorizontalDepthMap().keySet().size()>0){hdepthcount++;}
-            for(String origin:r.getHorizontalDepthMap().keySet()){
-                attrs.add(origin);
-                r.setAttribute(origin,r.getHorizontalDepthMap().get(origin).toString());
-            }
-        }
-        Log.stdout("total hdepth count = "+hdepthcount);
-
         LinkedList<String> attributes = new LinkedList<>();
         attributes.add("depth");
-        //attributes.add("priority");
-        //attributes.add("horizontalDepth");
-        attributes.add("citingFilled");
 
-        // add horizontal depths
-        attributes.addAll(attrs);
+        if (filter.size()>0) {
+            //for(Reference r:fullCorpus) {}
+
+            Log.stdout("init layer size = " + initlayer.size());
+            int n = initlayer.size();
+            int i = 0;
+            for (Reference r0 : initlayer) {
+                //Log.stdout("setting hdepth : "+i+" / "+n);
+                if (i % 50 == 0) {
+                    Log.stdout(" " + i + " / " + n + " ", false);
+                } else {
+                    Log.stdout("=", false);
+                }
+                HashMap<String, Integer> origs = r0.getHorizontalDepthMap();
+                //Log.stdout(" in-cit links = "+r0.getCiting().size());
+                for (String origin : origs.keySet()) {
+                    //Log.stdout(origin+":"+origs.get(origin));
+                    r0.setHorizontalDepth0(origin, origs.get(origin));
+                }
+                i++;
+            }
+
+            // DEBUG : at this step ALL refs in the corpus should have some hdepth
+
+            // filter using negative and kept horizontal depths
+
+            // TODO 20250909: fix export: had to add condition on filter size to avoid full removal
+
+            Corpus toremove = new DefaultCorpus();
+
+            for (Reference r : fullCorpus) {
+                boolean removeNeg = !filterExclusive;
+                boolean removeKept = true;
+                for (String origin : r.getHorizontalDepthMap().keySet()) {
+                    if (filterExclusive) removeNeg = removeNeg || (r.getHorizontalDepth(origin) < 0);
+                    else removeNeg = removeNeg && (r.getHorizontalDepth(origin) < 0);
+                    removeKept = removeKept && !keptHorizontalDepths.contains(origin);
+                }
+                boolean remove = removeNeg && removeKept;
+                if (!remove) toexport.references.add(r);
+                else {
+                    Log.stdout("Removing: " + r.getId());
+                    toremove.references.add(r);
+                }
+            }
+
+            // second pass to remove refs from citing HashSets in the exported corpus
+            for (Reference r : toexport) {
+                HashSet<Reference> citing = new HashSet<>(r.getCiting());
+                for (Reference c : citing) {
+                    if (toremove.references.contains(c)) r.getCiting().remove(c);
+                }
+            }
+
+            Log.stdout(toremove.references.size() + " refs to remove");
+            Log.stdout(toexport.references.size() + " refs to export");
+
+            // set hdepth as attributes
+            HashSet<String> attrs = new HashSet<>();
+            int hdepthcount = 0;
+            for (Reference r : toexport) {
+                if (r.getHorizontalDepthMap().keySet().size() > 0) {
+                    hdepthcount++;
+                }
+                for (String origin : r.getHorizontalDepthMap().keySet()) {
+                    attrs.add(origin);
+                    r.setAttribute(origin, r.getHorizontalDepthMap().get(origin).toString());
+                }
+            }
+            Log.stdout("total hdepth count = " + hdepthcount);
+
+
+            //attributes.add("priority");
+            //attributes.add("horizontalDepth");
+            //attributes.add("citingFilled");
+
+            // add horizontal depths
+            //attributes.addAll(attrs);
+        }else{
+            toexport = fullCorpus;
+        }
 
         toexport.csvExport(file,withAbstracts,attributes);
     }
